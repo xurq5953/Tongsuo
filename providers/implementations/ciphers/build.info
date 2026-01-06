@@ -40,8 +40,6 @@ IF[{- !$disabled{asm} -}]
     $GHASHDEF_ia64=GHASH_ASM
   ENDIF
 
-  $GHASHDEF_sparcv9=GHASH_ASM
-
   $GHASHDEF_alpha=GHASH_ASM
 
   $GHASHDEF_s390x=GHASH_ASM

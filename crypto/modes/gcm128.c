@@ -386,13 +386,6 @@ void gcm_gmult_v8(u64 Xi[2], const u128 Htable[16]);
 void gcm_ghash_v8(u64 Xi[2], const u128 Htable[16], const u8 *inp,
                   size_t len);
 #  endif
-# elif defined(__sparc__) || defined(__sparc)
-#  include "crypto/sparc_arch.h"
-#  define GHASH_ASM_SPARC
-void gcm_init_vis3(u128 Htable[16], const u64 Xi[2]);
-void gcm_gmult_vis3(u64 Xi[2], const u128 Htable[16]);
-void gcm_ghash_vis3(u64 Xi[2], const u128 Htable[16], const u8 *inp,
-                    size_t len);
 # elif defined(OPENSSL_CPUID_OBJ) && (defined(__powerpc__) || defined(__POWERPC__) || defined(_ARCH_PPC))
 #  include "crypto/ppc_arch.h"
 #  define GHASH_ASM_PPC
@@ -503,16 +496,6 @@ static void gcm_get_funcs(struct gcm_funcs_st *ctx)
         ctx->ghash = gcm_ghash_neon;
     }
 # endif
-    return;
-#elif defined(GHASH_ASM_SPARC)
-    /* SPARC defaults */
-    ctx->gmult = gcm_gmult_4bit;
-    ctx->ghash = gcm_ghash_4bit;
-    if (OPENSSL_sparcv9cap_P[0] & SPARCV9_VIS3) {
-        ctx->ginit = gcm_init_vis3;
-        ctx->gmult = gcm_gmult_vis3;
-        ctx->ghash = gcm_ghash_vis3;
-    }
     return;
 #elif defined(GHASH_ASM_PPC)
     /* PowerPC does not define GHASH_ASM; defaults set above */
