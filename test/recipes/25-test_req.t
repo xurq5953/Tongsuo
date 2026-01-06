@@ -15,7 +15,7 @@ use OpenSSL::Test qw/:DEFAULT srctop_file/;
 
 setup("test_req");
 
-plan tests => 113;
+plan tests => 114;
 
 require_ok(srctop_file('test', 'recipes', 'tconversion.pl'));
 
@@ -500,6 +500,40 @@ subtest "generating certificate requests with SLH-DSA" => sub {
                     "-config", srctop_file("test", "test.cnf"),
                     "-in", "csr_slh_dsa_shake128.pem"])),
                     "verifying SLH-DSA-SHAKE-128s csr");
+    }
+};
+
+subtest "generating SM2 certificate requests (compat)" => sub {
+    plan tests => 4;
+
+    SKIP: {
+        skip "SM2 is not supported by this OpenSSL build", 4
+        if disabled("sm2");
+        ok(run(app(["openssl", "req",
+                    "-config", srctop_file("test", "test.cnf"),
+                    "-new", "-key", srctop_file(@certs, "sm2.key"),
+                    "-sigopt", "sm2_id:1234567812345678",
+                    "-out", "testreq-sm2-cpt.pem", "-sm3"])),
+           "Generating SM2 certificate request (compat)");
+
+        ok(run(app(["openssl", "req",
+                    "-config", srctop_file("test", "test.cnf"),
+                    "-verify", "-in", "testreq-sm2-cpt.pem", "-noout",
+                    "-sm2-id", "1234567812345678", "-sm3"])),
+           "Verifying signature on SM2 certificate request (compat)");
+
+        ok(run(app(["openssl", "req",
+                    "-config", srctop_file("test", "test.cnf"),
+                    "-new", "-key", srctop_file(@certs, "sm2.key"),
+                    "-sigopt", "sm2_hex_id:DEADBEEF",
+                    "-out", "testreq-sm2-cpt.pem", "-sm3"])),
+           "Generating SM2 certificate request with hex id (compat)");
+
+        ok(run(app(["openssl", "req",
+                    "-config", srctop_file("test", "test.cnf"),
+                    "-verify", "-in", "testreq-sm2-cpt.pem", "-noout",
+                    "-sm2-hex-id", "DEADBEEF", "-sm3"])),
+           "Verifying signature on SM2 certificate request (compat)");
     }
 };
 

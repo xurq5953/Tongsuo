@@ -17,12 +17,12 @@ use File::Compare qw/compare_text compare/;
 
 setup("test_pkeyutl");
 
-plan tests => 27;
+plan tests => 29;
 
 # For the tests below we use the cert itself as the TBS file
 
 SKIP: {
-    skip "Skipping tests that require EC, SM2 or SM3", 4
+    skip "Skipping tests that require EC, SM2 or SM3", 6
         if disabled("ec") || disabled("sm2") || disabled("sm3");
 
     # SM2
@@ -51,6 +51,20 @@ SKIP: {
                       && compare_text('sm2.dat',
                                       srctop_file('test', 'data2.bin')) == 0,
                       "Decrypt a piece of data using SM2");
+    # SM2 compatible options
+    ok_nofips(run(app(([ 'openssl', 'pkeyutl', '-sign',
+                      '-in', srctop_file('test', 'certs', 'sm2.pem'),
+                      '-inkey', srctop_file('test', 'certs', 'sm2.key'),
+                      '-out', 'sm2.sig', '-rawin',
+                      '-digest', 'sm3', '-pkeyopt', 'sm2_id:someid']))),
+                      "Sign a piece of data using SM2 (compat)");
+    ok_nofips(run(app(([ 'openssl', 'pkeyutl',
+                      '-verify', '-certin',
+                      '-in', srctop_file('test', 'certs', 'sm2.pem'),
+                      '-inkey', srctop_file('test', 'certs', 'sm2.pem'),
+                      '-sigfile', 'sm2.sig', '-rawin',
+                      '-digest', 'sm3', '-pkeyopt', 'sm2_id:someid']))),
+                      "Verify an SM2 signature against a piece of data (compat)");
 }
 
 SKIP: {

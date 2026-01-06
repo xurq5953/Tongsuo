@@ -16,7 +16,7 @@ use OpenSSL::Test qw/:DEFAULT srctop_file/;
 
 setup("test_x509");
 
-plan tests => 138;
+plan tests => 140;
 
 # Prevent MSys2 filename munging for arguments that look like file paths but
 # aren't
@@ -92,6 +92,29 @@ ok(run(app(["openssl", "pkey", "-in", $pkey, "-pubout", "-out", $pubkey]))
             "-trusted", $selfout, "-partial_chain", $testcert])));
 # not unlinking $pubkey
 # not unlinking $selfout
+
+SKIP: {
+    skip "SM2 is not supported by this OpenSSL build", 2 if disabled("sm2");
+    ok(run(app(["openssl", "x509",
+                "-req",
+                "-in", srctop_file(@certs, "sm2-csr.pem"),
+                "-signkey", srctop_file(@certs, "sm2.key"),
+                "-out", "sm2.crt",
+                "-sm3",
+                "-vfyopt", "distid:1234567812345678",
+                "-sigopt", "distid:1234567812345678"])),
+                "Generating self-signed SM2 certificate");
+
+    ok(run(app(["openssl", "x509",
+                "-req",
+                "-in", srctop_file(@certs, "sm2-csr.pem"),
+                "-signkey", srctop_file(@certs, "sm2.key"),
+                "-out", "sm2-compat.crt",
+                "-sm3",
+                "-sm2-id", "1234567812345678",
+                "-sigopt", "sm2_id:1234567812345678"])),
+                "Generating self-signed SM2 certificate (compat)");
+}
 
 # test -set_issuer option
 my $ca_issu = srctop_file(@certs, "ca-cert.pem"); # issuer cert
