@@ -20,6 +20,7 @@ extern "C" {
 # define SSL_MAX_MASTER_KEY_LENGTH 48
 
 /* SSL/TLS uses a 2 byte unsigned version number */
+# define NTLS1_1_VERSION                 0x0101
 # define SSL3_VERSION                    0x0300
 # define TLS1_VERSION                    0x0301
 # define TLS1_1_VERSION                  0x0302

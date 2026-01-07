@@ -1352,7 +1352,7 @@ static const unsigned char so[9533] = {
     0x2A,0x81,0x1C,0xCF,0x55,0x01,0x86,0x21,       /* [ 9524] OBJ_zuc_128_eea3 */
 };
 
-#define NUM_NID 1489
+#define NUM_NID 1492
 static const ASN1_OBJECT nid_objs[NUM_NID] = {
     {"UNDEF", "undefined", NID_undef},
     {"rsadsi", "RSA Data Security, Inc.", NID_rsadsi, 6, &so[0]},
@@ -2843,9 +2843,12 @@ static const ASN1_OBJECT nid_objs[NUM_NID] = {
     {"id-hash-slh-dsa-shake-256f-with-shake256", "SLH-DSA-SHAKE-256f-WITH-SHAKE256", NID_SLH_DSA_SHAKE_256f_WITH_SHAKE256, 9, &so[9507]},
     {"ZUC", "zuc", NID_zuc, 8, &so[9516]},
     {"ZUC-128-EEA3", "zuc-128-eea3", NID_zuc_128_eea3, 8, &so[9524]},
+    {"KxSM2", "kx-sm2", NID_kx_sm2},
+    {"KxSM2DHE", "kx-sm2dhe", NID_kx_sm2dhe},
+    {"AuthSM2", "auth-sm2", NID_auth_sm2},
 };
 
-#define NUM_SN 1480
+#define NUM_SN 1483
 static const unsigned int sn_objs[NUM_SN] = {
      364,    /* "AD_DVCS" */
      419,    /* "AES-128-CBC" */
@@ -2918,6 +2921,7 @@ static const unsigned int sn_objs[NUM_SN] = {
     1053,    /* "AuthNULL" */
     1048,    /* "AuthPSK" */
     1046,    /* "AuthRSA" */
+    1491,    /* "AuthSM2" */
     1052,    /* "AuthSRP" */
       91,    /* "BF-CBC" */
       93,    /* "BF-CFB" */
@@ -3028,6 +3032,8 @@ static const unsigned int sn_objs[NUM_SN] = {
     1043,    /* "KxPSK" */
     1037,    /* "KxRSA" */
     1042,    /* "KxRSA_PSK" */
+    1489,    /* "KxSM2" */
+    1490,    /* "KxSM2DHE" */
     1044,    /* "KxSRP" */
       15,    /* "L" */
      856,    /* "LocalKeySet" */
@@ -4329,7 +4335,7 @@ static const unsigned int sn_objs[NUM_SN] = {
     1289,    /* "zstd" */
 };
 
-#define NUM_LN 1480
+#define NUM_LN 1483
 static const unsigned int ln_objs[NUM_LN] = {
      363,    /* "AD Time Stamping" */
      405,    /* "ANSI X9.62" */
@@ -4842,6 +4848,7 @@ static const unsigned int ln_objs[NUM_LN] = {
     1053,    /* "auth-null" */
     1048,    /* "auth-psk" */
     1046,    /* "auth-rsa" */
+    1491,    /* "auth-sm2" */
     1052,    /* "auth-srp" */
      882,    /* "authorityRevocationList" */
       91,    /* "bf-cbc" */
@@ -5405,6 +5412,8 @@ static const unsigned int ln_objs[NUM_LN] = {
     1043,    /* "kx-psk" */
     1037,    /* "kx-rsa" */
     1042,    /* "kx-rsa-psk" */
+    1489,    /* "kx-sm2" */
+    1490,    /* "kx-sm2dhe" */
     1044,    /* "kx-srp" */
      477,    /* "lastModifiedBy" */
      476,    /* "lastModifiedTime" */

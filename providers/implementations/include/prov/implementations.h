@@ -366,6 +366,9 @@ extern const OSSL_DISPATCH ossl_x25519_keyexch_functions[];
 extern const OSSL_DISPATCH ossl_x448_keyexch_functions[];
 # endif
 #endif
+#ifndef OPENSSL_NO_SM2
+extern const OSSL_DISPATCH ossl_sm2dh_keyexch_functions[];
+#endif
 extern const OSSL_DISPATCH ossl_kdf_tls1_prf_keyexch_functions[];
 extern const OSSL_DISPATCH ossl_kdf_hkdf_keyexch_functions[];
 extern const OSSL_DISPATCH ossl_kdf_scrypt_keyexch_functions[];

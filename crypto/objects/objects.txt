@@ -1831,6 +1831,8 @@ id-pkinit 5                     : pkInitKDC             : Signing KDC Response
                             : KxGOST       : kx-gost
                             : KxGOST18     : kx-gost18
                             : KxANY        : kx-any
+                            : KxSM2        : kx-sm2
+                            : KxSM2DHE     : kx-sm2dhe
 
 # NIDs for cipher authentication
                             : AuthRSA      : auth-rsa
@@ -1842,6 +1844,7 @@ id-pkinit 5                     : pkInitKDC             : Signing KDC Response
                             : AuthSRP      : auth-srp
                             : AuthNULL     : auth-null
                             : AuthANY      : auth-any
+                            : AuthSM2      : auth-sm2
 # NID for Poly1305
                             : Poly1305     : poly1305
 # NID for SipHash

@@ -1,4 +1,4 @@
-# Copyright 1999-2025 The OpenSSL Project Authors. All Rights Reserved.
+# Copyright 1999-2026 The OpenSSL Project Authors. All Rights Reserved.
 #
 # Licensed under the Apache License 2.0 (the "License").  You may not use
 # this file except in compliance with the License.  You can obtain a copy
@@ -1345,6 +1345,7 @@ SM2_R_INVALID_ENCODING:104:invalid encoding
 SM2_R_INVALID_FIELD:105:invalid field
 SM2_R_INVALID_PRIVATE_KEY:113:invalid private key
 SM2_R_NO_PARAMETERS_SET:109:no parameters set
+SM2_R_POINT_ARITHMETIC_FAILURE:114:point arithmetic failure
 SM2_R_USER_ID_TOO_LARGE:106:user id too large
 SSL_R_APPLICATION_DATA_AFTER_CLOSE_NOTIFY:291:\
 	application data after close notify
@@ -1503,6 +1504,7 @@ SSL_R_LISTENER_USE_ONLY:421:listener use only
 SSL_R_MAXIMUM_ENCRYPTED_PKTS_REACHED:395:maximum encrypted pkts reached
 SSL_R_MISSING_DSA_SIGNING_CERT:165:missing dsa signing cert
 SSL_R_MISSING_ECDSA_SIGNING_CERT:381:missing ecdsa signing cert
+SSL_R_MISSING_ENC_CERTIFICATE:424:missing encryption certificate
 SSL_R_MISSING_FATAL:256:missing fatal
 SSL_R_MISSING_PARAMETERS:290:missing parameters
 SSL_R_MISSING_PSK_KEX_MODES_EXTENSION:310:missing psk kex modes extension
@@ -1638,6 +1640,7 @@ SSL_R_SSL_SESSION_ID_CONTEXT_TOO_LONG:273:ssl session id context too long
 SSL_R_SSL_SESSION_ID_HAS_BAD_LENGTH:303:ssl session id has bad length
 SSL_R_SSL_SESSION_ID_TOO_LONG:408:ssl session id too long
 SSL_R_SSL_SESSION_VERSION_MISMATCH:210:ssl session version mismatch
+SSL_R_STATUS_CALLBACK_ERROR:425:status callback error
 SSL_R_STILL_IN_INIT:121:still in init
 SSL_R_STREAM_COUNT_LIMITED:411:stream count limited
 SSL_R_STREAM_FINISHED:365:stream finished

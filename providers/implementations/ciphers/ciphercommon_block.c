@@ -152,6 +152,9 @@ int ossl_cipher_tlsunpadblock(OSSL_LIB_CTX *libctx, unsigned int tlsversion,
                                                alloced, blocksize, macsize,
                                                libctx);
 
+#ifndef OPENSSL_NO_NTLS
+    case NTLS1_1_VERSION:
+#endif
     case TLS1_2_VERSION:
     case DTLS1_2_VERSION:
     case TLS1_1_VERSION:

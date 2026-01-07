@@ -418,6 +418,16 @@ void ssl_cert_set_cert_cb(CERT *c, int (*cb) (SSL *ssl, void *arg), void *arg)
     c->cert_cb_arg = arg;
 }
 
+SSL_cert_cb_fn ssl_cert_get_cert_cb(CERT *c)
+{
+    return c->cert_cb;
+}
+
+void *ssl_cert_get_cert_cb_arg(CERT *c)
+{
+    return c->cert_cb_arg;
+}
+
 /*
  * Verify a certificate chain/raw public key
  * Return codes:
@@ -1256,7 +1266,11 @@ static int ssl_security_default_callback(const SSL *s, const SSL_CTX *ctx,
             if (minbits > 160 && c->algorithm_mac & SSL_SHA1)
                 return 0;
             /* Level 3: forward secure ciphersuites only */
+#ifndef OPENSSL_NO_NTLS
+            pfs_mask = SSL_kDHE | SSL_kECDHE | SSL_kDHEPSK | SSL_kECDHEPSK | SSL_kSM2DHE;
+#else
             pfs_mask = SSL_kDHE | SSL_kECDHE | SSL_kDHEPSK | SSL_kECDHEPSK;
+#endif
             if (level >= 3 && c->min_tls != TLS1_3_VERSION &&
                                !(c->algorithm_mkey & pfs_mask))
                 return 0;
@@ -1266,6 +1280,11 @@ static int ssl_security_default_callback(const SSL *s, const SSL_CTX *ctx,
         if ((sc = SSL_CONNECTION_FROM_CONST_SSL(s)) == NULL)
             return 0;
         if (!SSL_CONNECTION_IS_DTLS(sc)) {
+#ifndef OPENSSL_NO_NTLS
+            /* NTLS v1.1 not allowed at level 3 */
+            if (nid == NTLS_VERSION && level >= 3)
+                return 0;
+#endif
             /* SSLv3, TLS v1.0 and TLS v1.1 only allowed at level 0 */
             if (nid <= TLS1_1_VERSION && level > 0)
                 return 0;

@@ -92,6 +92,9 @@ static const TLS_GROUP_CONSTANTS group_list[] = {
     /* 41 */ { OSSL_TLS_GROUP_ID_X25519MLKEM768, ML_KEM_768_SECBITS, TLS1_3_VERSION, 0, -1, -1, 1 },
     /* 42 */ { OSSL_TLS_GROUP_ID_SecP256r1MLKEM768, ML_KEM_768_SECBITS, TLS1_3_VERSION, 0, -1, -1, 1 },
     /* 43 */ { OSSL_TLS_GROUP_ID_SecP384r1MLKEM1024, ML_KEM_1024_SECBITS, TLS1_3_VERSION, 0, -1, -1, 1 },
+#if !defined(OPENSSL_NO_SM2) && !defined(FIPS_MODULE)
+    /* 44 */ { OSSL_TLS_GROUP_ID_sm2, 128, NTLS1_1_VERSION, 0, -1, -1, 0 },
+#endif
 };
 
 #define TLS_GROUP_ENTRY(tlsname, realname, algorithm, idx) \
@@ -198,6 +201,9 @@ static const OSSL_PARAM param_group_list[][11] = {
     TLS_GROUP_ENTRY("ffdhe4096", "ffdhe4096", "DH", 35),
     TLS_GROUP_ENTRY("ffdhe6144", "ffdhe6144", "DH", 36),
     TLS_GROUP_ENTRY("ffdhe8192", "ffdhe8192", "DH", 37),
+# endif
+# if !defined(OPENSSL_NO_SM2) && !defined(FIPS_MODULE)
+    TLS_GROUP_ENTRY("curveSM2", "SM2", "SM2", 44),
 # endif
 # ifndef OPENSSL_NO_TLS_DEPRECATED_EC
 #  ifndef OPENSSL_NO_EC2M

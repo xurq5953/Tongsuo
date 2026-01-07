@@ -55,6 +55,12 @@ static int tls_validate_record_header(OSSL_RECORD_LAYER *rl, TLS_RL_RECORD *rec)
         }
     } else {
         if (rl->version == TLS_ANY_VERSION) {
+#ifndef OPENSSL_NO_NTLS
+            if (rec->rec_version == NTLS_VERSION) {
+                /* TODO: check s->enable_tls == 1*/
+                /* Do nothing */
+            } else 
+#endif
             if ((rec->rec_version >> 8) != SSL3_VERSION_MAJOR) {
                 if (rl->is_first_record) {
                     unsigned char *p;

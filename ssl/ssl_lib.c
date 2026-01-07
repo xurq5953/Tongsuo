@@ -554,8 +554,13 @@ static int ssl_check_allowed_versions(int min_version, int max_version)
 #ifdef OPENSSL_NO_TLS1_3
             || (min_version <= TLS1_3_VERSION && TLS1_3_VERSION <= max_version)
 #endif
-            )
+            ) {
+#ifndef OPENSSL_NO_NTLS
+            if (min_version == NTLS_VERSION || max_version == NTLS_VERSION)
+                return 1;
+#endif
             return 0;
+        }
     }
     return 1;
 }
@@ -773,7 +778,9 @@ SSL *ossl_ssl_connection_new_int(SSL_CTX *ctx, SSL *user_ssl,
 
     s->num_tickets = ctx->num_tickets;
     s->pha_enabled = ctx->pha_enabled;
-
+#ifndef OPENSSL_NO_NTLS
+    s->enable_ntls = ctx->enable_ntls;
+#endif
     /* Shallow copy of the ciphersuites stack */
     s->tls13_ciphersuites = sk_SSL_CIPHER_dup(ctx->tls13_ciphersuites);
     if (s->tls13_ciphersuites == NULL)
@@ -1001,6 +1008,23 @@ int SSL_is_dtls(const SSL *s)
 
     return SSL_CONNECTION_IS_DTLS(sc) ? 1 : 0;
 }
+
+#ifndef OPENSSL_NO_NTLS
+int SSL_is_ntls(const SSL *s)
+{   
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+#ifndef OPENSSL_NO_QUIC
+    if (s->type == SSL_TYPE_QUIC_CONNECTION || s->type == SSL_TYPE_QUIC_XSO)
+        return 0;
+#endif
+
+    if (sc == NULL)
+        return 0;
+    
+    return SSL_CONNECTION_IS_NTLS(sc) ? 1 : 0;
+}
+#endif
 
 int SSL_is_tls(const SSL *s)
 {
@@ -1672,6 +1696,16 @@ BIO *SSL_get_wbio(const SSL *s)
          */
         return BIO_next(sc->bbio);
     }
+    return sc->wbio;
+}
+
+BIO *BABASSL_get0_wbio(const SSL *s)
+{
+    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+
+    if (sc == NULL)
+        return NULL;
+
     return sc->wbio;
 }
 
@@ -4071,6 +4105,9 @@ SSL_CTX *SSL_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq,
             goto err;
     }
 
+#ifndef OPENSSL_NO_NTLS
+    ret->enable_ntls = 0;
+#endif
     ret->method = meth;
     ret->min_proto_version = 0;
     ret->max_proto_version = 0;
@@ -4577,6 +4614,16 @@ void SSL_CTX_set_cert_cb(SSL_CTX *c, int (*cb) (SSL *ssl, void *arg), void *arg)
     ssl_cert_set_cert_cb(c->cert, cb, arg);
 }
 
+SSL_cert_cb_fn BABASSL_CTX_get_cert_cb(SSL_CTX *c)
+{
+    return ssl_cert_get_cert_cb(c->cert);
+}
+
+void *BABASSL_CTX_get_cert_cb_arg(SSL_CTX *c)
+{
+    return ssl_cert_get_cert_cb_arg(c->cert);
+}
+
 void SSL_set_cert_cb(SSL *s, int (*cb) (SSL *ssl, void *arg), void *arg)
 {
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
@@ -4587,6 +4634,26 @@ void SSL_set_cert_cb(SSL *s, int (*cb) (SSL *ssl, void *arg), void *arg)
     ssl_cert_set_cert_cb(sc->cert, cb, arg);
 }
 
+SSL_cert_cb_fn BABASSL_get_cert_cb(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return;
+
+    return ssl_cert_get_cert_cb(sc->cert);
+}
+
+void *BABASSL_get_cert_cb_arg(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return;
+
+    return ssl_cert_get_cert_cb_arg(sc->cert);
+}
+
 void ssl_set_masks(SSL_CONNECTION *s)
 {
     CERT *c = s->cert;
@@ -4594,6 +4661,10 @@ void ssl_set_masks(SSL_CONNECTION *s)
     int rsa_enc, rsa_sign, dh_tmp, dsa_sign;
     unsigned long mask_k, mask_a;
     int have_ecc_cert, ecdsa_ok;
+#ifndef OPENSSL_NO_NTLS
+    int sm2_enc, sm2_sign;
+    int ntls_rsa_enc, ntls_rsa_sign;
+#endif
 
     if (c == NULL)
         return;
@@ -4606,6 +4677,12 @@ void ssl_set_masks(SSL_CONNECTION *s)
     rsa_sign = pvalid[SSL_PKEY_RSA] & CERT_PKEY_VALID;
     dsa_sign = pvalid[SSL_PKEY_DSA_SIGN] & CERT_PKEY_VALID;
     have_ecc_cert = pvalid[SSL_PKEY_ECC] & CERT_PKEY_VALID;
+#ifndef OPENSSL_NO_NTLS
+    sm2_sign = pvalid[SSL_PKEY_SM2_SIGN] & CERT_PKEY_VALID;
+    sm2_enc = pvalid[SSL_PKEY_SM2_ENC] & CERT_PKEY_VALID;
+    ntls_rsa_sign = pvalid[SSL_PKEY_RSA_SIGN] & CERT_PKEY_VALID;
+    ntls_rsa_enc = pvalid[SSL_PKEY_RSA_ENC] & CERT_PKEY_VALID;
+#endif
     mask_k = 0;
     mask_a = 0;
 
@@ -4692,7 +4769,23 @@ void ssl_set_masks(SSL_CONNECTION *s)
             && TLS1_get_version(&s->ssl) == TLS1_2_VERSION)
             mask_a |= SSL_aECDSA;
 
+#ifndef OPENSSL_NO_NTLS
+    if (sm2_sign)
+        mask_a |= SSL_aSM2;
+
+    if (sm2_enc)
+        mask_k |= SSL_kSM2 | SSL_kSM2DHE;
+
+    if (ntls_rsa_sign)
+        mask_a |= SSL_aRSA;
+
+    if (ntls_rsa_enc)
+        mask_k |= SSL_kRSA;
+#endif
+
+#ifndef OPENSSL_NO_EC
     mask_k |= SSL_kECDHE;
+#endif
 
 #ifndef OPENSSL_NO_PSK
     mask_k |= SSL_kPSK;
@@ -4892,6 +4985,10 @@ int ossl_ssl_get_error(const SSL *s, int i, int check_err)
 #endif
     {
         if (SSL_want_read(s)) {
+#ifndef OPENSSL_NO_NTLS
+        if (s->enable_ntls == 1 && SSL_IS_FIRST_HANDSHAKE(s))
+            return SSL_ERROR_WANT_READ;
+#endif
             bio = SSL_get_rbio(s);
             if (BIO_should_read(bio))
                 return SSL_ERROR_WANT_READ;
@@ -5089,6 +5186,11 @@ const char *ssl_protocol_to_string(int version)
 
     case DTLS1_2_VERSION:
         return "DTLSv1.2";
+
+#ifndef OPENSSL_NO_NTLS
+    case NTLS1_1_VERSION:
+        return "NTLSv1.1";
+#endif
 
     default:
         return "unknown";
@@ -5545,6 +5647,25 @@ SSL_CTX *SSL_set_SSL_CTX(SSL *ssl, SSL_CTX *ctx)
 err:
     ssl_cert_free(new_cert);
     return NULL;
+}
+
+SSL_CTX *BABASSL_set_SESSION_CTX(SSL *ssl, SSL_CTX *ctx)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
+
+    if (sc == NULL)
+        return NULL;
+
+    if (ssl->ctx == ctx)
+        return ssl->ctx;
+    if (ctx == NULL)
+        ctx = sc->session_ctx;
+
+    SSL_CTX_up_ref(ctx);
+    SSL_CTX_free(ssl->ctx);     /* decrement reference count */
+    ssl->ctx = ctx;
+
+    return ssl->ctx;
 }
 
 int SSL_CTX_set_default_verify_paths(SSL_CTX *ctx)
@@ -6930,6 +7051,55 @@ int SSL_client_hello_get_extension_order(SSL *s, uint16_t *exts, size_t *num_ext
     return 1;
 }
 
+int BABASSL_client_hello_get1_extensions(SSL *s, int **out, size_t *outlen)
+{
+    int *exts, i = 0;
+    size_t num = 0;
+    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return 0;
+
+    PACKET extensions = sc->clienthello->extensions;
+
+    while (PACKET_remaining(&extensions) > 0) {
+        unsigned int type;
+        PACKET extension;
+
+        if (!PACKET_get_net_2(&extensions, &type) ||
+            !PACKET_get_length_prefixed_2(&extensions, &extension)) {
+            return 0;
+        }
+
+        num++;
+    }
+
+    exts = OPENSSL_malloc(sizeof(*exts) * num);
+    if (exts == NULL)
+        return 0;
+
+    extensions = sc->clienthello->extensions;
+
+    while (PACKET_remaining(&extensions) > 0) {
+        unsigned int type;
+        PACKET extension;
+
+        if (!PACKET_get_net_2(&extensions, &type) ||
+            !PACKET_get_length_prefixed_2(&extensions, &extension)) {
+            goto err;
+        }
+
+        exts[i++] = type;
+    }
+
+    *out = exts;
+    *outlen = num;
+    return 1;
+ err:
+    OPENSSL_free(exts);
+    return 0;
+}
+
 int SSL_client_hello_get0_ext(SSL *s, unsigned int type, const unsigned char **out,
                        size_t *outlen)
 {
@@ -7479,6 +7649,38 @@ void SSL_set_allow_early_data_cb(SSL *s,
     sc->allow_early_data_cb_data = arg;
 }
 
+#ifndef OPENSSL_NO_NTLS
+void SSL_CTX_enable_ntls(SSL_CTX *ctx)
+{
+    ctx->enable_ntls = 1;
+}
+
+void SSL_CTX_disable_ntls(SSL_CTX *ctx)
+{
+    ctx->enable_ntls = 0;
+}
+
+void SSL_enable_ntls(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return;
+
+    sc->enable_ntls = 1;
+}
+
+void SSL_disable_ntls(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return;
+
+    sc->enable_ntls = 0;
+}
+#endif
+
 const EVP_CIPHER *ssl_evp_cipher_fetch(OSSL_LIB_CTX *libctx,
                                        int nid,
                                        const char *properties)
@@ -7612,6 +7814,155 @@ int SSL_CTX_set0_tmp_dh_pkey(SSL_CTX *ctx, EVP_PKEY *dhpkey)
     EVP_PKEY_free(ctx->cert->dh_tmp);
     ctx->cert->dh_tmp = dhpkey;
     return 1;
+}
+
+int BABASSL_SESSION_get_ref(SSL_SESSION *sess)
+{
+    if(sess != NULL)
+        return sess->references;
+    else
+        return 0;
+}
+
+/*
+ * For a cipher return the index corresponding to the certificate type
+ */
+static int ssl_cipher_get_cert_index(const SSL_CIPHER *c)
+{
+    uint32_t alg_a;
+
+    alg_a = c->algorithm_auth;
+
+    if (alg_a & SSL_aECDSA)
+        return SSL_PKEY_ECC;
+    else if (alg_a & SSL_aRSA)
+        return SSL_PKEY_RSA;
+    else if (alg_a & SSL_aSM2)
+        return SSL_PKEY_SM2;
+
+    return -1;
+}
+
+X509 *BABASSL_get_use_certificate(const SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return NULL;
+
+    CERT *c = sc->cert;
+    int idx;
+
+    if (sc->s3.tmp.new_cipher == NULL)
+        return NULL;
+
+#ifdef OPENSSL_SSL_DEBUG_BROKEN_PROTOCOL
+    /*
+     * Broken protocol test: return last used certificate: which may mismatch
+     * the one expected.
+     */
+    if (c->cert_flags & SSL_CERT_FLAG_BROKEN_PROTOCOL)
+        return c->key ? c->key->x509 : NULL;
+#endif
+
+    if (SSL_CONNECTION_IS_TLS13(sc))
+        return SSL_get_certificate(s);
+
+    idx = ssl_cipher_get_cert_index(sc->s3.tmp.new_cipher);
+    /* This may or may not be an error. */
+    if (idx < 0)
+        return NULL;
+
+    return c->pkeys[idx].x509;
+}
+
+#ifndef OPENSSL_NO_NTLS
+X509 *BABASSL_get_sign_certificate_ntls(const SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return NULL;
+
+    if (sc->s3.tmp.sign_cert != NULL)
+        return sc->s3.tmp.sign_cert->x509;
+
+    return NULL;
+}
+
+X509 *BABASSL_get_enc_certificate_ntls(const SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return NULL;
+
+    if (sc->s3.tmp.enc_cert != NULL)
+        return sc->s3.tmp.enc_cert->x509;
+
+    return NULL;
+}
+#endif
+
+/*
+ *  BABASSL_get0_alpn_proposed gets the proposed ALPN protocol (if any) from
+ *  |ssl|. On return it sets |*data| to point to |*len| bytes of protocol name
+ *  (not including the leading length-prefix byte). If the server didn't
+ *  respond with a negotiated protocol then |*len| will be zero.
+ */
+void BABASSL_get0_alpn_proposed(const SSL *ssl, const unsigned char **data,
+                                unsigned *len)
+{
+    if (ssl == NULL || data == NULL || len == NULL)
+        return;
+
+    *data = ssl->s3.alpn_proposed;
+
+    if (*data == NULL)
+        *len = 0;
+    else
+        *len = ssl->s3.alpn_proposed_len;
+}
+
+/* TODO: condition opt */
+int BABASSL_get_master_key(SSL *s, unsigned char **master_key,
+                           int *master_key_len)
+{
+    if (s == NULL || s->session == NULL || s->statem.in_handshake == 1)
+        return 0;
+
+    if (master_key != NULL)
+        *master_key = s->session->master_key;
+
+    if (master_key_len != NULL)
+        *master_key_len = s->session->master_key_length;
+
+    return 1;
+}
+
+void BABASSL_CTX_certs_clear(SSL_CTX *ctx)
+{
+    ssl_cert_clear_certs(ctx->cert);
+}
+
+int BABASSL_check_tlsext_status(SSL *s)
+{
+    if (s->ext.status_type != -1 && s->ctx && s->ctx->ext.status_cb)
+        return 1;
+    else
+        return 0;
+}
+
+void BABASSL_debug(SSL *s, unsigned char *str, int len)
+{
+    int i;
+    if (!str)
+        return;
+
+    for(i = 0; i < len; i++)
+        printf("%02x", str[i]);
+    printf("\n");
+    printf("%d\n", len);
 }
 
 /* QUIC-specific methods which are supported on QUIC connections only. */

@@ -378,6 +378,9 @@ static const OSSL_ALGORITHM deflt_keyexch[] = {
     { PROV_NAMES_X448, "provider=default", ossl_x448_keyexch_functions },
 # endif
 #endif
+#ifndef OPENSSL_NO_SM2
+    { PROV_NAMES_SM2DH, "provider=default", ossl_sm2dh_keyexch_functions },
+#endif
     { PROV_NAMES_TLS1_PRF, "provider=default", ossl_kdf_tls1_prf_keyexch_functions },
     { PROV_NAMES_HKDF, "provider=default", ossl_kdf_hkdf_keyexch_functions },
     { PROV_NAMES_SCRYPT, "provider=default",

@@ -20,6 +20,9 @@
 #include "../ssl_local.h"
 #include "statem_local.h"
 #include <assert.h>
+#ifndef OPENSSL_NO_NTLS
+# include "../statem_ntls/ntls_statem.h"
+#endif
 
 /*
  * This file implements the SSL/TLS/DTLS state machines.
@@ -298,6 +301,20 @@ int ossl_statem_connect(SSL *s)
     if (sc == NULL)
         return -1;
 
+#ifndef OPENSSL_NO_NTLS
+    int ret;
+
+    if (s->enable_ntls == 1) {
+        ret = SSL_connection_is_ntls(sc, 0);
+        if (ret == 0)
+            return state_machine(sc, 0);
+        else if (ret == 1)
+            return state_machine_ntls(sc, 0);
+        else
+            return -1;
+    } else
+#endif
+
     return state_machine(sc, 0);
 }
 
@@ -307,6 +324,20 @@ int ossl_statem_accept(SSL *s)
 
     if (sc == NULL)
         return -1;
+
+#ifndef OPENSSL_NO_NTLS
+    int ret;
+
+    if (s->enable_ntls == 1) {
+        ret = SSL_connection_is_ntls(sc, 1);
+        if (ret == 0)
+            return state_machine(sc, 1);
+        else if (ret == 1)
+            return state_machine_ntls(sc, 1);
+        else
+            return ret;
+    } else
+#endif
 
     return state_machine(sc, 1);
 }

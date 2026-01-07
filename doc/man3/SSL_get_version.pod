@@ -3,6 +3,8 @@
 =head1 NAME
 
 SSL_client_version, SSL_get_version, SSL_is_dtls, SSL_is_tls, SSL_is_quic,
+SSL_is_ntls, SSL_enable_ntls, SSL_disable_ntls,
+SSL_CTX_enable_ntls, SSL_CTX_disable_ntls
 SSL_version - get the protocol information of a connection
 
 =head1 SYNOPSIS
@@ -18,6 +20,15 @@ SSL_version - get the protocol information of a connection
  int SSL_is_quic(const SSL *ssl);
 
  int SSL_version(const SSL *s);
+
+ #ifndef OPENSSL_NO_NTLS
+ int SSL_is_ntls(const SSL *s);
+
+ void SSL_enable_ntls(SSL *s);
+ void SSL_disable_ntls(SSL *s);
+ void SSL_CTX_enable_ntls(SSL_CTX *ctx);
+ void SSL_CTX_disable_ntls(SSL_CTX *ctx);
+ #endif
 
 =head1 DESCRIPTION
 
@@ -37,6 +48,13 @@ SSL_is_dtls() returns 1 if the connection is using DTLS or 0 if not.
 SSL_is_tls() returns 1 if the connection is using SSL/TLS or 0 if not.
 
 SSL_is_quic() returns 1 if the connection is using QUIC or 0 if not.
+
+SSL_is_ntls() returns one if the connection is using NTLS, zero if not.
+
+SSL_enable_ntls() and SSL_CTX_enable_ntls() enable NTLS protocol either for
+a given SSL connection or for all connections that share the given SSL context,
+respectively. SSL_disable_ntls and SSL_CTX_disable_ntls() turn off NTLS
+protocol.
 
 =head1 RETURN VALUES
 
