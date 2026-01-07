@@ -7965,6 +7965,14 @@ void BABASSL_debug(SSL *s, unsigned char *str, int len)
     printf("%d\n", len);
 }
 
+#ifndef OPENSSL_NO_SKIP_SCSV
+void SSL_set_skip_scsv(SSL_CONNECTION *s, int skip_scsv)
+{
+    if (s)
+        s->skip_scsv = skip_scsv;
+}
+#endif
+
 /* QUIC-specific methods which are supported on QUIC connections only. */
 int SSL_handle_events(SSL *s)
 {

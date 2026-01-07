@@ -1820,6 +1820,12 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
                 s->s3.send_connection_binding = 1;
             } else if (SSL_CIPHER_get_id(c) == SSL3_CK_FALLBACK_SCSV &&
                        !ssl_check_version_downgrade(s)) {
+#ifndef OPENSSL_NO_SKIP_SCSV
+                /* XXX: we skip SCSV in case of bad client implementations */
+                if (s->skip_scsv)
+                    continue;
+#endif
+
                 /*
                  * This SCSV indicates that the client previously tried
                  * a higher version.  We should fail if the current version

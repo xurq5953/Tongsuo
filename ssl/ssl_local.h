@@ -1220,6 +1220,9 @@ struct ssl_ctx_st {
     /* Tag of NTLS */
     int enable_ntls;
 #endif
+# ifndef OPENSSL_NO_SKIP_SCSV
+    int skip_scsv;
+# endif
 
 #ifndef OPENSSL_NO_COMP_ALG
     /* certificate compression preferences */
