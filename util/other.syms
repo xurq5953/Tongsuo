@@ -906,3 +906,7 @@ SSL_CTX_get_verify_server_certificate_host define
 SSL_CTX_set_verify_server_certificate_host define
 SSL_get_session_reuse_type              define
 SSL_get_desc_and_level                  define
+TONGSUO_VERSION_NUMBER                  define
+TONGSUO_VERSION_TEXT                    define
+BABASSL_VERSION_NUMBER                  define
+BABASSL_VERSION_TEXT                    define
