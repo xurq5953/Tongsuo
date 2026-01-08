@@ -120,7 +120,6 @@ int tls1_change_cipher_state(SSL_CONNECTION *s, int which)
     const EVP_CIPHER *c;
     const SSL_COMP *comp = NULL;
     const EVP_MD *m;
-    int mac_type;
     size_t mac_secret_size;
     size_t n, i, j, k, cl;
     int iivlen;
@@ -133,7 +132,6 @@ int tls1_change_cipher_state(SSL_CONNECTION *s, int which)
 
     c = s->s3.tmp.new_sym_enc;
     m = s->s3.tmp.new_hash;
-    mac_type = s->s3.tmp.new_mac_pkey_type;
 #ifndef OPENSSL_NO_COMP
     comp = s->s3.tmp.new_compression;
 #endif
@@ -199,32 +197,12 @@ int tls1_change_cipher_state(SSL_CONNECTION *s, int which)
         else
             s->s3.flags &= ~TLS1_FLAGS_ENCRYPT_THEN_MAC_READ;
 
-        if (s->s3.tmp.new_cipher->algorithm2 & TLS1_STREAM_MAC)
-            s->mac_flags |= SSL_MAC_FLAG_READ_MAC_STREAM;
-        else
-            s->mac_flags &= ~SSL_MAC_FLAG_READ_MAC_STREAM;
-
-        if (s->s3.tmp.new_cipher->algorithm2 & TLS1_TLSTREE)
-            s->mac_flags |= SSL_MAC_FLAG_READ_MAC_TLSTREE;
-        else
-            s->mac_flags &= ~SSL_MAC_FLAG_READ_MAC_TLSTREE;
-
         direction = OSSL_RECORD_DIRECTION_READ;
     } else {
         if (s->ext.use_etm)
             s->s3.flags |= TLS1_FLAGS_ENCRYPT_THEN_MAC_WRITE;
         else
             s->s3.flags &= ~TLS1_FLAGS_ENCRYPT_THEN_MAC_WRITE;
-
-        if (s->s3.tmp.new_cipher->algorithm2 & TLS1_STREAM_MAC)
-            s->mac_flags |= SSL_MAC_FLAG_WRITE_MAC_STREAM;
-        else
-            s->mac_flags &= ~SSL_MAC_FLAG_WRITE_MAC_STREAM;
-
-        if (s->s3.tmp.new_cipher->algorithm2 & TLS1_TLSTREE)
-            s->mac_flags |= SSL_MAC_FLAG_WRITE_MAC_TLSTREE;
-        else
-            s->mac_flags &= ~SSL_MAC_FLAG_WRITE_MAC_TLSTREE;
 
         direction = OSSL_RECORD_DIRECTION_WRITE;
     }
@@ -332,9 +310,6 @@ size_t tls1_final_finish_mac(SSL_CONNECTION *s, const char *str,
     size_t hashlen;
     unsigned char hash[EVP_MAX_MD_SIZE];
     size_t finished_size = TLS1_FINISH_MAC_LENGTH;
-
-    if (s->s3.tmp.new_cipher->algorithm_mkey & SSL_kGOST18)
-        finished_size = 32;
 
     if (!ssl3_digest_cached_records(s, 0)) {
         /* SSLfatal() already called */

@@ -199,13 +199,6 @@ static const struct {
     {NID_brainpoolP256r1tls13, OSSL_TLS_GROUP_ID_brainpoolP256r1_tls13},
     {NID_brainpoolP384r1tls13, OSSL_TLS_GROUP_ID_brainpoolP384r1_tls13},
     {NID_brainpoolP512r1tls13, OSSL_TLS_GROUP_ID_brainpoolP512r1_tls13},
-    {NID_id_tc26_gost_3410_2012_256_paramSetA, OSSL_TLS_GROUP_ID_gc256A},
-    {NID_id_tc26_gost_3410_2012_256_paramSetB, OSSL_TLS_GROUP_ID_gc256B},
-    {NID_id_tc26_gost_3410_2012_256_paramSetC, OSSL_TLS_GROUP_ID_gc256C},
-    {NID_id_tc26_gost_3410_2012_256_paramSetD, OSSL_TLS_GROUP_ID_gc256D},
-    {NID_id_tc26_gost_3410_2012_512_paramSetA, OSSL_TLS_GROUP_ID_gc512A},
-    {NID_id_tc26_gost_3410_2012_512_paramSetB, OSSL_TLS_GROUP_ID_gc512B},
-    {NID_id_tc26_gost_3410_2012_512_paramSetC, OSSL_TLS_GROUP_ID_gc512C},
     {NID_ffdhe2048, OSSL_TLS_GROUP_ID_ffdhe2048},
     {NID_ffdhe3072, OSSL_TLS_GROUP_ID_ffdhe3072},
     {NID_ffdhe4096, OSSL_TLS_GROUP_ID_ffdhe4096},
@@ -1996,14 +1989,6 @@ static const uint16_t tls12_sigalgs[] = {
     TLSEXT_SIGALG_dsa_sha256,
     TLSEXT_SIGALG_dsa_sha384,
     TLSEXT_SIGALG_dsa_sha512,
-
-#ifndef OPENSSL_NO_GOST
-    TLSEXT_SIGALG_gostr34102012_256_intrinsic,
-    TLSEXT_SIGALG_gostr34102012_512_intrinsic,
-    TLSEXT_SIGALG_gostr34102012_256_gostr34112012_256,
-    TLSEXT_SIGALG_gostr34102012_512_gostr34112012_512,
-    TLSEXT_SIGALG_gostr34102001_gostr3411,
-#endif
 };
 
 
@@ -2160,41 +2145,6 @@ static const SIGALG_LOOKUP sigalg_lookup_tbl[] = {
      NID_dsaWithSHA1, NID_undef, 1, 0,
      TLS1_2_VERSION, TLS1_2_VERSION, DTLS1_2_VERSION, DTLS1_2_VERSION},
 
-#ifndef OPENSSL_NO_GOST
-    {TLSEXT_SIGALG_gostr34102012_256_intrinsic_alias, /* RFC9189 */
-     TLSEXT_SIGALG_gostr34102012_256_intrinsic_name,
-     TLSEXT_SIGALG_gostr34102012_256_intrinsic,
-     NID_id_GostR3411_2012_256, SSL_MD_GOST12_256_IDX,
-     NID_id_GostR3410_2012_256, SSL_PKEY_GOST12_256,
-     NID_undef, NID_undef, 1, 0,
-     TLS1_2_VERSION, TLS1_2_VERSION, DTLS1_2_VERSION, DTLS1_2_VERSION},
-    {TLSEXT_SIGALG_gostr34102012_256_intrinsic_alias, /* RFC9189 */
-     TLSEXT_SIGALG_gostr34102012_256_intrinsic_name,
-     TLSEXT_SIGALG_gostr34102012_512_intrinsic,
-     NID_id_GostR3411_2012_512, SSL_MD_GOST12_512_IDX,
-     NID_id_GostR3410_2012_512, SSL_PKEY_GOST12_512,
-     NID_undef, NID_undef, 1, 0,
-     TLS1_2_VERSION, TLS1_2_VERSION, DTLS1_2_VERSION, DTLS1_2_VERSION},
-
-    {TLSEXT_SIGALG_gostr34102012_256_gostr34112012_256_name,
-     NULL, TLSEXT_SIGALG_gostr34102012_256_gostr34112012_256,
-     NID_id_GostR3411_2012_256, SSL_MD_GOST12_256_IDX,
-     NID_id_GostR3410_2012_256, SSL_PKEY_GOST12_256,
-     NID_undef, NID_undef, 1, 0,
-     TLS1_2_VERSION, TLS1_2_VERSION, DTLS1_2_VERSION, DTLS1_2_VERSION},
-    {TLSEXT_SIGALG_gostr34102012_512_gostr34112012_512_name,
-     NULL, TLSEXT_SIGALG_gostr34102012_512_gostr34112012_512,
-     NID_id_GostR3411_2012_512, SSL_MD_GOST12_512_IDX,
-     NID_id_GostR3410_2012_512, SSL_PKEY_GOST12_512,
-     NID_undef, NID_undef, 1, 0,
-     TLS1_2_VERSION, TLS1_2_VERSION, DTLS1_2_VERSION, DTLS1_2_VERSION},
-    {TLSEXT_SIGALG_gostr34102001_gostr3411_name,
-     NULL, TLSEXT_SIGALG_gostr34102001_gostr3411,
-     NID_id_GostR3411_94, SSL_MD_GOST94_IDX,
-     NID_id_GostR3410_2001, SSL_PKEY_GOST01,
-     NID_undef, NID_undef, 1, 0,
-     TLS1_2_VERSION, TLS1_2_VERSION, DTLS1_2_VERSION, DTLS1_2_VERSION},
-#endif
 };
 /* Legacy sigalgs for TLS < 1.2 RSA TLS signatures */
 static const SIGALG_LOOKUP legacy_rsa_sigalg = {
@@ -2214,9 +2164,6 @@ static const uint16_t tls_default_sigalg[] = {
     0, /* SSL_PKEY_RSA_PSS_SIGN */
     TLSEXT_SIGALG_dsa_sha1, /* SSL_PKEY_DSA_SIGN */
     TLSEXT_SIGALG_ecdsa_sha1, /* SSL_PKEY_ECC */
-    TLSEXT_SIGALG_gostr34102001_gostr3411, /* SSL_PKEY_GOST01 */
-    TLSEXT_SIGALG_gostr34102012_256_intrinsic, /* SSL_PKEY_GOST12_256 */
-    TLSEXT_SIGALG_gostr34102012_512_intrinsic, /* SSL_PKEY_GOST12_512 */
     0, /* SSL_PKEY_ED25519 */
     0, /* SSL_PKEY_ED448 */
 #ifndef OPENSSL_NO_NTLS
@@ -2510,36 +2457,6 @@ static const SIGALG_LOOKUP *tls1_get_legacy_sigalg(const SSL_CONNECTION *s,
                 if (clu->amask & s->s3.tmp.new_cipher->algorithm_auth) {
                     idx = i;
                     break;
-                }
-            }
-
-            /*
-             * Some GOST ciphersuites allow more than one signature algorithms
-             * */
-            if (idx == SSL_PKEY_GOST01 && s->s3.tmp.new_cipher->algorithm_auth != SSL_aGOST01) {
-                int real_idx;
-
-                for (real_idx = SSL_PKEY_GOST12_512; real_idx >= SSL_PKEY_GOST01;
-                     real_idx--) {
-                    if (s->cert->pkeys[real_idx].privatekey != NULL) {
-                        idx = real_idx;
-                        break;
-                    }
-                }
-            }
-            /*
-             * As both SSL_PKEY_GOST12_512 and SSL_PKEY_GOST12_256 indices can be used
-             * with new (aGOST12-only) ciphersuites, we should find out which one is available really.
-             */
-            else if (idx == SSL_PKEY_GOST12_256) {
-                int real_idx;
-
-                for (real_idx = SSL_PKEY_GOST12_512; real_idx >= SSL_PKEY_GOST12_256;
-                     real_idx--) {
-                     if (s->cert->pkeys[real_idx].privatekey != NULL) {
-                         idx = real_idx;
-                         break;
-                     }
                 }
             }
         } else {
@@ -3435,45 +3352,6 @@ static int tls12_sigalg_allowed(const SSL_CONNECTION *s, int op,
     if (ssl_cert_is_disabled(SSL_CONNECTION_GET_CTX(s), lu->sig_idx))
         return 0;
 
-    if (lu->sig == NID_id_GostR3410_2012_256
-            || lu->sig == NID_id_GostR3410_2012_512
-            || lu->sig == NID_id_GostR3410_2001) {
-        /* We never allow GOST sig algs on the server with TLSv1.3 */
-        if (s->server && SSL_CONNECTION_IS_TLS13(s))
-            return 0;
-        if (!s->server
-                && SSL_CONNECTION_GET_SSL(s)->method->version == TLS_ANY_VERSION
-                && s->s3.tmp.max_ver >= TLS1_3_VERSION) {
-            int i, num;
-            STACK_OF(SSL_CIPHER) *sk;
-
-            /*
-             * We're a client that could negotiate TLSv1.3. We only allow GOST
-             * sig algs if we could negotiate TLSv1.2 or below and we have GOST
-             * ciphersuites enabled.
-             */
-
-            if (s->s3.tmp.min_ver >= TLS1_3_VERSION)
-                return 0;
-
-            sk = SSL_get_ciphers(SSL_CONNECTION_GET_SSL(s));
-            num = sk != NULL ? sk_SSL_CIPHER_num(sk) : 0;
-            for (i = 0; i < num; i++) {
-                const SSL_CIPHER *c;
-
-                c = sk_SSL_CIPHER_value(sk, i);
-                /* Skip disabled ciphers */
-                if (ssl_cipher_disabled(s, c, SSL_SECOP_CIPHER_SUPPORTED, 0))
-                    continue;
-
-                if ((c->algorithm_mkey & (SSL_kGOST | SSL_kGOST18)) != 0)
-                    break;
-            }
-            if (i == num)
-                return 0;
-        }
-    }
-
     /* Finally see if security callback allows it */
     secbits = sigalg_security_bits(SSL_CONNECTION_GET_CTX(s), lu);
     sigalgstr[0] = (lu->sigalg >> 8) & 0xff;
@@ -4203,21 +4081,6 @@ int tls1_check_chain(SSL_CONNECTION *s, X509 *x, EVP_PKEY *pk,
                 default_nid = NID_ecdsa_with_SHA1;
                 break;
 
-            case SSL_PKEY_GOST01:
-                rsign = NID_id_GostR3410_2001;
-                default_nid = NID_id_GostR3411_94_with_GostR3410_2001;
-                break;
-
-            case SSL_PKEY_GOST12_256:
-                rsign = NID_id_GostR3410_2012_256;
-                default_nid = NID_id_tc26_signwithdigest_gost3410_2012_256;
-                break;
-
-            case SSL_PKEY_GOST12_512:
-                rsign = NID_id_GostR3410_2012_512;
-                default_nid = NID_id_tc26_signwithdigest_gost3410_2012_512;
-                break;
-
             default:
                 default_nid = -1;
                 break;
@@ -4374,9 +4237,6 @@ void tls1_set_cert_validity(SSL_CONNECTION *s)
     tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_RSA_PSS_SIGN);
     tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_DSA_SIGN);
     tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_ECC);
-    tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_GOST01);
-    tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_GOST12_256);
-    tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_GOST12_512);
     tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_ED25519);
     tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_ED448);
     tls1_check_chain(s, NULL, NULL, NULL, SSL_PKEY_SM2);
@@ -4864,27 +4724,6 @@ int tls_choose_sigalg(SSL_CONNECTION *s, int fatalerrs)
                     if (curve == -1 || lu->curve == curve)
                         break;
                 }
-#ifndef OPENSSL_NO_GOST
-                /*
-                 * Some Windows-based implementations do not send GOST algorithms indication
-                 * in supported_algorithms extension, so when we have GOST-based ciphersuite,
-                 * we have to assume GOST support.
-                 */
-                if (i == s->shared_sigalgslen
-                    && (s->s3.tmp.new_cipher->algorithm_auth
-                        & (SSL_aGOST01 | SSL_aGOST12)) != 0) {
-                  if ((lu = tls1_get_legacy_sigalg(s, -1)) == NULL) {
-                    if (!fatalerrs)
-                      return 1;
-                    SSLfatal(s, SSL_AD_HANDSHAKE_FAILURE,
-                             SSL_R_NO_SUITABLE_SIGNATURE_ALGORITHM);
-                    return 0;
-                  } else {
-                    i = 0;
-                    sig_idx = lu->sig_idx;
-                  }
-                }
-#endif
                 if (i == s->shared_sigalgslen) {
                     if (!fatalerrs)
                         return 1;

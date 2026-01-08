@@ -250,12 +250,6 @@ __owur CON_FUNC_RETURN tls_construct_new_session_ticket(SSL_CONNECTION *s,
 MSG_PROCESS_RETURN tls_process_end_of_early_data(SSL_CONNECTION *s,
                                                  PACKET *pkt);
 
-#ifndef OPENSSL_NO_GOST
-/* These functions are used in GOST18 CKE, both for client and server */
-int ossl_gost18_cke_cipher_nid(const SSL_CONNECTION *s);
-int ossl_gost_ukm(const SSL_CONNECTION *s, unsigned char *dgst_buf);
-#endif
-
 /* Extension processing */
 
 typedef enum ext_return_en {
@@ -413,14 +407,6 @@ EXT_RETURN tls_construct_stoc_key_share(SSL_CONNECTION *s, WPACKET *pkt,
 EXT_RETURN tls_construct_stoc_cookie(SSL_CONNECTION *s, WPACKET *pkt,
                                      unsigned int context,
                                      X509 *x, size_t chainidx);
-/*
- * Not in public headers as this is not an official extension. Only used when
- * SSL_OP_CRYPTOPRO_TLSEXT_BUG is set.
- */
-#define TLSEXT_TYPE_cryptopro_bug      0xfde8
-EXT_RETURN tls_construct_stoc_cryptopro_bug(SSL_CONNECTION *s, WPACKET *pkt,
-                                            unsigned int context, X509 *x,
-                                            size_t chainidx);
 EXT_RETURN tls_construct_stoc_psk(SSL_CONNECTION *s, WPACKET *pkt,
                                   unsigned int context,
                                   X509 *x, size_t chainidx);
