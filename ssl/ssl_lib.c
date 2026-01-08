@@ -8115,6 +8115,16 @@ int  SSL_CTX_get_verify_cert_with_sni(SSL_CTX *ctx)
 }
 #endif
 
+#ifndef OPENSSL_NO_SESSION_REUSED_TYPE
+int SSL_get_session_reused_type(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    if (sc == NULL)
+        return 0;
+    return !sc->hit ? SSL_SESSION_REUSED_TYPE_NOCACHE : sc->session_reused_type;
+}
+#endif
+
 /* QUIC-specific methods which are supported on QUIC connections only. */
 int SSL_handle_events(SSL *s)
 {

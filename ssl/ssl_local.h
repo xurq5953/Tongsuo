@@ -1213,9 +1213,6 @@ struct ssl_ctx_st {
     /* Tag of NTLS */
     int enable_ntls;
 #endif
-# ifndef OPENSSL_NO_SKIP_SCSV
-    int skip_scsv;
-# endif
 
 #ifndef OPENSSL_NO_COMP_ALG
     /* certificate compression preferences */
@@ -1891,6 +1888,15 @@ struct ssl_connection_st {
 
 # ifndef OPENSSL_NO_NTLS
     int enable_ntls;
+# endif
+
+# ifndef OPENSSL_NO_SKIP_SCSV
+    int skip_scsv;
+# endif
+
+# ifndef OPENSSL_NO_SESSION_REUSED_TYPE
+    /* session reuse type: 0->nocache, 1->cache, 2->ticket */
+    int session_reused_type;
 # endif
 
 #ifndef OPENSSL_NO_COMP_ALG
