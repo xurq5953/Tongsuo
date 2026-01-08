@@ -1121,6 +1121,7 @@ while (@argvcopy)
                 elsif (/^--banner=(.*)$/)
                         {
                         $banner = $1 . "\n";
+                        }
                 elsif (/^--system-ciphers-file=(.*)$/)
                         {
                             $config{system_ciphers_file}=$1;
