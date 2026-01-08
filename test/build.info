@@ -286,7 +286,7 @@ IF[{- !$disabled{tests} -}]
   ENDIF
   
   IF[{- !$disabled{'deprecated-3.0'} -}]
-    PROGRAMS{noinst}=igetest bftest casttest
+    PROGRAMS{noinst}=igetest bftest
 
     SOURCE[igetest]=igetest.c
     INCLUDE[igetest]=../include ../apps/include
@@ -296,9 +296,6 @@ IF[{- !$disabled{tests} -}]
     INCLUDE[bftest]=../include ../apps/include
     DEPEND[bftest]=../libcrypto libtestutil.a
 
-    SOURCE[casttest]=casttest.c
-    INCLUDE[casttest]=../include ../apps/include
-    DEPEND[casttest]=../libcrypto libtestutil.a
   ENDIF
 
   IF[{- !$disabled{'ml-dsa'} -}]

@@ -5565,10 +5565,6 @@ static int is_cipher_disabled(const char *name)
     if (HAS_CASE_PREFIX(name, "BF"))
         return 1;
 #endif
-#ifdef OPENSSL_NO_CAST
-    if (HAS_CASE_PREFIX(name, "CAST"))
-        return 1;
-#endif
 #ifdef OPENSSL_NO_CHACHA
     if (HAS_CASE_PREFIX(name, "CHACHA"))
         return 1;

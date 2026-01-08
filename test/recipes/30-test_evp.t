@@ -130,7 +130,6 @@ push @files, qw(
 my @defltfiles = qw(
                      evpciph_aes_ocb.txt
                      evpciph_bf.txt
-                     evpciph_cast5.txt
                      evpciph_chacha.txt
                      evpciph_des.txt
                      evpciph_idea.txt
