@@ -50,7 +50,7 @@ int version_main(int argc, char **argv)
 {
     int ret = 1, dirty = 0, seed = 0;
     int cflags = 0, version = 0, date = 0, options = 0, platform = 0, dir = 0;
-    int engdir = 0, moddir = 0, cpuinfo = 0;
+    int engdir = 0, moddir = 0, cpuinfo = 0, engines = 0;
 #if defined(_WIN32)
     int windows = 0;
 #endif
@@ -106,7 +106,7 @@ opthelp:
 #endif
         case OPT_A:
             seed = options = cflags = version = date = platform
-                = dir = engdir = moddir = cpuinfo
+                = dir = engdir = moddir = cpuinfo = engines
                 = 1;
             break;
         }
@@ -145,6 +145,18 @@ opthelp:
     }
     if (cpuinfo)
         printf("%s\n", OpenSSL_version(OPENSSL_CPU_INFO));
+    if (engines) {
+#ifndef OPENSSL_NO_ENGINE
+        ENGINE *e;
+        printf("engines:  ");
+        e = ENGINE_get_first();
+        while (e) {
+            printf("%s ", ENGINE_get_id(e));
+            e = ENGINE_get_next(e);
+        }
+        printf("\n");
+#endif
+    }
 #if defined(_WIN32)
     if (windows)
         printf("%s\n", OpenSSL_version(OPENSSL_WINCTX));
