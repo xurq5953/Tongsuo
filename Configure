@@ -322,7 +322,7 @@ $config{perlargv} = [ @argvcopy ];
 # We reverse the input list for cosmetic purely reasons, to compensate that
 # 'unshift' adds at the front of the list (i.e. in reverse input order).
 foreach ( reverse sort( 'aes', 'bf', 'des', 'dh',
-                        'dsa', 'ec', 'hmac', 'md5', 'mdc2',
+                        'dsa', 'ec', 'hmac', 'md5',
                         'rc2', 'rc4', 'rc5', 'ripemd', 'sha',
                         'sm2', 'sm3', 'sm4', 'zuc', 'eia3') ) {
     unshift @argvcopy, "no-$_" if ! -d catdir($srcdir, 'crypto', $_);
@@ -492,7 +492,6 @@ my @disablables = (
     "legacy",
     "loadereng",
     "makedepend",
-    "mdc2",
     "ml-dsa",
     "ml-kem",
     "module",
@@ -666,7 +665,6 @@ my @disable_cascades = (
     "zlib"              => [ "zlib-dynamic" ],
     "brotli"            => [ "brotli-dynamic" ],
     "zstd"              => [ "zstd-dynamic" ],
-    "des"               => [ "mdc2" ],
     "deprecated"        => [ "tls-deprecated-ec" ],
     "ec"                => [ qw(ec2m ecdsa ecdh sm2 ecx tls-deprecated-ec) ],
     "dgram"             => [ "dtls", "quic", "sctp" ],
