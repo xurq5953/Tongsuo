@@ -8100,6 +8100,20 @@ int SSL_CTX_set_cipher_list_by_id(SSL_CTX *ctx,
     return 1;
 }
 
+#ifndef OPENSSL_NO_VERIFY_SNI
+void SSL_CTX_set_verify_cert_with_sni(SSL_CTX *ctx, int value)
+{
+    if (value == 1)
+        ctx->verify_mode |= SSL_VERIFY_FAIL_IF_SNI_NOT_MATCH_CERT;
+    else
+        ctx->verify_mode &= ~SSL_VERIFY_FAIL_IF_SNI_NOT_MATCH_CERT;
+}
+
+int  SSL_CTX_get_verify_cert_with_sni(SSL_CTX *ctx)
+{
+    return ctx->verify_mode & SSL_VERIFY_FAIL_IF_SNI_NOT_MATCH_CERT;
+}
+#endif
 
 /* QUIC-specific methods which are supported on QUIC connections only. */
 int SSL_handle_events(SSL *s)

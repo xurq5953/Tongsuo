@@ -22,6 +22,7 @@
 #include <openssl/objects.h>
 #include <openssl/evp.h>
 #include <openssl/x509.h>
+#include <openssl/x509v3.h>
 #include <openssl/dh.h>
 #include <openssl/rsa.h>
 #include <openssl/bn.h>
@@ -2449,6 +2450,27 @@ CON_FUNC_RETURN tls_construct_server_hello(SSL_CONNECTION *s, WPACKET *pkt)
     unsigned char *session_id;
     int usetls13 = SSL_CONNECTION_IS_TLS13(s)
                    || s->hello_retry_request == SSL_HRR_PENDING;
+
+#ifndef OPENSSL_NO_VERIFY_SNI
+    X509 *x509;
+    const char *servername;
+    SSL *ssl = SSL_CONNECTION_GET_SSL(s);
+
+    if (!s->hit &&
+            (s->verify_mode & SSL_VERIFY_FAIL_IF_SNI_NOT_MATCH_CERT)) {
+        servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
+
+        if (servername != NULL && (x509 = SSL_get_certificate(ssl)) != NULL
+                 && X509_check_host(x509, servername, strlen(servername),
+                                    X509_CHECK_FLAG_MULTI_LABEL_WILDCARDS,
+                                    NULL) != 1) {
+            if (s->verify_mode & SSL_VERIFY_FAIL_IF_SNI_NOT_MATCH_CERT) {
+                SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+                return 0;
+            }
+        }
+    }
+#endif
 
     version = usetls13 ? TLS1_2_VERSION : s->version;
     if (!WPACKET_put_bytes_u16(pkt, version)
