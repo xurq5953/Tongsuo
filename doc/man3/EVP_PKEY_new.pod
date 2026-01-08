@@ -123,8 +123,9 @@ B<EVP_PKEY_ED25519>, B<EVP_PKEY_X448> or B<EVP_PKEY_ED448>.
 EVP_PKEY_new_raw_private_key_ex() and EVP_PKEY_new_raw_private_key() may also
 be used with most MACs implemented as public key algorithms, so key types such
 as "HMAC", "POLY1305", "SIPHASH", or their NID form B<EVP_PKEY_POLY1305>,
-B<EVP_PKEY_SIPHASH>, B<EVP_PKEY_HMAC> are also accepted.  This usage is,
-as mentioned above, discouraged in favor of the L<EVP_MAC(3)> API.
+B<EVP_PKEY_EIA3>, B<EVP_PKEY_SIPHASH>, B<EVP_PKEY_HMAC> are also accepted.
+This usage is, as mentioned above, discouraged in favor of the L<EVP_MAC(3)>
+API.
 
 EVP_PKEY_new_raw_public_key_ex() works in the same way as
 EVP_PKEY_new_raw_private_key_ex() except that I<key> points to the raw

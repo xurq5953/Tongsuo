@@ -48,6 +48,7 @@
 # define EVP_R_EXPECTING_A_DSA_KEY                        129
 # define EVP_R_EXPECTING_A_ECX_KEY                        219
 # define EVP_R_EXPECTING_A_EC_KEY                         142
+# define EVP_R_EXPECTING_A_EIA3_KEY                       166
 # define EVP_R_EXPECTING_A_POLY1305_KEY                   164
 # define EVP_R_EXPECTING_A_SIPHASH_KEY                    175
 # define EVP_R_FINAL_ERROR                                188
