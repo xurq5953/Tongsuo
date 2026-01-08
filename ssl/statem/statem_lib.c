@@ -338,6 +338,27 @@ CON_FUNC_RETURN tls_construct_cert_verify(SSL_CONNECTION *s, WPACKET *pkt)
         goto err;
     }
 
+#ifndef OPENSSL_NO_SM2
+    if (EVP_PKEY_is_sm2(pkey)) {
+        if (pkey != NULL) {
+            pctx = EVP_PKEY_CTX_new_from_pkey(s->ctx->libctx, pkey,
+                                              s->ctx->propq);
+            if (pctx == NULL) {
+                SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+                goto err;
+            }
+
+            if (EVP_PKEY_CTX_set1_id(pctx, HANDSHAKE_SM2_ID,
+                                     HANDSHAKE_SM2_ID_LEN) != 1) {
+                SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+                goto err;
+            }
+
+            EVP_MD_CTX_set_pkey_ctx(mctx, pctx);
+        }
+    }
+#endif
+
     /* Get the data to be signed */
     if (!get_cert_verify_tbs_data(s, tls13tbs, &hdata, &hdatalen)) {
         /* SSLfatal() already called */
@@ -426,10 +447,19 @@ CON_FUNC_RETURN tls_construct_cert_verify(SSL_CONNECTION *s, WPACKET *pkt)
 
     OPENSSL_free(sig);
     EVP_MD_CTX_free(mctx);
+#ifndef OPENSSL_NO_SM2
+    /*other sig call EVP_PKEY_CTX_free there may cause segfault */
+    if (pkey != NULL && EVP_PKEY_is_sm2(pkey))
+        EVP_PKEY_CTX_free(pctx);
+#endif
     return CON_FUNC_SUCCESS;
  err:
     OPENSSL_free(sig);
     EVP_MD_CTX_free(mctx);
+#ifndef OPENSSL_NO_SM2
+    if (pkey != NULL && EVP_PKEY_is_sm2(pkey))
+        EVP_PKEY_CTX_free(pctx);
+#endif
     return CON_FUNC_ERROR;
 }
 
@@ -461,6 +491,15 @@ MSG_PROCESS_RETURN tls_process_cert_verify(SSL_CONNECTION *s, PACKET *pkt)
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
         goto err;
     }
+
+#ifndef OPENSSL_NO_SM2
+    if (EVP_PKEY_is_sm2(pkey)) {
+        if (!EVP_PKEY_set_alias_type(pkey, EVP_PKEY_SM2)) {
+            SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+            goto err;
+        }
+    }
+#endif
 
     if (ssl_cert_lookup_by_pkey(pkey, NULL, sctx) == NULL) {
         SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER,
@@ -530,6 +569,24 @@ MSG_PROCESS_RETURN tls_process_cert_verify(SSL_CONNECTION *s, PACKET *pkt)
 
     OSSL_TRACE1(TLS, "Using client verify alg %s\n",
                 md == NULL ? "n/a" : EVP_MD_get0_name(md));
+
+#ifndef OPENSSL_NO_SM2
+    if (EVP_PKEY_is_sm2(pkey))  {
+        pctx = EVP_PKEY_CTX_new_from_pkey(sctx->libctx, pkey, sctx->propq);
+        if (pctx == NULL) {
+            SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+            goto err;
+        }
+
+        if (EVP_PKEY_CTX_set1_id(pctx, HANDSHAKE_SM2_ID,
+                                 HANDSHAKE_SM2_ID_LEN) != 1) {
+            SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_EVP_LIB);
+            goto err;
+        }
+
+        EVP_MD_CTX_set_pkey_ctx(mctx, pctx);
+    }
+#endif
 
     if (EVP_DigestVerifyInit_ex(mctx, &pctx,
                                 md == NULL ? NULL : EVP_MD_get0_name(md),
@@ -603,6 +660,11 @@ MSG_PROCESS_RETURN tls_process_cert_verify(SSL_CONNECTION *s, PACKET *pkt)
     EVP_MD_CTX_free(mctx);
 #ifndef OPENSSL_NO_GOST
     OPENSSL_free(gost_data);
+#endif
+#ifndef OPENSSL_NO_SM2
+    /*other sig call EVP_PKEY_CTX_free there may cause segfault */
+    if (pkey != NULL && EVP_PKEY_is_sm2(pkey))
+        EVP_PKEY_CTX_free(pctx);
 #endif
     return ret;
 }

@@ -659,6 +659,24 @@ IMPLEMENT_SSL_TEST_BOOL_OPTION(SSL_TEST_CLIENT_CONF, client, enable_pha)
 IMPLEMENT_SSL_TEST_BOOL_OPTION(SSL_TEST_SERVER_CONF, server, force_pha)
 IMPLEMENT_SSL_TEST_BOOL_OPTION(SSL_TEST_CLIENT_CONF, client, no_extms_on_reneg)
 
+/* ExpectedHRR */
+
+static const test_enum ssl_hrr[] = {
+    {"Ignore", SSL_TEST_HRR_IGNORE},
+    {"Yes", SSL_TEST_HRR_YES},
+    {"No", SSL_TEST_HRR_NO},
+};
+
+__owur static int parse_test_expected_hrr(SSL_TEST_CTX *test_ctx, const char *value)
+{
+    int ret_value;
+    if (!parse_enum(ssl_hrr, OSSL_NELEM(ssl_hrr), &ret_value, value))
+        return 0;
+
+    test_ctx->expected_hrr = ret_value;
+    return 1;
+}
+
 /* FIPS provider version limiting */
 IMPLEMENT_SSL_TEST_STRING_OPTION(SSL_TEST_CTX, test, fips_version)
 
@@ -703,6 +721,7 @@ static const ssl_test_ctx_option ssl_test_ctx_options[] = {
     { "ExpectedCipher", &parse_test_expected_cipher },
     { "ExpectedSessionTicketAppData", &parse_test_expected_session_ticket_app_data },
     { "FIPSversion", &parse_test_fips_version },
+    { "ExpectedHRR", &parse_test_expected_hrr },
 };
 
 /* Nested client options. */
