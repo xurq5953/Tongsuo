@@ -29,7 +29,6 @@ int ossl_digest_rsa_sign_get_md_nid(const EVP_MD *md)
     static const OSSL_ITEM name_to_nid[] = {
         { NID_md5,       OSSL_DIGEST_NAME_MD5       },
         { NID_md5_sha1,  OSSL_DIGEST_NAME_MD5_SHA1  },
-        { NID_ripemd160, OSSL_DIGEST_NAME_RIPEMD160 },
         { NID_sm3,       OSSL_DIGEST_NAME_SM3 },
     };
 
