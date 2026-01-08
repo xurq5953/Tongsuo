@@ -49,3 +49,6 @@ extern const X509V3_EXT_METHOD ossl_v3_time_specification;
 extern const X509V3_EXT_METHOD ossl_v3_attribute_mappings;
 extern const X509V3_EXT_METHOD ossl_v3_allowed_attribute_assignments;
 extern const X509V3_EXT_METHOD ossl_v3_aa_issuing_dist_point;
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+extern const X509V3_EXT_METHOD ossl_v3_dc_usage;
+#endif

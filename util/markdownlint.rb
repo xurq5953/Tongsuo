@@ -16,6 +16,7 @@ exclude_rule 'MD007'
 # Not possible to line-break headers (currently cannot be selectively exempted)
 exclude_rule 'MD013'
 
+exclude_rule 'MD003'
 exclude_rule 'MD004' # Unordered list style TODO(fix?)
 exclude_rule 'MD005' # Inconsistent indentation for list items at the same level
 exclude_rule 'MD006' # Consider starting bulleted lists at the beginning of the line

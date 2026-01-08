@@ -27,6 +27,7 @@
 #include <openssl/trace.h>
 #include <openssl/core_names.h>
 #include <openssl/param_build.h>
+#include <openssl/ssl.h>
 #include "internal/cryptlib.h"
 #include "internal/comp.h"
 #include "internal/ssl_unwrap.h"
@@ -2263,6 +2264,28 @@ WORK_STATE tls_post_process_server_certificate(SSL_CONNECTION *s,
     X509_free(s->session->peer);
     s->session->peer = x;
     s->session->verify_result = s->verify_result;
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    if (s->delegated_credential_tag & DC_HAS_BEEN_USED_FOR_VERIFY_PEER) {
+        if (!SSL_CONNECTION_IS_TLS13(s)) {
+            SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER,
+                     SSL_R_UNKNOWN_CERTIFICATE_TYPE);
+            return WORK_ERROR;
+        }
+ 
+        if (!DC_check_valid(x, s->session->peer_dc)) {
+            SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER,
+                     SSL_R_CERTIFICATE_VERIFY_FAILED);
+            return WORK_ERROR;
+        }
+
+        if (SSL_verify_delegated_credential_signature(x, s->session->peer_dc,
+                                                      1) <= 0) {
+            SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER,
+                     SSL_R_CERTIFICATE_VERIFY_FAILED);
+            return WORK_ERROR;
+        }
+    }
+#endif
     /* Ensure there is no RPK */
     EVP_PKEY_free(s->session->peer_rpk);
     s->session->peer_rpk = NULL;

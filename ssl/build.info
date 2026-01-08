@@ -44,3 +44,7 @@ IF[{- !$disabled{quic} -}]
     SHARED_SOURCE[../libssl]=../crypto/siphash/siphash.c
   ENDIF
 ENDIF
+
+IF[{- !$disabled{'delegated-credential'} -}]
+  SOURCE[../libssl]=ssl_dc.c
+ENDIF

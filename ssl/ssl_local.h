@@ -534,6 +534,9 @@ struct ssl_session_st {
     EVP_PKEY *peer_rpk;
     /* This is the cert and type for the other end. */
     X509 *peer;
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    DELEGATED_CREDENTIAL *peer_dc;
+#endif
     /* Certificate chain peer sent. */
     STACK_OF(X509) *peer_chain;
     /*
@@ -702,6 +705,7 @@ typedef enum tlsext_index_en {
     TLSEXT_IDX_use_srtp,
     TLSEXT_IDX_encrypt_then_mac,
     TLSEXT_IDX_signed_certificate_timestamp,
+    TLSEXT_IDX_delegated_credential,
     TLSEXT_IDX_extended_master_secret,
     TLSEXT_IDX_signature_algorithms_cert,
     TLSEXT_IDX_post_handshake_auth,
@@ -1216,7 +1220,6 @@ struct ssl_ctx_st {
     /* Tag of NTLS */
     int enable_ntls;
 #endif
-
 #ifndef OPENSSL_NO_SM2
     /*
      * tag of determining whether we should strict follow RFC 8998,
@@ -1245,6 +1248,11 @@ struct ssl_ctx_st {
 # ifndef OPENSSL_NO_QLOG
     char *qlog_title; /* Session title for qlog */
 # endif
+
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    int enable_verify_peer_by_dc;
+    int enable_sign_by_dc;
+#endif
 };
 
 typedef struct ossl_quic_tls_callbacks_st {
@@ -1261,6 +1269,10 @@ typedef struct ossl_quic_tls_callbacks_st {
                                    void *arg);
     int (*alert_cb)(SSL *s, unsigned char alert_code, void *arg);
 } OSSL_QUIC_TLS_CALLBACKS;
+
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+typedef struct dc_pkey_st DC_PKEY;
+#endif
 
 typedef struct cert_pkey_st CERT_PKEY;
 
@@ -1439,7 +1451,10 @@ struct ssl_connection_st {
             const struct sigalg_lookup_st *sigalg;
             /* Pointer to certificate we use */
             CERT_PKEY *cert;
-
+# ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+            /* Pointer to dc we use */
+            DC_PKEY *dc;
+# endif
 # ifndef OPENSSL_NO_NTLS
             CERT_PKEY *sign_cert;
             CERT_PKEY *enc_cert;
@@ -1455,6 +1470,10 @@ struct ssl_connection_st {
             /* Size of above arrays */
             size_t peer_sigalgslen;
             size_t peer_cert_sigalgslen;
+# ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+            uint16_t *peer_dc_sigalgs;
+            size_t peer_dc_sigalgslen;
+# endif
             /* Sigalg peer actually uses */
             const struct sigalg_lookup_st *peer_sigalg;
             /*
@@ -1907,6 +1926,21 @@ struct ssl_connection_st {
     int skip_scsv;
 # endif
 
+# ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    int enable_verify_peer_by_dc;
+    int enable_sign_by_dc;
+    /*
+     * delegated_credential_tag is used to illustrate whether client/server has send
+     * a delegated_credential extension or used it for handshake, If the client receives
+     * a delegated credential without sending this extension, then the client MUST abort
+     * with an "unexpected_message" alert.
+     */
+    int delegated_credential_tag;
+
+    const struct sigalg_lookup_st **shared_dc_sigalgs;
+    size_t shared_dc_sigalgslen;
+# endif
+
 # ifndef OPENSSL_NO_SESSION_REUSED_TYPE
     /* session reuse type: 0->nocache, 1->cache, 2->ticket */
     int session_reused_type;
@@ -2066,6 +2100,13 @@ typedef struct dtls1_state_st {
 #  define EXPLICIT_CHAR2_CURVE_TYPE  2
 #  define NAMED_CURVE_TYPE           3
 
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+struct dc_pkey_st {
+    DELEGATED_CREDENTIAL *dc;
+    EVP_PKEY *privatekey;
+};
+#endif
+
 # ifndef OPENSSL_NO_COMP_ALG
 struct ossl_comp_cert_st {
     unsigned char *data;
@@ -2169,6 +2210,10 @@ typedef struct cert_st {
     uint32_t cert_flags;
     CERT_PKEY *pkeys;
     size_t ssl_pkey_num;
+
+# ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    DC_PKEY dc_pkeys[ssl_pkey_num];
+# endif
     /* Custom certificate types sent in certificate request message. */
     uint8_t *ctype;
     size_t ctype_len;
@@ -2554,6 +2599,17 @@ struct openssl_ssl_test_functions {
 };
 
 const char *ssl_protocol_to_string(int version);
+
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+static ossl_inline int ssl_has_dc(const SSL *s, int idx)
+{
+    if (idx < 0 || idx >= SSL_PKEY_NUM)
+        return 0;
+
+    return s->cert->dc_pkeys[idx].dc != NULL
+           && s->cert->dc_pkeys[idx].privatekey != NULL;
+}
+#endif
 
 static ossl_inline int tls12_rpk_and_privkey(const SSL_CONNECTION *sc, int idx)
 {
@@ -3010,6 +3066,10 @@ __owur int tls1_process_sigalgs(SSL_CONNECTION *s);
 __owur int tls1_set_peer_legacy_sigalg(SSL_CONNECTION *s, const EVP_PKEY *pkey);
 __owur int tls1_lookup_md(SSL_CTX *ctx, const SIGALG_LOOKUP *lu,
                           const EVP_MD **pmd);
+__owur const SIGALG_LOOKUP *ssl_sigalg_lookup(uint16_t sigalg);
+__owur const SIGALG_LOOKUP *ssl_sigalg_lookup_by_pkey_and_hash(EVP_PKEY *pkey,
+                                                               int hash,
+                                                               int is_tls13);
 __owur size_t tls12_get_psigalgs(SSL_CONNECTION *s, int sent,
                                  const uint16_t **psigs);
 __owur int tls_check_sigalg_curve(const SSL_CONNECTION *s, int curve);
@@ -3101,6 +3161,10 @@ void custom_exts_free(custom_ext_methods *exts);
 
 /* ssl_mcnf.c */
 int ssl_ctx_system_config(SSL_CTX *ctx);
+
+#  ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+int tls1_set_shared_dc_sigalgs(SSL *s);
+#  endif
 
 const EVP_CIPHER *ssl_evp_cipher_fetch(OSSL_LIB_CTX *libctx,
                                        int nid,

@@ -555,6 +555,20 @@ EXT_RETURN tls_construct_ctos_sct(SSL_CONNECTION *s, WPACKET *pkt,
 }
 #endif
 
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+EXT_RETURN tls_construct_ctos_delegated_credential(SSL *s, WPACKET *pkt, unsigned int context,
+                                                   X509 *x, size_t chainidx)
+{
+    if (s->statem.hand_state == TLS_ST_CW_CLNT_HELLO)
+        return tls_construct_delegated_credential_request(s, pkt, context, x, chainidx);
+
+    if (s->statem.hand_state == TLS_ST_CW_CERT)
+        return tls_construct_delegated_credential_raw(s, pkt, context, x, chainidx);
+
+    return EXT_RETURN_NOT_SENT;
+}
+#endif
+
 EXT_RETURN tls_construct_ctos_ems(SSL_CONNECTION *s, WPACKET *pkt,
                                   unsigned int context,
                                   X509 *x, size_t chainidx)
@@ -1596,6 +1610,19 @@ int tls_parse_stoc_sct(SSL_CONNECTION *s, PACKET *pkt, unsigned int context,
 }
 #endif
 
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+int tls_parse_stoc_delegated_credential(SSL *s, PACKET *pkt, unsigned int context,
+                                        X509 *x, size_t chainidx)
+{
+    if (s->statem.hand_state == TLS_ST_CR_CERT_REQ)
+        return tls_process_dc_request(s, pkt, context, x, chainidx);
+
+    if (s->statem.hand_state == TLS_ST_CR_CERT)
+        return tls_parse_dc_from_extension(s, pkt, context, x, chainidx);
+
+    return 0;
+}
+#endif
 
 #ifndef OPENSSL_NO_NEXTPROTONEG
 /*

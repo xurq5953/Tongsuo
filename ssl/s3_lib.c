@@ -2842,6 +2842,9 @@ void ssl3_free(SSL *s)
     OPENSSL_free(sc->s3.tmp.peer_sigalgs);
     OPENSSL_free(sc->s3.tmp.peer_cert_sigalgs);
     OPENSSL_free(sc->s3.tmp.valid_flags);
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    OPENSSL_free(sc->s3.tmp.peer_dc_sigalgs);
+#endif
     ssl3_free_digest_list(sc);
     OPENSSL_free(sc->s3.alpn_selected);
     OPENSSL_free(sc->s3.alpn_proposed);

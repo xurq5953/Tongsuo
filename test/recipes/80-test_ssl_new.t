@@ -16,8 +16,9 @@ use warnings;
 
 use File::Basename;
 use File::Compare qw/compare_text/;
+use File::Spec::Functions qw/devnull catdir/;
 use OpenSSL::Glob;
-use OpenSSL::Test qw/:DEFAULT srctop_dir srctop_file bldtop_file bldtop_dir/;
+use OpenSSL::Test qw/:DEFAULT srctop_dir srctop_file bldtop_dir result_dir/;
 use OpenSSL::Test::Utils qw/disabled alldisabled available_protocols/;
 
 BEGIN {
@@ -30,6 +31,7 @@ use lib bldtop_dir('.');
 my $no_fips = disabled('fips') || ($ENV{NO_FIPS} // 0);
 
 $ENV{TEST_CERTS_DIR} = srctop_dir("test", "certs");
+$ENV{TEST_RUNS_DIR} = catdir(result_dir(), "..", "test_dc_sign");
 
 my @conf_srcs = ();
 if (defined $ENV{SSL_TESTS}) {
@@ -42,7 +44,7 @@ if (defined $ENV{SSL_TESTS}) {
     @conf_srcs = glob(srctop_file("test", "ssl-tests", "*.cnf.in"));
     # We hard-code the number of tests to double-check that the globbing above
     # finds all files as expected.
-    plan tests => 35;
+    plan tests => 36;
 }
 map { s/;.*// } @conf_srcs if $^O eq "VMS";
 my @conf_files = map { basename($_, ".in") } @conf_srcs;
@@ -97,6 +99,7 @@ my %conf_dependent_tests = (
   "30-extended-master-secret.cnf" => disabled("tls1_2"),
   "31-ntls.cnf" => disabled("ntls"),
   "32-compressed-certificate.cnf" => disabled("comp") || disabled("tls1_3"),
+  "38-delegated-credential.cnf" => disabled("delegated-credential"),
   "39-ntls-sni-ticket.cnf" => disabled("ntls"),
   "40-ntls_client_auth.cnf" => disabled("ntls"),
   "41-ntls-alpn.cnf" => disabled("ntls"),
@@ -139,6 +142,7 @@ my %skip = (
   "31-ntls.cnf" => disabled("ntls") || disabled("sm2") || disabled("sm3")
                     || disabled("sm4") || !$no_fips,
   "32-compressed-certificate.cnf" => disabled("comp") || disabled("tls1_3"),
+  "38-delegated-credential.cnf" => disabled("delegated-credential"),
   "39-ntls-sni-ticket.cnf" => disabled("ntls") || disabled("sm2")
                                 || disabled("sm3") || disabled("sm4")
                                 || !$no_fips,
@@ -195,6 +199,12 @@ sub test_conf {
       # Test 3. Run the test.
       skip "No tests available; skipping tests", 1 if $skip;
       skip "Stale sources; skipping tests", 1 if !$run_test;
+
+      if ($conf eq "38-delegated-credential.cnf") {
+          run(perltest(["run_tests.pl", "test_dc_sign"],
+              interpreter_args => [ "-I", srctop_dir("util", "perl")],
+              stdout => devnull()));
+      }
 
       my $msg = "running CTLOG_FILE=test/ct/log_list.cnf". # $ENV{CTLOG_FILE}.
           " TEST_CERTS_DIR=test/certs". # $ENV{TEST_CERTS_DIR}.
