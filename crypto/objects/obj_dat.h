@@ -2419,153 +2419,153 @@ static const ASN1_OBJECT nid_objs[NUM_NID] = {
     {"SipHash", "siphash", NID_siphash},
     {"KxANY", "kx-any", NID_kx_any},
     {"AuthANY", "auth-any", NID_auth_any},
-    {"ARIA-128-ECB", "aria-128-ecb", NID_aria_128_ecb, 9, &so[6780]},
-    {"ARIA-128-CBC", "aria-128-cbc", NID_aria_128_cbc, 9, &so[6789]},
-    {"ARIA-128-CFB", "aria-128-cfb", NID_aria_128_cfb128, 9, &so[6798]},
-    {"ARIA-128-OFB", "aria-128-ofb", NID_aria_128_ofb128, 9, &so[6807]},
-    {"ARIA-128-CTR", "aria-128-ctr", NID_aria_128_ctr, 9, &so[6816]},
-    {"ARIA-192-ECB", "aria-192-ecb", NID_aria_192_ecb, 9, &so[6825]},
-    {"ARIA-192-CBC", "aria-192-cbc", NID_aria_192_cbc, 9, &so[6834]},
-    {"ARIA-192-CFB", "aria-192-cfb", NID_aria_192_cfb128, 9, &so[6843]},
-    {"ARIA-192-OFB", "aria-192-ofb", NID_aria_192_ofb128, 9, &so[6852]},
-    {"ARIA-192-CTR", "aria-192-ctr", NID_aria_192_ctr, 9, &so[6861]},
-    {"ARIA-256-ECB", "aria-256-ecb", NID_aria_256_ecb, 9, &so[6870]},
-    {"ARIA-256-CBC", "aria-256-cbc", NID_aria_256_cbc, 9, &so[6879]},
-    {"ARIA-256-CFB", "aria-256-cfb", NID_aria_256_cfb128, 9, &so[6888]},
-    {"ARIA-256-OFB", "aria-256-ofb", NID_aria_256_ofb128, 9, &so[6897]},
-    {"ARIA-256-CTR", "aria-256-ctr", NID_aria_256_ctr, 9, &so[6906]},
-    {"ARIA-128-CFB1", "aria-128-cfb1", NID_aria_128_cfb1},
-    {"ARIA-192-CFB1", "aria-192-cfb1", NID_aria_192_cfb1},
-    {"ARIA-256-CFB1", "aria-256-cfb1", NID_aria_256_cfb1},
-    {"ARIA-128-CFB8", "aria-128-cfb8", NID_aria_128_cfb8},
-    {"ARIA-192-CFB8", "aria-192-cfb8", NID_aria_192_cfb8},
-    {"ARIA-256-CFB8", "aria-256-cfb8", NID_aria_256_cfb8},
-    {"id-smime-aa-signingCertificateV2", "id-smime-aa-signingCertificateV2", NID_id_smime_aa_signingCertificateV2, 11, &so[6915]},
-    {"ED25519", "ED25519", NID_ED25519, 3, &so[6926]},
-    {"ED448", "ED448", NID_ED448, 3, &so[6929]},
-    {"organizationIdentifier", "organizationIdentifier", NID_organizationIdentifier, 3, &so[6932]},
-    {"c3", "countryCode3c", NID_countryCode3c, 3, &so[6935]},
-    {"n3", "countryCode3n", NID_countryCode3n, 3, &so[6938]},
-    {"dnsName", "dnsName", NID_dnsName, 3, &so[6941]},
-    {"x509ExtAdmission", "Professional Information or basis for Admission", NID_x509ExtAdmission, 5, &so[6944]},
-    {"SHA512-224", "sha512-224", NID_sha512_224, 9, &so[6949]},
-    {"SHA512-256", "sha512-256", NID_sha512_256, 9, &so[6958]},
-    {"SHA3-224", "sha3-224", NID_sha3_224, 9, &so[6967]},
-    {"SHA3-256", "sha3-256", NID_sha3_256, 9, &so[6976]},
-    {"SHA3-384", "sha3-384", NID_sha3_384, 9, &so[6985]},
-    {"SHA3-512", "sha3-512", NID_sha3_512, 9, &so[6994]},
-    {"SHAKE128", "shake128", NID_shake128, 9, &so[7003]},
-    {"SHAKE256", "shake256", NID_shake256, 9, &so[7012]},
-    {"id-hmacWithSHA3-224", "hmac-sha3-224", NID_hmac_sha3_224, 9, &so[7021]},
-    {"id-hmacWithSHA3-256", "hmac-sha3-256", NID_hmac_sha3_256, 9, &so[7030]},
-    {"id-hmacWithSHA3-384", "hmac-sha3-384", NID_hmac_sha3_384, 9, &so[7039]},
-    {"id-hmacWithSHA3-512", "hmac-sha3-512", NID_hmac_sha3_512, 9, &so[7048]},
-    {"id-dsa-with-sha384", "dsa_with_SHA384", NID_dsa_with_SHA384, 9, &so[7057]},
-    {"id-dsa-with-sha512", "dsa_with_SHA512", NID_dsa_with_SHA512, 9, &so[7066]},
-    {"id-dsa-with-sha3-224", "dsa_with_SHA3-224", NID_dsa_with_SHA3_224, 9, &so[7075]},
-    {"id-dsa-with-sha3-256", "dsa_with_SHA3-256", NID_dsa_with_SHA3_256, 9, &so[7084]},
-    {"id-dsa-with-sha3-384", "dsa_with_SHA3-384", NID_dsa_with_SHA3_384, 9, &so[7093]},
-    {"id-dsa-with-sha3-512", "dsa_with_SHA3-512", NID_dsa_with_SHA3_512, 9, &so[7102]},
-    {"id-ecdsa-with-sha3-224", "ecdsa_with_SHA3-224", NID_ecdsa_with_SHA3_224, 9, &so[7111]},
-    {"id-ecdsa-with-sha3-256", "ecdsa_with_SHA3-256", NID_ecdsa_with_SHA3_256, 9, &so[7120]},
-    {"id-ecdsa-with-sha3-384", "ecdsa_with_SHA3-384", NID_ecdsa_with_SHA3_384, 9, &so[7129]},
-    {"id-ecdsa-with-sha3-512", "ecdsa_with_SHA3-512", NID_ecdsa_with_SHA3_512, 9, &so[7138]},
-    {"id-rsassa-pkcs1-v1_5-with-sha3-224", "RSA-SHA3-224", NID_RSA_SHA3_224, 9, &so[7147]},
-    {"id-rsassa-pkcs1-v1_5-with-sha3-256", "RSA-SHA3-256", NID_RSA_SHA3_256, 9, &so[7156]},
-    {"id-rsassa-pkcs1-v1_5-with-sha3-384", "RSA-SHA3-384", NID_RSA_SHA3_384, 9, &so[7165]},
-    {"id-rsassa-pkcs1-v1_5-with-sha3-512", "RSA-SHA3-512", NID_RSA_SHA3_512, 9, &so[7174]},
-    {"ARIA-128-CCM", "aria-128-ccm", NID_aria_128_ccm, 9, &so[7183]},
-    {"ARIA-192-CCM", "aria-192-ccm", NID_aria_192_ccm, 9, &so[7192]},
-    {"ARIA-256-CCM", "aria-256-ccm", NID_aria_256_ccm, 9, &so[7201]},
-    {"ARIA-128-GCM", "aria-128-gcm", NID_aria_128_gcm, 9, &so[7210]},
-    {"ARIA-192-GCM", "aria-192-gcm", NID_aria_192_gcm, 9, &so[7219]},
-    {"ARIA-256-GCM", "aria-256-gcm", NID_aria_256_gcm, 9, &so[7228]},
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    {"id-smime-aa-signingCertificateV2", "id-smime-aa-signingCertificateV2", NID_id_smime_aa_signingCertificateV2, 11, &so[6780]},
+    {"ED25519", "ED25519", NID_ED25519, 3, &so[6791]},
+    {"ED448", "ED448", NID_ED448, 3, &so[6794]},
+    {"organizationIdentifier", "organizationIdentifier", NID_organizationIdentifier, 3, &so[6797]},
+    {"c3", "countryCode3c", NID_countryCode3c, 3, &so[6800]},
+    {"n3", "countryCode3n", NID_countryCode3n, 3, &so[6803]},
+    {"dnsName", "dnsName", NID_dnsName, 3, &so[6806]},
+    {"x509ExtAdmission", "Professional Information or basis for Admission", NID_x509ExtAdmission, 5, &so[6809]},
+    {"SHA512-224", "sha512-224", NID_sha512_224, 9, &so[6814]},
+    {"SHA512-256", "sha512-256", NID_sha512_256, 9, &so[6823]},
+    {"SHA3-224", "sha3-224", NID_sha3_224, 9, &so[6832]},
+    {"SHA3-256", "sha3-256", NID_sha3_256, 9, &so[6841]},
+    {"SHA3-384", "sha3-384", NID_sha3_384, 9, &so[6850]},
+    {"SHA3-512", "sha3-512", NID_sha3_512, 9, &so[6859]},
+    {"SHAKE128", "shake128", NID_shake128, 9, &so[6868]},
+    {"SHAKE256", "shake256", NID_shake256, 9, &so[6877]},
+    {"id-hmacWithSHA3-224", "hmac-sha3-224", NID_hmac_sha3_224, 9, &so[6886]},
+    {"id-hmacWithSHA3-256", "hmac-sha3-256", NID_hmac_sha3_256, 9, &so[6895]},
+    {"id-hmacWithSHA3-384", "hmac-sha3-384", NID_hmac_sha3_384, 9, &so[6904]},
+    {"id-hmacWithSHA3-512", "hmac-sha3-512", NID_hmac_sha3_512, 9, &so[6913]},
+    {"id-dsa-with-sha384", "dsa_with_SHA384", NID_dsa_with_SHA384, 9, &so[6922]},
+    {"id-dsa-with-sha512", "dsa_with_SHA512", NID_dsa_with_SHA512, 9, &so[6931]},
+    {"id-dsa-with-sha3-224", "dsa_with_SHA3-224", NID_dsa_with_SHA3_224, 9, &so[6940]},
+    {"id-dsa-with-sha3-256", "dsa_with_SHA3-256", NID_dsa_with_SHA3_256, 9, &so[6949]},
+    {"id-dsa-with-sha3-384", "dsa_with_SHA3-384", NID_dsa_with_SHA3_384, 9, &so[6958]},
+    {"id-dsa-with-sha3-512", "dsa_with_SHA3-512", NID_dsa_with_SHA3_512, 9, &so[6967]},
+    {"id-ecdsa-with-sha3-224", "ecdsa_with_SHA3-224", NID_ecdsa_with_SHA3_224, 9, &so[6976]},
+    {"id-ecdsa-with-sha3-256", "ecdsa_with_SHA3-256", NID_ecdsa_with_SHA3_256, 9, &so[6985]},
+    {"id-ecdsa-with-sha3-384", "ecdsa_with_SHA3-384", NID_ecdsa_with_SHA3_384, 9, &so[6994]},
+    {"id-ecdsa-with-sha3-512", "ecdsa_with_SHA3-512", NID_ecdsa_with_SHA3_512, 9, &so[7003]},
+    {"id-rsassa-pkcs1-v1_5-with-sha3-224", "RSA-SHA3-224", NID_RSA_SHA3_224, 9, &so[7012]},
+    {"id-rsassa-pkcs1-v1_5-with-sha3-256", "RSA-SHA3-256", NID_RSA_SHA3_256, 9, &so[7021]},
+    {"id-rsassa-pkcs1-v1_5-with-sha3-384", "RSA-SHA3-384", NID_RSA_SHA3_384, 9, &so[7030]},
+    {"id-rsassa-pkcs1-v1_5-with-sha3-512", "RSA-SHA3-512", NID_RSA_SHA3_512, 9, &so[7039]},
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
+    { NULL, NULL, NID_undef },
     {"ffdhe2048", "ffdhe2048", NID_ffdhe2048},
     {"ffdhe3072", "ffdhe3072", NID_ffdhe3072},
     {"ffdhe4096", "ffdhe4096", NID_ffdhe4096},
     {"ffdhe6144", "ffdhe6144", NID_ffdhe6144},
     {"ffdhe8192", "ffdhe8192", NID_ffdhe8192},
-    {"cmcCA", "CMC Certificate Authority", NID_cmcCA, 8, &so[7237]},
-    {"cmcRA", "CMC Registration Authority", NID_cmcRA, 8, &so[7245]},
-    {"SM4-ECB", "sm4-ecb", NID_sm4_ecb, 8, &so[7253]},
-    {"SM4-CBC", "sm4-cbc", NID_sm4_cbc, 8, &so[7261]},
-    {"SM4-OFB", "sm4-ofb", NID_sm4_ofb128, 8, &so[7269]},
-    {"SM4-CFB1", "sm4-cfb1", NID_sm4_cfb1, 8, &so[7277]},
-    {"SM4-CFB", "sm4-cfb", NID_sm4_cfb128, 8, &so[7285]},
-    {"SM4-CFB8", "sm4-cfb8", NID_sm4_cfb8, 8, &so[7293]},
-    {"SM4-CTR", "sm4-ctr", NID_sm4_ctr, 8, &so[7301]},
-    {"ISO-CN", "ISO CN Member Body", NID_ISO_CN, 3, &so[7309]},
-    {"oscca", "oscca", NID_oscca, 5, &so[7312]},
-    {"sm-scheme", "sm-scheme", NID_sm_scheme, 6, &so[7317]},
-    {"SM3", "sm3", NID_sm3, 8, &so[7323]},
-    {"RSA-SM3", "sm3WithRSAEncryption", NID_sm3WithRSAEncryption, 8, &so[7331]},
-    {"RSA-SHA512/224", "sha512-224WithRSAEncryption", NID_sha512_224WithRSAEncryption, 9, &so[7339]},
-    {"RSA-SHA512/256", "sha512-256WithRSAEncryption", NID_sha512_256WithRSAEncryption, 9, &so[7348]},
-    {"id-tc26-gost-3410-2012-256-constants", "id-tc26-gost-3410-2012-256-constants", NID_id_tc26_gost_3410_2012_256_constants, 8, &so[7357]},
-    {"id-tc26-gost-3410-2012-256-paramSetA", "GOST R 34.10-2012 (256 bit) ParamSet A", NID_id_tc26_gost_3410_2012_256_paramSetA, 9, &so[7365]},
-    {"id-tc26-gost-3410-2012-512-paramSetC", "GOST R 34.10-2012 (512 bit) ParamSet C", NID_id_tc26_gost_3410_2012_512_paramSetC, 9, &so[7374]},
-    {"ISO-UA", "ISO-UA", NID_ISO_UA, 3, &so[7383]},
-    {"ua-pki", "ua-pki", NID_ua_pki, 7, &so[7386]},
-    {"dstu28147", "DSTU Gost 28147-2009", NID_dstu28147, 10, &so[7393]},
-    {"dstu28147-ofb", "DSTU Gost 28147-2009 OFB mode", NID_dstu28147_ofb, 11, &so[7403]},
-    {"dstu28147-cfb", "DSTU Gost 28147-2009 CFB mode", NID_dstu28147_cfb, 11, &so[7414]},
-    {"dstu28147-wrap", "DSTU Gost 28147-2009 key wrap", NID_dstu28147_wrap, 11, &so[7425]},
-    {"hmacWithDstu34311", "HMAC DSTU Gost 34311-95", NID_hmacWithDstu34311, 10, &so[7436]},
-    {"dstu34311", "DSTU Gost 34311-95", NID_dstu34311, 10, &so[7446]},
-    {"dstu4145le", "DSTU 4145-2002 little endian", NID_dstu4145le, 11, &so[7456]},
-    {"dstu4145be", "DSTU 4145-2002 big endian", NID_dstu4145be, 13, &so[7467]},
-    {"uacurve0", "DSTU curve 0", NID_uacurve0, 13, &so[7480]},
-    {"uacurve1", "DSTU curve 1", NID_uacurve1, 13, &so[7493]},
-    {"uacurve2", "DSTU curve 2", NID_uacurve2, 13, &so[7506]},
-    {"uacurve3", "DSTU curve 3", NID_uacurve3, 13, &so[7519]},
-    {"uacurve4", "DSTU curve 4", NID_uacurve4, 13, &so[7532]},
-    {"uacurve5", "DSTU curve 5", NID_uacurve5, 13, &so[7545]},
-    {"uacurve6", "DSTU curve 6", NID_uacurve6, 13, &so[7558]},
-    {"uacurve7", "DSTU curve 7", NID_uacurve7, 13, &so[7571]},
-    {"uacurve8", "DSTU curve 8", NID_uacurve8, 13, &so[7584]},
-    {"uacurve9", "DSTU curve 9", NID_uacurve9, 13, &so[7597]},
-    {"ieee", "ieee", NID_ieee, 2, &so[7610]},
-    {"ieee-siswg", "IEEE Security in Storage Working Group", NID_ieee_siswg, 5, &so[7612]},
-    {"SM2", "sm2", NID_sm2, 8, &so[7617]},
-    {"id-tc26-cipher-gostr3412-2015-magma", "id-tc26-cipher-gostr3412-2015-magma", NID_id_tc26_cipher_gostr3412_2015_magma, 8, &so[7625]},
-    {"magma-ctr-acpkm", "magma-ctr-acpkm", NID_magma_ctr_acpkm, 9, &so[7633]},
-    {"magma-ctr-acpkm-omac", "magma-ctr-acpkm-omac", NID_magma_ctr_acpkm_omac, 9, &so[7642]},
-    {"id-tc26-cipher-gostr3412-2015-kuznyechik", "id-tc26-cipher-gostr3412-2015-kuznyechik", NID_id_tc26_cipher_gostr3412_2015_kuznyechik, 8, &so[7651]},
-    {"kuznyechik-ctr-acpkm", "kuznyechik-ctr-acpkm", NID_kuznyechik_ctr_acpkm, 9, &so[7659]},
-    {"kuznyechik-ctr-acpkm-omac", "kuznyechik-ctr-acpkm-omac", NID_kuznyechik_ctr_acpkm_omac, 9, &so[7668]},
-    {"id-tc26-wrap", "id-tc26-wrap", NID_id_tc26_wrap, 7, &so[7677]},
-    {"id-tc26-wrap-gostr3412-2015-magma", "id-tc26-wrap-gostr3412-2015-magma", NID_id_tc26_wrap_gostr3412_2015_magma, 8, &so[7684]},
-    {"magma-kexp15", "magma-kexp15", NID_magma_kexp15, 9, &so[7692]},
-    {"id-tc26-wrap-gostr3412-2015-kuznyechik", "id-tc26-wrap-gostr3412-2015-kuznyechik", NID_id_tc26_wrap_gostr3412_2015_kuznyechik, 8, &so[7701]},
-    {"kuznyechik-kexp15", "kuznyechik-kexp15", NID_kuznyechik_kexp15, 9, &so[7709]},
-    {"id-tc26-gost-3410-2012-256-paramSetB", "GOST R 34.10-2012 (256 bit) ParamSet B", NID_id_tc26_gost_3410_2012_256_paramSetB, 9, &so[7718]},
-    {"id-tc26-gost-3410-2012-256-paramSetC", "GOST R 34.10-2012 (256 bit) ParamSet C", NID_id_tc26_gost_3410_2012_256_paramSetC, 9, &so[7727]},
-    {"id-tc26-gost-3410-2012-256-paramSetD", "GOST R 34.10-2012 (256 bit) ParamSet D", NID_id_tc26_gost_3410_2012_256_paramSetD, 9, &so[7736]},
+    {"cmcCA", "CMC Certificate Authority", NID_cmcCA, 8, &so[7048]},
+    {"cmcRA", "CMC Registration Authority", NID_cmcRA, 8, &so[7056]},
+    {"SM4-ECB", "sm4-ecb", NID_sm4_ecb, 8, &so[7064]},
+    {"SM4-CBC", "sm4-cbc", NID_sm4_cbc, 8, &so[7072]},
+    {"SM4-OFB", "sm4-ofb", NID_sm4_ofb128, 8, &so[7080]},
+    {"SM4-CFB1", "sm4-cfb1", NID_sm4_cfb1, 8, &so[7088]},
+    {"SM4-CFB", "sm4-cfb", NID_sm4_cfb128, 8, &so[7096]},
+    {"SM4-CFB8", "sm4-cfb8", NID_sm4_cfb8, 8, &so[7104]},
+    {"SM4-CTR", "sm4-ctr", NID_sm4_ctr, 8, &so[7112]},
+    {"ISO-CN", "ISO CN Member Body", NID_ISO_CN, 3, &so[7120]},
+    {"oscca", "oscca", NID_oscca, 5, &so[7123]},
+    {"sm-scheme", "sm-scheme", NID_sm_scheme, 6, &so[7128]},
+    {"SM3", "sm3", NID_sm3, 8, &so[7134]},
+    {"RSA-SM3", "sm3WithRSAEncryption", NID_sm3WithRSAEncryption, 8, &so[7142]},
+    {"RSA-SHA512/224", "sha512-224WithRSAEncryption", NID_sha512_224WithRSAEncryption, 9, &so[7150]},
+    {"RSA-SHA512/256", "sha512-256WithRSAEncryption", NID_sha512_256WithRSAEncryption, 9, &so[7159]},
+    {"id-tc26-gost-3410-2012-256-constants", "id-tc26-gost-3410-2012-256-constants", NID_id_tc26_gost_3410_2012_256_constants, 8, &so[7168]},
+    {"id-tc26-gost-3410-2012-256-paramSetA", "GOST R 34.10-2012 (256 bit) ParamSet A", NID_id_tc26_gost_3410_2012_256_paramSetA, 9, &so[7176]},
+    {"id-tc26-gost-3410-2012-512-paramSetC", "GOST R 34.10-2012 (512 bit) ParamSet C", NID_id_tc26_gost_3410_2012_512_paramSetC, 9, &so[7185]},
+    {"ISO-UA", "ISO-UA", NID_ISO_UA, 3, &so[7194]},
+    {"ua-pki", "ua-pki", NID_ua_pki, 7, &so[7197]},
+    {"dstu28147", "DSTU Gost 28147-2009", NID_dstu28147, 10, &so[7204]},
+    {"dstu28147-ofb", "DSTU Gost 28147-2009 OFB mode", NID_dstu28147_ofb, 11, &so[7214]},
+    {"dstu28147-cfb", "DSTU Gost 28147-2009 CFB mode", NID_dstu28147_cfb, 11, &so[7225]},
+    {"dstu28147-wrap", "DSTU Gost 28147-2009 key wrap", NID_dstu28147_wrap, 11, &so[7236]},
+    {"hmacWithDstu34311", "HMAC DSTU Gost 34311-95", NID_hmacWithDstu34311, 10, &so[7247]},
+    {"dstu34311", "DSTU Gost 34311-95", NID_dstu34311, 10, &so[7257]},
+    {"dstu4145le", "DSTU 4145-2002 little endian", NID_dstu4145le, 11, &so[7267]},
+    {"dstu4145be", "DSTU 4145-2002 big endian", NID_dstu4145be, 13, &so[7278]},
+    {"uacurve0", "DSTU curve 0", NID_uacurve0, 13, &so[7291]},
+    {"uacurve1", "DSTU curve 1", NID_uacurve1, 13, &so[7304]},
+    {"uacurve2", "DSTU curve 2", NID_uacurve2, 13, &so[7317]},
+    {"uacurve3", "DSTU curve 3", NID_uacurve3, 13, &so[7330]},
+    {"uacurve4", "DSTU curve 4", NID_uacurve4, 13, &so[7343]},
+    {"uacurve5", "DSTU curve 5", NID_uacurve5, 13, &so[7356]},
+    {"uacurve6", "DSTU curve 6", NID_uacurve6, 13, &so[7369]},
+    {"uacurve7", "DSTU curve 7", NID_uacurve7, 13, &so[7382]},
+    {"uacurve8", "DSTU curve 8", NID_uacurve8, 13, &so[7395]},
+    {"uacurve9", "DSTU curve 9", NID_uacurve9, 13, &so[7408]},
+    {"ieee", "ieee", NID_ieee, 2, &so[7421]},
+    {"ieee-siswg", "IEEE Security in Storage Working Group", NID_ieee_siswg, 5, &so[7423]},
+    {"SM2", "sm2", NID_sm2, 8, &so[7428]},
+    {"id-tc26-cipher-gostr3412-2015-magma", "id-tc26-cipher-gostr3412-2015-magma", NID_id_tc26_cipher_gostr3412_2015_magma, 8, &so[7436]},
+    {"magma-ctr-acpkm", "magma-ctr-acpkm", NID_magma_ctr_acpkm, 9, &so[7444]},
+    {"magma-ctr-acpkm-omac", "magma-ctr-acpkm-omac", NID_magma_ctr_acpkm_omac, 9, &so[7453]},
+    {"id-tc26-cipher-gostr3412-2015-kuznyechik", "id-tc26-cipher-gostr3412-2015-kuznyechik", NID_id_tc26_cipher_gostr3412_2015_kuznyechik, 8, &so[7462]},
+    {"kuznyechik-ctr-acpkm", "kuznyechik-ctr-acpkm", NID_kuznyechik_ctr_acpkm, 9, &so[7470]},
+    {"kuznyechik-ctr-acpkm-omac", "kuznyechik-ctr-acpkm-omac", NID_kuznyechik_ctr_acpkm_omac, 9, &so[7479]},
+    {"id-tc26-wrap", "id-tc26-wrap", NID_id_tc26_wrap, 7, &so[7488]},
+    {"id-tc26-wrap-gostr3412-2015-magma", "id-tc26-wrap-gostr3412-2015-magma", NID_id_tc26_wrap_gostr3412_2015_magma, 8, &so[7495]},
+    {"magma-kexp15", "magma-kexp15", NID_magma_kexp15, 9, &so[7503]},
+    {"id-tc26-wrap-gostr3412-2015-kuznyechik", "id-tc26-wrap-gostr3412-2015-kuznyechik", NID_id_tc26_wrap_gostr3412_2015_kuznyechik, 8, &so[7512]},
+    {"kuznyechik-kexp15", "kuznyechik-kexp15", NID_kuznyechik_kexp15, 9, &so[7520]},
+    {"id-tc26-gost-3410-2012-256-paramSetB", "GOST R 34.10-2012 (256 bit) ParamSet B", NID_id_tc26_gost_3410_2012_256_paramSetB, 9, &so[7529]},
+    {"id-tc26-gost-3410-2012-256-paramSetC", "GOST R 34.10-2012 (256 bit) ParamSet C", NID_id_tc26_gost_3410_2012_256_paramSetC, 9, &so[7538]},
+    {"id-tc26-gost-3410-2012-256-paramSetD", "GOST R 34.10-2012 (256 bit) ParamSet D", NID_id_tc26_gost_3410_2012_256_paramSetD, 9, &so[7547]},
     {"magma-ecb", "magma-ecb", NID_magma_ecb},
     {"magma-ctr", "magma-ctr", NID_magma_ctr},
     {"magma-ofb", "magma-ofb", NID_magma_ofb},
     {"magma-cbc", "magma-cbc", NID_magma_cbc},
     {"magma-cfb", "magma-cfb", NID_magma_cfb},
     {"magma-mac", "magma-mac", NID_magma_mac},
-    {"hmacWithSHA512-224", "hmacWithSHA512-224", NID_hmacWithSHA512_224, 8, &so[7745]},
-    {"hmacWithSHA512-256", "hmacWithSHA512-256", NID_hmacWithSHA512_256, 8, &so[7753]},
-    {"GMAC", "gmac", NID_gmac, 5, &so[7761]},
-    {"KMAC128", "kmac128", NID_kmac128, 9, &so[7766]},
-    {"KMAC256", "kmac256", NID_kmac256, 9, &so[7775]},
+    {"hmacWithSHA512-224", "hmacWithSHA512-224", NID_hmacWithSHA512_224, 8, &so[7556]},
+    {"hmacWithSHA512-256", "hmacWithSHA512-256", NID_hmacWithSHA512_256, 8, &so[7564]},
+    {"GMAC", "gmac", NID_gmac, 5, &so[7572]},
+    {"KMAC128", "kmac128", NID_kmac128, 9, &so[7577]},
+    {"KMAC256", "kmac256", NID_kmac256, 9, &so[7586]},
     {"AES-128-SIV", "aes-128-siv", NID_aes_128_siv},
     {"AES-192-SIV", "aes-192-siv", NID_aes_192_siv},
     {"AES-256-SIV", "aes-256-siv", NID_aes_256_siv},
-    {"BLAKE2BMAC", "blake2bmac", NID_blake2bmac, 10, &so[7784]},
-    {"BLAKE2SMAC", "blake2smac", NID_blake2smac, 10, &so[7794]},
+    {"BLAKE2BMAC", "blake2bmac", NID_blake2bmac, 10, &so[7595]},
+    {"BLAKE2SMAC", "blake2smac", NID_blake2smac, 10, &so[7605]},
     {"SSHKDF", "sshkdf", NID_sshkdf},
-    {"SM2-SM3", "SM2-with-SM3", NID_SM2_with_SM3, 8, &so[7804]},
+    {"SM2-SM3", "SM2-with-SM3", NID_SM2_with_SM3, 8, &so[7615]},
     {"SSKDF", "sskdf", NID_sskdf},
     {"X963KDF", "x963kdf", NID_x963kdf},
     {"X942KDF", "x942kdf", NID_x942kdf},
-    {"id-on-SmtpUTF8Mailbox", "Smtp UTF8 Mailbox", NID_id_on_SmtpUTF8Mailbox, 8, &so[7812]},
-    {"id-on-xmppAddr", "XmppAddr", NID_XmppAddr, 8, &so[7820]},
-    {"id-on-dnsSRV", "SRVName", NID_SRVName, 8, &so[7828]},
-    {"id-on-NAIRealm", "NAIRealm", NID_NAIRealm, 8, &so[7836]},
+    {"id-on-SmtpUTF8Mailbox", "Smtp UTF8 Mailbox", NID_id_on_SmtpUTF8Mailbox, 8, &so[7623]},
+    {"id-on-xmppAddr", "XmppAddr", NID_XmppAddr, 8, &so[7631]},
+    {"id-on-dnsSRV", "SRVName", NID_SRVName, 8, &so[7639]},
+    {"id-on-NAIRealm", "NAIRealm", NID_NAIRealm, 8, &so[7647]},
     {"modp_1536", "modp_1536", NID_modp_1536},
     {"modp_2048", "modp_2048", NID_modp_2048},
     {"modp_3072", "modp_3072", NID_modp_3072},
@@ -2886,33 +2886,6 @@ static const unsigned int sn_objs[NUM_SN] = {
      428,    /* "AES-256-OFB" */
     1200,    /* "AES-256-SIV" */
      914,    /* "AES-256-XTS" */
-    1066,    /* "ARIA-128-CBC" */
-    1120,    /* "ARIA-128-CCM" */
-    1067,    /* "ARIA-128-CFB" */
-    1080,    /* "ARIA-128-CFB1" */
-    1083,    /* "ARIA-128-CFB8" */
-    1069,    /* "ARIA-128-CTR" */
-    1065,    /* "ARIA-128-ECB" */
-    1123,    /* "ARIA-128-GCM" */
-    1068,    /* "ARIA-128-OFB" */
-    1071,    /* "ARIA-192-CBC" */
-    1121,    /* "ARIA-192-CCM" */
-    1072,    /* "ARIA-192-CFB" */
-    1081,    /* "ARIA-192-CFB1" */
-    1084,    /* "ARIA-192-CFB8" */
-    1074,    /* "ARIA-192-CTR" */
-    1070,    /* "ARIA-192-ECB" */
-    1124,    /* "ARIA-192-GCM" */
-    1073,    /* "ARIA-192-OFB" */
-    1076,    /* "ARIA-256-CBC" */
-    1122,    /* "ARIA-256-CCM" */
-    1077,    /* "ARIA-256-CFB" */
-    1082,    /* "ARIA-256-CFB1" */
-    1085,    /* "ARIA-256-CFB8" */
-    1079,    /* "ARIA-256-CTR" */
-    1075,    /* "ARIA-256-ECB" */
-    1125,    /* "ARIA-256-GCM" */
-    1078,    /* "ARIA-256-OFB" */
     1064,    /* "AuthANY" */
     1049,    /* "AuthDSS" */
     1047,    /* "AuthECDSA" */
@@ -4810,33 +4783,6 @@ static const unsigned int ln_objs[NUM_LN] = {
     1200,    /* "aes-256-siv" */
      914,    /* "aes-256-xts" */
      376,    /* "algorithm" */
-    1066,    /* "aria-128-cbc" */
-    1120,    /* "aria-128-ccm" */
-    1067,    /* "aria-128-cfb" */
-    1080,    /* "aria-128-cfb1" */
-    1083,    /* "aria-128-cfb8" */
-    1069,    /* "aria-128-ctr" */
-    1065,    /* "aria-128-ecb" */
-    1123,    /* "aria-128-gcm" */
-    1068,    /* "aria-128-ofb" */
-    1071,    /* "aria-192-cbc" */
-    1121,    /* "aria-192-ccm" */
-    1072,    /* "aria-192-cfb" */
-    1081,    /* "aria-192-cfb1" */
-    1084,    /* "aria-192-cfb8" */
-    1074,    /* "aria-192-ctr" */
-    1070,    /* "aria-192-ecb" */
-    1124,    /* "aria-192-gcm" */
-    1073,    /* "aria-192-ofb" */
-    1076,    /* "aria-256-cbc" */
-    1122,    /* "aria-256-ccm" */
-    1077,    /* "aria-256-cfb" */
-    1082,    /* "aria-256-cfb1" */
-    1085,    /* "aria-256-cfb8" */
-    1079,    /* "aria-256-ctr" */
-    1075,    /* "aria-256-ecb" */
-    1125,    /* "aria-256-gcm" */
-    1078,    /* "aria-256-ofb" */
      484,    /* "associatedDomain" */
      485,    /* "associatedName" */
      501,    /* "audio" */
@@ -6718,27 +6664,6 @@ static const unsigned int obj_objs[NUM_OBJ] = {
      439,    /* OBJ_pilotAttributeSyntax         0 9 2342 19200300 100 3 */
      440,    /* OBJ_pilotObjectClass             0 9 2342 19200300 100 4 */
      441,    /* OBJ_pilotGroups                  0 9 2342 19200300 100 10 */
-    1065,    /* OBJ_aria_128_ecb                 1 2 410 200046 1 1 1 */
-    1066,    /* OBJ_aria_128_cbc                 1 2 410 200046 1 1 2 */
-    1067,    /* OBJ_aria_128_cfb128              1 2 410 200046 1 1 3 */
-    1068,    /* OBJ_aria_128_ofb128              1 2 410 200046 1 1 4 */
-    1069,    /* OBJ_aria_128_ctr                 1 2 410 200046 1 1 5 */
-    1070,    /* OBJ_aria_192_ecb                 1 2 410 200046 1 1 6 */
-    1071,    /* OBJ_aria_192_cbc                 1 2 410 200046 1 1 7 */
-    1072,    /* OBJ_aria_192_cfb128              1 2 410 200046 1 1 8 */
-    1073,    /* OBJ_aria_192_ofb128              1 2 410 200046 1 1 9 */
-    1074,    /* OBJ_aria_192_ctr                 1 2 410 200046 1 1 10 */
-    1075,    /* OBJ_aria_256_ecb                 1 2 410 200046 1 1 11 */
-    1076,    /* OBJ_aria_256_cbc                 1 2 410 200046 1 1 12 */
-    1077,    /* OBJ_aria_256_cfb128              1 2 410 200046 1 1 13 */
-    1078,    /* OBJ_aria_256_ofb128              1 2 410 200046 1 1 14 */
-    1079,    /* OBJ_aria_256_ctr                 1 2 410 200046 1 1 15 */
-    1123,    /* OBJ_aria_128_gcm                 1 2 410 200046 1 1 34 */
-    1124,    /* OBJ_aria_192_gcm                 1 2 410 200046 1 1 35 */
-    1125,    /* OBJ_aria_256_gcm                 1 2 410 200046 1 1 36 */
-    1120,    /* OBJ_aria_128_ccm                 1 2 410 200046 1 1 37 */
-    1121,    /* OBJ_aria_192_ccm                 1 2 410 200046 1 1 38 */
-    1122,    /* OBJ_aria_256_ccm                 1 2 410 200046 1 1 39 */
     1174,    /* OBJ_magma_ctr_acpkm              1 2 643 7 1 1 5 1 1 */
     1175,    /* OBJ_magma_ctr_acpkm_omac         1 2 643 7 1 1 5 1 2 */
     1177,    /* OBJ_kuznyechik_ctr_acpkm         1 2 643 7 1 1 5 2 1 */

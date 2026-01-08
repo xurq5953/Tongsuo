@@ -326,7 +326,7 @@ $config{perlargv} = [ @argvcopy ];
 # crypto/build.info)
 # We reverse the input list for cosmetic purely reasons, to compensate that
 # 'unshift' adds at the front of the list (i.e. in reverse input order).
-foreach ( reverse sort( 'aes', 'aria', 'bf', 'camellia', 'cast', 'des', 'dh',
+foreach ( reverse sort( 'aes', 'bf', 'camellia', 'cast', 'des', 'dh',
                         'dsa', 'ec', 'hmac', 'idea', 'md2', 'md5', 'mdc2',
                         'rc2', 'rc4', 'rc5', 'ripemd', 'seed', 'sha',
                         'sm2', 'sm3', 'sm4', 'zuc') ) {
@@ -425,7 +425,6 @@ my @disablables = (
     "afalgeng",
     "apps",
     "argon2",
-    "aria",
     "asan",
     "asm",
     "async",
@@ -634,7 +633,7 @@ our %disabled = ( # "what"         => "comment"
 my @disable_cascades = (
     # "what"            => [ "cascade", ... ]
     "bulk"              => [ "shared", "dso",
-                             "aria", "async", "atexit", "autoload-config",
+                             "async", "atexit", "autoload-config",
                              "blake2", "bf", "camellia", "cast", "chacha",
                              "cmac", "cms", "cmp", "comp", "ct",
                              "des", "dgram", "dh", "dsa",

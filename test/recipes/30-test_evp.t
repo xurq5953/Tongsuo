@@ -129,7 +129,6 @@ push @files, qw(
 # (i.e. The algorithms are not present in the fips provider)
 my @defltfiles = qw(
                      evpciph_aes_ocb.txt
-                     evpciph_aria.txt 
                      evpciph_bf.txt
                      evpciph_camellia.txt
                      evpciph_camellia_cts.txt
