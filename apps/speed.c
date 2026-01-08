@@ -308,7 +308,7 @@ const OPTIONS speed_options[] = {
 enum {
     D_MDC2, D_MD4, D_MD5, D_SHA1, D_RMD160,
     D_SHA256, D_SHA512, D_WHIRLPOOL, D_HMAC,
-    D_CBC_DES, D_EDE3_DES, D_RC4, D_CBC_IDEA,
+    D_CBC_DES, D_EDE3_DES, D_RC4,
     D_CBC_RC2, D_CBC_RC5, D_CBC_BF, D_CBC_CAST,
     D_CBC_128_AES, D_CBC_192_AES, D_CBC_256_AES,
     D_CBC_128_CML, D_CBC_192_CML, D_CBC_256_CML,
@@ -320,7 +320,7 @@ enum {
 static const char *names[ALGOR_NUM] = {
     "mdc2", "md4", "md5", "sha1", "rmd160",
     "sha256", "sha512", "whirlpool", "hmac(sha256)",
-    "des-cbc", "des-ede3", "rc4", "idea-cbc",
+    "des-cbc", "des-ede3", "rc4",
     "rc2-cbc", "rc5-cbc", "blowfish",
     "aes-128-cbc", "aes-192-cbc", "aes-256-cbc",
     "evp", "ghash", "rand", "cmac", "kmac128", "kmac256",
@@ -350,8 +350,6 @@ static const OPT_PAIR doit_choices[] = {
     {"rc2", D_CBC_RC2},
     {"rc5-cbc", D_CBC_RC5},
     {"rc5", D_CBC_RC5},
-    {"idea-cbc", D_CBC_IDEA},
-    {"idea", D_CBC_IDEA},
     {"bf-cbc", D_CBC_BF},
     {"blowfish", D_CBC_BF},
     {"bf", D_CBC_BF},

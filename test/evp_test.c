@@ -5583,10 +5583,6 @@ static int is_cipher_disabled(const char *name)
     if (HAS_CASE_SUFFIX(name, "OCB"))
         return 1;
 #endif
-#ifdef OPENSSL_NO_IDEA
-    if (HAS_CASE_PREFIX(name, "IDEA"))
-        return 1;
-#endif
 #ifdef OPENSSL_NO_RC2
     if (HAS_CASE_PREFIX(name, "RC2"))
         return 1;

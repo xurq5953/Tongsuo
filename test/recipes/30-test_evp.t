@@ -132,7 +132,6 @@ my @defltfiles = qw(
                      evpciph_bf.txt
                      evpciph_chacha.txt
                      evpciph_des.txt
-                     evpciph_idea.txt
                      evpciph_rc2.txt
                      evpciph_rc4.txt
                      evpciph_rc4_stitched.txt
