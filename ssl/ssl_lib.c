@@ -7977,6 +7977,130 @@ void SSL_set_skip_scsv(SSL_CONNECTION *s, int skip_scsv)
 }
 #endif
 
+#ifndef OPENSSL_NO_DYNAMIC_CIPHERS
+int SSL_set_cipher_list2(SSL *s, STACK_OF(SSL_CIPHER) *cipher_list)
+{
+    STACK_OF(SSL_CIPHER) *sk = NULL;
+
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return NULL;
+
+    if (cipher_list != NULL) {
+        sk = sk_SSL_CIPHER_dup(cipher_list);
+        if (sk == NULL)
+            return 0;
+    }
+
+    if (sc->cipher_list != NULL)
+        sk_SSL_CIPHER_free(sc->cipher_list);
+
+    sc->cipher_list = sk;
+
+    return 1;
+}
+
+int SSL_set_cipher_list_by_id(SSL *s, STACK_OF(SSL_CIPHER) *cipher_list_by_id)
+{
+    STACK_OF(SSL_CIPHER) *sk = NULL;
+
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return NULL;
+
+    if (cipher_list_by_id != NULL) {
+        sk = sk_SSL_CIPHER_dup(cipher_list_by_id);
+        if (sk == NULL)
+            return 0;
+    }
+
+    if (sc->cipher_list_by_id != NULL)
+        sk_SSL_CIPHER_free(sc->cipher_list_by_id);
+
+    sc->cipher_list_by_id = sk;
+
+    return 1;
+}
+
+STACK_OF(SSL_CIPHER) *SSL_dup_cipher_list(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return NULL;
+
+    if (sc->cipher_list != NULL)
+        return sk_SSL_CIPHER_dup(sc->cipher_list);
+
+    return NULL;
+}
+
+STACK_OF(SSL_CIPHER) *SSL_dup_cipher_list_by_id(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return NULL;
+
+    if (sc->cipher_list_by_id != NULL)
+        return sk_SSL_CIPHER_dup(sc->cipher_list_by_id);
+
+    return NULL;
+}
+
+int SSL_CTX_set_cipher_list2(SSL_CTX *ctx, STACK_OF(SSL_CIPHER) *cipher_list)
+{
+    STACK_OF(SSL_CIPHER) *sk = NULL;
+
+    if (ctx == NULL)
+        return 0;
+
+    if (cipher_list != NULL) {
+        sk = sk_SSL_CIPHER_dup(cipher_list);
+        if (sk == NULL)
+            return 0;
+    }
+
+    if (ctx->cipher_list != NULL)
+        sk_SSL_CIPHER_free(ctx->cipher_list);
+
+    ctx->cipher_list = sk;
+
+    return 1;
+}
+
+STACK_OF(SSL_CIPHER) *SSL_CTX_get_cipher_list_by_id(const SSL_CTX *ctx)
+{
+    if (ctx != NULL)
+        return ctx->cipher_list_by_id;
+    return NULL;
+}
+
+int SSL_CTX_set_cipher_list_by_id(SSL_CTX *ctx,
+                                  STACK_OF(SSL_CIPHER) *cipher_list_by_id)
+{
+    STACK_OF(SSL_CIPHER) *sk = NULL;
+
+    if (ctx == NULL)
+        return 0;
+
+    if (cipher_list_by_id != NULL) {
+        sk = sk_SSL_CIPHER_dup(cipher_list_by_id);
+        if (sk == NULL)
+            return 0;
+    }
+
+    if (ctx->cipher_list_by_id != NULL)
+        sk_SSL_CIPHER_free(ctx->cipher_list_by_id);
+
+    ctx->cipher_list_by_id = sk;
+
+    return 1;
+}
+
+
 /* QUIC-specific methods which are supported on QUIC connections only. */
 int SSL_handle_events(SSL *s)
 {

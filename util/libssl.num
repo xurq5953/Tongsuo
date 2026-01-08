@@ -652,3 +652,10 @@ BABASSL_get_master_key                  652	3_5_0	EXIST::FUNCTION:
 BABASSL_debug                           653	3_5_0	EXIST::FUNCTION:
 SSL_set_skip_scsv                       654	3_5_0	EXIST::FUNCTION:SKIP_SCSV
 SSL_magic_pending_session_ptr           655	3_5_0	EXIST::FUNCTION:SESSION_LOOKUP
+SSL_set_cipher_list2                    656	3_5_0	EXIST::FUNCTION:DYNAMIC_CIPHERS
+SSL_set_cipher_list_by_id               657	3_5_0	EXIST::FUNCTION:DYNAMIC_CIPHERS
+SSL_CTX_set_cipher_list2                658	3_5_0	EXIST::FUNCTION:DYNAMIC_CIPHERS
+SSL_CTX_get_cipher_list_by_id           659	3_5_0	EXIST::FUNCTION:DYNAMIC_CIPHERS
+SSL_CTX_set_cipher_list_by_id           660	3_5_0	EXIST::FUNCTION:DYNAMIC_CIPHERS
+SSL_dup_cipher_list                     661	3_5_0	EXIST::FUNCTION:DYNAMIC_CIPHERS
+SSL_dup_cipher_list_by_id               662	3_5_0	EXIST::FUNCTION:DYNAMIC_CIPHERS
