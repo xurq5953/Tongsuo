@@ -323,7 +323,6 @@ static const char *names[ALGOR_NUM] = {
     "des-cbc", "des-ede3", "rc4", "idea-cbc",
     "rc2-cbc", "rc5-cbc", "blowfish", "cast-cbc",
     "aes-128-cbc", "aes-192-cbc", "aes-256-cbc",
-    "camellia-128-cbc", "camellia-192-cbc", "camellia-256-cbc",
     "evp", "ghash", "rand", "cmac", "kmac128", "kmac256",
     "sm3", "sm4"
 };
@@ -347,9 +346,6 @@ static const OPT_PAIR doit_choices[] = {
     {"aes-128-cbc", D_CBC_128_AES},
     {"aes-192-cbc", D_CBC_192_AES},
     {"aes-256-cbc", D_CBC_256_AES},
-    {"camellia-128-cbc", D_CBC_128_CML},
-    {"camellia-192-cbc", D_CBC_192_CML},
-    {"camellia-256-cbc", D_CBC_256_CML},
     {"rc2-cbc", D_CBC_RC2},
     {"rc2", D_CBC_RC2},
     {"rc5-cbc", D_CBC_RC5},
@@ -2585,10 +2581,6 @@ int speed_main(int argc, char **argv)
             doit[D_CBC_128_AES] = doit[D_CBC_192_AES] = doit[D_CBC_256_AES] = 1;
             algo_found = 1;
         }
-        if (strcmp(algo, "camellia") == 0) {
-            doit[D_CBC_128_CML] = doit[D_CBC_192_CML] = doit[D_CBC_256_CML] = 1;
-            algo_found = 1;
-        }
         if (HAS_PREFIX(algo, "ecdsa")) {
             if (algo[sizeof("ecdsa") - 1] == '\0') {
                 memset(ecdsa_doit, 1, sizeof(ecdsa_doit));
@@ -2800,7 +2792,7 @@ int speed_main(int argc, char **argv)
             if (!have_md(names[i]))
                 doit[i] = 0;
         }
-        for (i = D_CBC_DES; i <= D_CBC_256_CML; i++) {
+        for (i = D_CBC_DES; i <= D_CBC_256_AES; i++) {
             if (!have_cipher(names[i]))
                 doit[i] = 0;
         }
@@ -3183,33 +3175,6 @@ int speed_main(int argc, char **argv)
 
     for (k = 0; k < 3; k++) {
         algindex = D_CBC_128_AES + k;
-        if (doit[algindex]) {
-            int st = 1;
-
-            keylen = 16 + k * 8;
-            for (i = 0; st && i < loopargs_len; i++) {
-                loopargs[i].ctx = init_evp_cipher_ctx(names[algindex],
-                                                      key32, keylen);
-                st = loopargs[i].ctx != NULL;
-            }
-
-            for (testnum = 0; st && testnum < size_num; testnum++) {
-                if (!check_block_size(loopargs[0].ctx, lengths[testnum]))
-                    break;
-                print_message(names[algindex], lengths[testnum], seconds.sym);
-                Time_F(START);
-                count =
-                    run_benchmark(async_jobs, EVP_Cipher_loop, loopargs);
-                d = Time_F(STOP);
-                print_result(algindex, testnum, count, d);
-            }
-            for (i = 0; i < loopargs_len; i++)
-                EVP_CIPHER_CTX_free(loopargs[i].ctx);
-        }
-    }
-
-    for (k = 0; k < 3; k++) {
-        algindex = D_CBC_128_CML + k;
         if (doit[algindex]) {
             int st = 1;
 
