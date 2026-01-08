@@ -560,6 +560,7 @@ my @disablables = (
     "zstd",
     "zstd-dynamic",
     "skip-scsv",
+    "session-lookup",
     );
 foreach my $proto ((@tls, @dtls))
         {

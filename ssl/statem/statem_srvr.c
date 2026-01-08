@@ -1717,6 +1717,11 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
     SSL *ssl = SSL_CONNECTION_GET_SSL(s);
     SSL *ussl = SSL_CONNECTION_GET_USER_SSL(s);
 
+#ifndef OPENSSL_NO_SESSION_LOOKUP
+    if (SSL_want_sess_lookup(s))
+        goto query_session_reentry;
+#endif
+
     /* Finished parsing the ClientHello, now we can start processing it */
     /* Give the ClientHello callback a crack at things */
     if (sctx->client_hello_cb != NULL) {
@@ -1894,6 +1899,9 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
             goto err;
         }
     } else {
+#if !defined(OPENSSL_NO_SESSION_LOOKUP)
+ query_session_reentry:
+#endif
         i = ssl_get_prev_session(s, clienthello);
         if (i == 1) {
             /* previous session */
@@ -1901,6 +1909,14 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
         } else if (i == -1) {
             /* SSLfatal() already called */
             goto err;
+#ifndef OPENSSL_NO_SESSION_LOOKUP
+        } else if (i == -2) {
+            s->rwstate = SSL_SESS_LOOKUP;
+            s->statem.read_state_work = WORK_MORE_A;
+            s->clienthello->ciphers = ciphers;
+            sk_SSL_CIPHER_free(scsvs);
+            return i;
+#endif
         } else {
             /* i == 0 */
             if (!ssl_get_new_session(s, 1)) {
@@ -1908,6 +1924,9 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
                 goto err;
             }
         }
+#ifndef OPENSSL_NO_SESSION_LOOKUP
+        s->rwstate = SSL_NOTHING;
+#endif
     }
 
     if (SSL_CONNECTION_IS_TLS13(s)) {
@@ -1915,6 +1934,11 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
                s->clienthello->session_id_len);
         s->tmp_session_id_len = s->clienthello->session_id_len;
     }
+
+#if !defined(OPENSSL_NO_SESSION_LOOKUP)
+    if (ciphers == NULL && s->clienthello->ciphers != NULL)
+        ciphers = s->clienthello->ciphers;
+#endif
 
     /*
      * If it is a hit, check that the cipher is in the list. In TLSv1.3 we check

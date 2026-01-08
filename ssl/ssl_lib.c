@@ -5047,6 +5047,10 @@ int ossl_ssl_get_error(const SSL *s, int i, int check_err)
         return SSL_ERROR_WANT_ASYNC;
     if (SSL_want_async_job(s))
         return SSL_ERROR_WANT_ASYNC_JOB;
+#ifndef OPENSSL_NO_SESSION_LOOKUP
+    if (SSL_want_sess_lookup(s))
+        return SSL_ERROR_WANT_SESSION_LOOKUP;
+#endif
     if (SSL_want_client_hello_cb(s))
         return SSL_ERROR_WANT_CLIENT_HELLO_CB;
 
