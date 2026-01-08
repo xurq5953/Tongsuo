@@ -11,6 +11,8 @@
 # define OSSL_INTERNAL_CRYPTLIB_H
 # pragma once
 
+#include <openssl/opensslconf.h>
+
 # ifdef OPENSSL_USE_APPLINK
 #  define BIO_FLAGS_UPLINK_INTERNAL 0x8000
 #  include "ms/uplink.h"

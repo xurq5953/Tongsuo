@@ -432,6 +432,9 @@ BN_ULONG bn_sub_words(BN_ULONG *r, const BN_ULONG *a, const BN_ULONG *b,
 
 #if defined(BN_MUL_COMBA) && !defined(OPENSSL_SMALL_FOOTPRINT)
 
+# undef HEADER_SYMBOL_PREFIX_H
+# include <openssl/symbol_prefix.h>
+
 /* mul_add_c(a,b,c0,c1,c2)  -- c+=a*b for three word number c=(c2,c1,c0) */
 /* mul_add_c2(a,b,c0,c1,c2) -- c+=2*a*b for three word number c=(c2,c1,c0) */
 /* sqr_add_c(a,i,c0,c1,c2)  -- c+=a[i]^2 for three word number c=(c2,c1,c0) */
@@ -799,6 +802,9 @@ void bn_sqr_comba8(BN_ULONG *r, const BN_ULONG *a)
     r[14] = c3;
     r[15] = c1;
 }
+
+# undef HEADER_SYMBOL_PREFIX_H
+# include <openssl/symbol_prefix.h>
 
 void bn_sqr_comba4(BN_ULONG *r, const BN_ULONG *a)
 {

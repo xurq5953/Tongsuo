@@ -34,6 +34,8 @@ my $verbose = 0;
 my $ctest = 0;
 my $debug = 0;
 
+my $symbol_prefix = $config{symbol_prefix}||"";
+
 # For VMS, some modules may have case insensitive names
 my $case_insensitive = 0;
 
@@ -44,6 +46,7 @@ GetOptions('name=s'     => \$name,
            'type=s'     => \$type,
            'ctest'      => \$ctest,
            'verbose'    => \$verbose,
+           'debug'      => \$debug,
            # For VMS
            'case-insensitive' => \$case_insensitive)
     or die "Error in command line arguments\n";
@@ -146,6 +149,19 @@ do {
 
 my %disabled_uc = map { my $x = uc $_; $x =~ s|-|_|g; $x => 1 } keys %disabled;
 
+my %dso_symbols = ();
+
+foreach my $f (catfile($config{sourcedir}, "util/engines.num"),
+               catfile($config{sourcedir}, "util/providers.num")) {
+    open IN, $f or die "Couldn't open $f: $!\n";
+    while(<IN>) {
+        print STDERR "DEBUG: \$_=\"$_\"\n" if $debug;
+        $_ =~ qr/([\w_\d]+)\s+(?:\d+)\s+(?:\S+)/x;
+        $dso_symbols{$1} = $1;
+    }
+    close IN;
+}
+
 my %ordinal_opts = ();
 $ordinal_opts{sort} = $OS->{sort} if $OS->{sort};
 $ordinal_opts{filter} =
@@ -202,8 +218,16 @@ sub feature_filter {
             next unless /^DEPRECATEDIN_(\d+)_(\d+)(?:_(\d+))?$/;
             my $symdep = $1 * 10000 + $2 * 100 + ($3 // 0);
             $verdict = 0 if $config{api} >= $symdep;
-            print STDERR "DEBUG: \$symdep = $symdep, \$verdict = $verdict\n"
-                if $debug && $1 == 0;
+            print STDERR "DEBUG: name = ", $item->name(),", \$symdep = $symdep, \$verdict = $verdict\n"
+                if $debug && $verdict == 0;
+        }
+    } elsif ($disabled{'deprecated-0.9.8'}) {
+        foreach (@features) {
+            next unless /^DEPRECATEDIN_(\d+)_(\d+)(?:_(\d+))?$/;
+            my $symdep = $1 * 10000 + $2 * 100 + ($3 // 0);
+            $verdict = 0 if $symdep == 908;
+            print STDERR "DEBUG: name = ", $item->name(),", \$symdep = $symdep, \$verdict = $verdict\n"
+                if $debug && $verdict == 0;
         }
     }
 
@@ -273,7 +297,7 @@ ${currversion_s}{
     global:
 _____
         }
-        print '        ', $_->name(), ";\n";
+        print '        ', alias($_->name()), ";\n";
     }
 
     print <<"_____";
@@ -284,13 +308,13 @@ _____
 
 sub writer_aix {
     for (@_) {
-        print $_->name(),"\n";
+        print alias($_->name()),"\n";
     }
 }
 
 sub writer_nonstop {
     for (@_) {
-        print "-export ",$_->name(),"\n";
+        print "-export ",alias($_->name()),"\n";
     }
 }
 
@@ -305,9 +329,9 @@ LIBRARY         "$libname"
 EXPORTS
 _____
     for (@_) {
-        print "    ",$_->name();
+        print "    ",$symbol_prefix.$_->name();
         if (platform->can('export2internal')) {
-            print "=". platform->export2internal($_->name());
+            print "=". platform->export2internal($symbol_prefix.$_->name());
         }
         print "\n";
     }
@@ -351,7 +375,7 @@ sub writer_VMS {
             FUNCTION    => 'PROCEDURE',
             VARIABLE    => 'DATA'
            } -> {$_->type()};
-        push @slot_collection, $collector->($_->name(), $type);
+        push @slot_collection, $collector->(alias($_->name()), $type);
     }
 
     print <<"_____" if defined $version;
@@ -433,10 +457,10 @@ _____
         $this_num = $last_num + 1 if $this_num =~ m|^\?|;
 
         if ($_->type() eq 'VARIABLE') {
-            print "\textern int ", $_->name(), '; /* type unknown */ /* ',
+            print "\textern int ", alias($_->name()), '; /* type unknown */ /* ',
                   $this_num, ' ', $_->version(), " */\n";
         } else {
-            print "\textern int ", $_->name(), '(); /* type unknown */ /* ',
+            print "\textern int ", alias($_->name()), '(); /* type unknown */ /* ',
                   $this_num, ' ', $_->version(), " */\n";
         }
 
@@ -445,4 +469,9 @@ _____
     print <<'_____';
 }
 _____
+}
+
+sub alias {
+    (my $name) = @_;
+    return defined($dso_symbols{$name}) ? $name : $symbol_prefix.$name;
 }

@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <openssl/opensslconf.h>
 #include <openssl/e_os2.h>
 #include <openssl/md5.h>
 
@@ -17,9 +18,17 @@
      defined(__x86_64) || defined(__x86_64__) || defined(_M_AMD64) || \
      defined(_M_X64) || defined(__aarch64__) || \
      (defined(__loongarch__) && __loongarch_grlen == 64)
+#  ifdef md5_block_data_order
+#   undef md5_block_data_order
+#  endif
 #  define md5_block_data_order ossl_md5_block_asm_data_order
+#  define ASM_md5_block_data_order
 # elif defined(__ia64) || defined(__ia64__) || defined(_M_IA64)
+#  ifdef md5_block_data_order
+#   undef md5_block_data_order
+#  endif
 #  define md5_block_data_order ossl_md5_block_asm_data_order
+#  define ASM_md5_block_data_order
 # endif
 #endif
 

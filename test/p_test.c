@@ -16,6 +16,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <openssl/symbol_prefix.h>
+
 #include <stdarg.h>
 
 /*
@@ -25,6 +27,9 @@
  * object form.
  */
 #ifdef PROVIDER_INIT_FUNCTION_NAME
+# ifdef OSSL_provider_init
+#  undef OSSL_provider_init
+# endif
 # define OSSL_provider_init PROVIDER_INIT_FUNCTION_NAME
 #endif
 
