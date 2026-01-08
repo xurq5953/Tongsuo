@@ -872,6 +872,8 @@ int ssl3_read_bytes(SSL *ssl, uint8_t type, uint8_t *recvd_type,
             return -1;
         }
 
+        s->s3.alert_level = alert_level;
+
         if (s->msg_callback)
             s->msg_callback(0, s->version, SSL3_RT_ALERT, alert_bytes, 2, ssl,
                             s->msg_callback_arg);

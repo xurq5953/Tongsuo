@@ -392,6 +392,8 @@ int dtls1_read_bytes(SSL *s, uint8_t type, uint8_t *recvd_type,
             return -1;
         }
 
+        sc->s3.alert_level = alert_level;
+
         if (sc->msg_callback)
             sc->msg_callback(0, sc->version, SSL3_RT_ALERT, alert_bytes, 2, s,
                              sc->msg_callback_arg);
