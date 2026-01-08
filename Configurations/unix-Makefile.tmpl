@@ -246,55 +246,6 @@ MISC_SCRIPTS={-
                                && $unified_info{attributes}->{scripts}->{$_}->{misc} }
                         @{$unified_info{scripts}}))
 -}
-IMAGEDOCS1={-
-        join(" \\\n" . ' ' x 10,
-             fill_lines(" ", $COLUMNS - 10,
-                        @{$unified_info{imagedocs}->{man1}})) -}
-IMAGEDOCS3={-
-        join(" \\\n" . ' ' x 10,
-             fill_lines(" ", $COLUMNS - 10,
-                        @{$unified_info{imagedocs}->{man3}})) -}
-IMAGEDOCS5={-
-        join(" \\\n" . ' ' x 10,
-             fill_lines(" ", $COLUMNS - 10,
-                        @{$unified_info{imagedocs}->{man5}})) -}
-IMAGEDOCS7={-
-        join(" \\\n" . ' ' x 10,
-             fill_lines(" ", $COLUMNS - 10,
-                        @{$unified_info{imagedocs}->{man7}})) -}
-HTMLDOCS1={-
-        join(" \\\n" . ' ' x 10,
-             fill_lines(" ", $COLUMNS - 10,
-                        @{$unified_info{htmldocs}->{man1}})) -}
-HTMLDOCS3={-
-        join(" \\\n" . ' ' x 10,
-             fill_lines(" ", $COLUMNS - 10,
-                        @{$unified_info{htmldocs}->{man3}})) -}
-HTMLDOCS5={-
-        join(" \\\n" . ' ' x 10,
-             fill_lines(" ", $COLUMNS - 10,
-                        @{$unified_info{htmldocs}->{man5}})) -}
-HTMLDOCS7={-
-        join(" \\\n" . ' ' x 10,
-             fill_lines(" ", $COLUMNS - 10,
-                        @{$unified_info{htmldocs}->{man7}})) -}
-MANDOCS1={-
-        join(" \\\n" . ' ' x 9,
-             fill_lines(" ", $COLUMNS - 9,
-                        @{$unified_info{mandocs}->{man1}})) -}
-MANDOCS3={-
-        join(" \\\n" . ' ' x 9,
-             fill_lines(" ", $COLUMNS - 9,
-                        @{$unified_info{mandocs}->{man3}})) -}
-MANDOCS5={-
-        join(" \\\n" . ' ' x 9,
-             fill_lines(" ", $COLUMNS - 9,
-                        @{$unified_info{mandocs}->{man5}})) -}
-MANDOCS7={-
-        join(" \\\n" . ' ' x 9,
-             fill_lines(" ", $COLUMNS - 9,
-                        @{$unified_info{mandocs}->{man7}})) -}
-
 APPS_OPENSSL="{- use File::Spec::Functions;
                  catfile("apps","openssl") -}"
 
@@ -351,10 +302,6 @@ bindir={- file_name_is_absolute($bindir)
 
 PKGCONFIGDIR=$(libdir)/pkgconfig
 CMAKECONFIGDIR=$(libdir)/cmake/OpenSSL
-
-MANDIR=$(INSTALLTOP)/share/man
-DOCDIR=$(INSTALLTOP)/share/doc/$(BASENAME)
-HTMLDIR=$(DOCDIR)/html
 
 {- output_off() if $config{system_ciphers_file} eq ""; "" -}
 SYSTEM_CIPHERS_FILE_DEFINE=-DSYSTEM_CIPHERS_FILE="\"{- $config{system_ciphers_file} -}\""
@@ -550,18 +497,12 @@ LANG=C
 {- dependmagic('build_modules', 'Build the modules (i.e. providers and engines)'); -}: build_modules_nodep
 {- dependmagic('build_programs', 'Build the openssl executables and scripts'); -}: build_programs_nodep
 
-all: build_sw {- "build_docs" if !$disabled{docs}; -} ## Build software and documentation
+all: build_sw ## Build software
 debuginfo: $(SHLIBS)
 	@set -e; for i in $(SHLIBS); do \
 		$(OBJCOPY) --only-keep-debug $$i $$i.debug; \
 		$(OBJCOPY) --strip-debug --add-gnu-debuglink=$$i.debug $$i; \
 	done;
-
-##@ Documentation
-build_generated_pods: $(GENERATED_PODS)
-build_docs: build_man_docs build_html_docs ## Create documentation
-build_man_docs: $(MANDOCS1) $(MANDOCS3) $(MANDOCS5) $(MANDOCS7) ## Create manpages
-build_html_docs: $(HTMLDOCS1) $(HTMLDOCS3) $(HTMLDOCS5) $(HTMLDOCS7) ## Create HTML documentation
 
 build_generated: $(GENERATED_MANDATORY)
 build_libs_nodep: $(LIBS) {- join(" ",map { platform->sharedlib_simple($_) // platform->sharedlib_import($_) // platform->sharedlib($_) // () } @{$unified_info{libraries}}) -}
@@ -573,7 +514,7 @@ build_apps build_tests: build_programs
 
 # Convenience target to prebuild all generated files, not just the mandatory
 # ones
-build_all_generated: $(GENERATED_MANDATORY) $(GENERATED) build_docs
+build_all_generated: $(GENERATED_MANDATORY) $(GENERATED)
 	@ : {- output_off() if $disabled{makedepend}; "" -}
 	@echo "Warning: consider configuring with no-makedepend, because if"
 	@echo "         target system doesn't have $(PERL),"
@@ -647,7 +588,7 @@ clean: libclean ## Clean the workspace, keep the configuration
 	-find . -name '*{- platform->depext() -}' \! -name '.*' \! -type d -exec $(RM) {} \;
 	-find . -name '*{- platform->objext() -}' \! -name '.*' \! -type d -exec $(RM) {} \;
 	$(RM) core
-	$(RM) tags TAGS doc-nits md-nits
+	$(RM) tags TAGS
 	$(RM) -r test/test-runs
 	$(RM) providers/fips*.new
 	-find . -type l \! -name '.*' -exec $(RM) {} \;
@@ -667,18 +608,13 @@ depend: Makefile
 # Install helper targets #############################################
 ##@ Installation
 
-install: install_sw install_ssldirs {- "install_docs" if !$disabled{docs}; -} {- $disabled{fips} ? "" : "install_fips" -} ## Install software and documentation, create OpenSSL directories
+install: install_sw install_ssldirs {- $disabled{fips} ? "" : "install_fips" -} ## Install software and documentation, create OpenSSL directories
 
-uninstall: {- "uninstall_docs" if !$disabled{docs}; -} uninstall_sw {- $disabled{fips} ? "" : "uninstall_fips" -} ## Uninstall software and documentation
+uninstall: uninstall_sw {- $disabled{fips} ? "" : "uninstall_fips" -} ## Uninstall software and documentation
 
 install_sw: install_dev install_engines install_modules install_runtime ## Install just the software and libraries
 
 uninstall_sw: uninstall_runtime uninstall_modules uninstall_engines uninstall_dev ## Uninstall the software and libraries
-
-install_docs: install_man_docs install_html_docs ## Install manpages and HTML documentation
-
-uninstall_docs: uninstall_man_docs uninstall_html_docs ## Uninstall manpages and HTML documentation
-	$(RM) -r "$(DESTDIR)$(DOCDIR)"
 
 {- output_off() if $disabled{fips}; "" -}
 install_fips: build_sw $(INSTALL_FIPSMODULECONF)
@@ -1022,159 +958,6 @@ uninstall_runtime_libs:
 	done
 	@ : {- output_on() unless windowsdll(); "" -}
 
-
-install_man_docs: build_man_docs
-	@[ -n "$(INSTALLTOP)" ] || (echo INSTALLTOP should not be empty; exit 1)
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(MANDIR)/man1"
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(MANDIR)/man3"
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(MANDIR)/man5"
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(MANDIR)/man7"
-	@$(ECHO) "*** Installing manpages"
-	@set -e; for x in dummy $(MANDOCS1); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(MANDIR)/man1/$${fn}$(MANSUFFIX)"; \
-		cp $$x "$(DESTDIR)$(MANDIR)/man1/$${fn}$(MANSUFFIX)"; \
-		chmod 644 "$(DESTDIR)$(MANDIR)/man1/$${fn}$(MANSUFFIX)"; \
-		$(PERL) $(SRCDIR)/util/write-man-symlinks install $(SRCDIR)/doc/man1 $(BLDDIR)/doc/man1 $${fn}$(MANSUFFIX) "$(DESTDIR)$(MANDIR)/man1"; \
-	done
-	@set -e; for x in dummy $(MANDOCS3); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(MANDIR)/man3/$${fn}$(MANSUFFIX)"; \
-		cp $$x "$(DESTDIR)$(MANDIR)/man3/$${fn}$(MANSUFFIX)"; \
-		chmod 644 "$(DESTDIR)$(MANDIR)/man3/$${fn}$(MANSUFFIX)"; \
-		$(PERL) $(SRCDIR)/util/write-man-symlinks install $(SRCDIR)/doc/man3 $(BLDDIR)/doc/man3 $${fn}$(MANSUFFIX) "$(DESTDIR)$(MANDIR)/man3"; \
-	done
-	@set -e; for x in dummy $(MANDOCS5); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(MANDIR)/man5/$${fn}$(MANSUFFIX)"; \
-		cp $$x "$(DESTDIR)$(MANDIR)/man5/$${fn}$(MANSUFFIX)"; \
-		chmod 644 "$(DESTDIR)$(MANDIR)/man5/$${fn}$(MANSUFFIX)"; \
-		$(PERL) $(SRCDIR)/util/write-man-symlinks install $(SRCDIR)/doc/man5 $(BLDDIR)/doc/man5 $${fn}$(MANSUFFIX) "$(DESTDIR)$(MANDIR)/man5"; \
-	done
-	@set -e; for x in dummy $(MANDOCS7); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(MANDIR)/man7/$${fn}$(MANSUFFIX)"; \
-		cp $$x "$(DESTDIR)$(MANDIR)/man7/$${fn}$(MANSUFFIX)"; \
-		chmod 644 "$(DESTDIR)$(MANDIR)/man7/$${fn}$(MANSUFFIX)"; \
-		$(PERL) $(SRCDIR)/util/write-man-symlinks install $(SRCDIR)/doc/man7 $(BLDDIR)/doc/man7 $${fn}$(MANSUFFIX) "$(DESTDIR)$(MANDIR)/man7"; \
-	done
-
-uninstall_man_docs: build_man_docs
-	@$(ECHO) "*** Uninstalling manpages"
-	@set -e; for x in dummy $(MANDOCS1); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(MANDIR)/man1/$${fn}$(MANSUFFIX)"; \
-		$(RM) "$(DESTDIR)$(MANDIR)/man1/$${fn}$(MANSUFFIX)"; \
-		$(PERL) $(SRCDIR)/util/write-man-symlinks uninstall $(SRCDIR)/doc/man1 $(BLDDIR)/doc/man1 $${fn}$(MANSUFFIX) "$(DESTDIR)$(MANDIR)/man1"; \
-	done
-	@set -e; for x in dummy $(MANDOCS3); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(MANDIR)/man3/$${fn}$(MANSUFFIX)"; \
-		$(RM) "$(DESTDIR)$(MANDIR)/man3/$${fn}$(MANSUFFIX)"; \
-		$(PERL) $(SRCDIR)/util/write-man-symlinks uninstall $(SRCDIR)/doc/man3 $(BLDDIR)/doc/man3 $${fn}$(MANSUFFIX) "$(DESTDIR)$(MANDIR)/man3"; \
-	done
-	@set -e; for x in dummy $(MANDOCS5); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(MANDIR)/man5/$${fn}$(MANSUFFIX)"; \
-		$(RM) "$(DESTDIR)$(MANDIR)/man5/$${fn}$(MANSUFFIX)"; \
-		$(PERL) $(SRCDIR)/util/write-man-symlinks uninstall $(SRCDIR)/doc/man5 $(BLDDIR)/doc/man5 $${fn}$(MANSUFFIX) "$(DESTDIR)$(MANDIR)/man5"; \
-	done
-	@set -e; for x in dummy $(MANDOCS7); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(MANDIR)/man7/$${fn}$(MANSUFFIX)"; \
-		$(RM) "$(DESTDIR)$(MANDIR)/man7/$${fn}$(MANSUFFIX)"; \
-		$(PERL) $(SRCDIR)/util/write-man-symlinks uninstall $(SRCDIR)/doc/man7 $(BLDDIR)/doc/man7 $${fn}$(MANSUFFIX) "$(DESTDIR)$(MANDIR)/man7"; \
-	done
-
-install_html_docs: install_image_docs build_html_docs
-	@[ -n "$(INSTALLTOP)" ] || (echo INSTALLTOP should not be empty; exit 1)
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(HTMLDIR)/man1"
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(HTMLDIR)/man3"
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(HTMLDIR)/man5"
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(HTMLDIR)/man7"
-	@$(ECHO) "*** Installing HTML manpages"
-	@set -e; for x in dummy $(HTMLDOCS1); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(HTMLDIR)/man1/$$fn"; \
-		cp $$x "$(DESTDIR)$(HTMLDIR)/man1/$$fn"; \
-		chmod 644 "$(DESTDIR)$(HTMLDIR)/man1/$$fn"; \
-	done
-	@set -e; for x in dummy $(HTMLDOCS3); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(HTMLDIR)/man3/$$fn"; \
-		cp $$x "$(DESTDIR)$(HTMLDIR)/man3/$$fn"; \
-		chmod 644 "$(DESTDIR)$(HTMLDIR)/man3/$$fn"; \
-	done
-	@set -e; for x in dummy $(HTMLDOCS5); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(HTMLDIR)/man5/$$fn"; \
-		cp $$x "$(DESTDIR)$(HTMLDIR)/man5/$$fn"; \
-		chmod 644 "$(DESTDIR)$(HTMLDIR)/man5/$$fn"; \
-	done
-	@set -e; for x in dummy $(HTMLDOCS7); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(HTMLDIR)/man7/$$fn"; \
-		cp $$x "$(DESTDIR)$(HTMLDIR)/man7/$$fn"; \
-		chmod 644 "$(DESTDIR)$(HTMLDIR)/man7/$$fn"; \
-	done
-
-uninstall_html_docs: uninstall_image_docs
-	@$(ECHO) "*** Uninstalling HTML manpages"
-	@set -e; for x in dummy $(HTMLDOCS1); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(HTMLDIR)/man1/$$fn"; \
-		$(RM) "$(DESTDIR)$(HTMLDIR)/man1/$$fn"; \
-	done
-	@set -e; for x in dummy $(HTMLDOCS3); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(HTMLDIR)/man3/$$fn"; \
-		$(RM) "$(DESTDIR)$(HTMLDIR)/man3/$$fn"; \
-	done
-	@set -e; for x in dummy $(HTMLDOCS5); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(HTMLDIR)/man5/$$fn"; \
-		$(RM) "$(DESTDIR)$(HTMLDIR)/man5/$$fn"; \
-	done
-	@set -e; for x in dummy $(HTMLDOCS7); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(HTMLDIR)/man7/$$fn"; \
-		$(RM) "$(DESTDIR)$(HTMLDIR)/man7/$$fn"; \
-	done
-
-install_image_docs:
-	@$(PERL) $(SRCDIR)/util/mkdir-p.pl "$(DESTDIR)$(HTMLDIR)/man7/img"
-	@set -e; for x in dummy $(IMAGEDOCS7); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "install $$x -> $(DESTDIR)$(HTMLDIR)/man7/img/$$fn"; \
-		cp $(SRCDIR)/$$x "$(DESTDIR)$(HTMLDIR)/man7/img/$$fn"; \
-		chmod 644 "$(DESTDIR)$(HTMLDIR)/man7/img/$$fn"; \
-	done
-
-uninstall_image_docs:
-	@set -e; for x in dummy $(IMAGEDOCS7); do \
-		if [ "$$x" = "dummy" ]; then continue; fi; \
-		fn=`basename $$x`; \
-		$(ECHO) "$(RM) $(DESTDIR)$(HTMLDIR)/man7/img/$$fn"; \
-		$(RM) "$(DESTDIR)$(HTMLDIR)/man7/img/$$fn"; \
-	done
-
 # Developer targets (note: these are only available on Unix) #########
 ##@ Code maintenance
 
@@ -1186,22 +969,6 @@ update: generate errors ordinals generate_buildinfo ## Update errors, ordinals a
           generate_crypto_conf generate_crypto_asn1 generate_fuzz_oids
 generate: generate_apps generate_crypto_bn generate_crypto_objects \
           generate_crypto_conf generate_crypto_asn1 generate_fuzz_oids
-
-.PHONY: generate_buildinfo generate_doc_buildinfo
-generate_buildinfo: generate_doc_buildinfo
-
-.PHONY: doc-nits md-nits
-doc-nits: build_generated_pods ## Evaluate OpenSSL documentation
-	$(PERL) $(SRCDIR)/util/find-doc-nits -c -n -l -e -i
-
-# This uses "mdl", the markdownlint application, which is written in ruby.
-# The source is at https://github.com/markdownlint/markdownlint
-# If you have ruby installed, "gem install mdl" should work.
-# Another option is at https://snapcraft.io/install/mdl/debian
-# Finally, there's a Node.js version, which we haven't tried, that
-# can be found at https://github.com/DavidAnson/markdownlint
-md-nits: ## Evaluate markdown files via "mdl"
-	mdl -s $(SRCDIR)/util/markdownlint.rb .
 
 # Test coverage is a good idea for the future
 #coverage: $(PROGRAMS) $(TESTPROGRAMS)
@@ -1260,20 +1027,6 @@ generate_fuzz_oids:
 generate_symbol_prefix:
 	( cd $(SRCDIR); $(PERL) util/mk_symbol_prefix.pl --symhacks include/openssl/symhacks.h\
 				> include/openssl/symbol_prefix.h )
-
-generate_doc_buildinfo:
-	( $(PERL) -I$(BLDDIR) -Mconfigdata \
-                $(SRCDIR)/util/dofile.pl -o Makefile \
-                        $(SRCDIR)/doc/build.info.in \
-                        > $(SRCDIR)/doc/build.info.new; \
-          if ( test -e $(SRCDIR)/doc/build.info \
-               && cmp $(SRCDIR)/doc/build.info.new $(SRCDIR)/doc/build.info \
-                  > /dev/null ); \
-          then \
-                rm $(SRCDIR)/doc/build.info.new; \
-          else \
-                mv $(SRCDIR)/doc/build.info.new $(SRCDIR)/doc/build.info; \
-          fi )
 
 generate_fips_sources: providers/fips.module.sources.new
 providers/fips.module.sources.new: configdata.pm
@@ -1568,30 +1321,7 @@ EOF
       my $deps = join(" ", compute_platform_depends(@{$args{generator_deps}},
                                                     @{$args{deps}}));
 
-      if ($args{src} =~ /\.html$/) {
-          #
-          # HTML generator
-          #
-          my $title = basename($args{src}, ".html");
-          my $pod = $gen0;
-          return <<"EOF";
-$args{src}: $pod
-	\$(PERL) \$(SRCDIR)/util/mkpod2html.pl -i "$pod" -o \$\@ -t "$title" -r "\$(SRCDIR)/doc"
-EOF
-      } elsif ($args{src} =~ /\.(\d)$/) {
-          #
-          # Man-page generator
-          #
-          my $section = $1;
-          my $name = uc basename($args{src}, ".$section");
-          my $pod = $gen0;
-          return <<"EOF";
-$args{src}: $pod
-	pod2man --name=$name --section=$section\$(MANSUFFIX) --center=OpenSSL \\
-		--date=\$(RELEASE_DATE) --release=\$(VERSION) \\
-		$pod >\$\@
-EOF
-      } elsif (platform->isdef($args{src})) {
+      if (platform->isdef($args{src})) {
           #
           # Linker script-ish generator
           #
