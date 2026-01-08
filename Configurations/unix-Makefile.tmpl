@@ -978,6 +978,7 @@ install_programs: install_runtime_libs build_programs
 		chmod 755 "$(DESTDIR)$(bindir)/$$fn.new"; \
 		mv -f "$(DESTDIR)$(bindir)/$$fn.new" \
 		      "$(DESTDIR)$(bindir)/$$fn"; \
+        ln -sf $(DESTDIR)$(bindir)/bin/$$fn $(DESTDIR)$(bindir)/bin/tongsuo; \
 	done
 	@set -e; for x in dummy $(BIN_SCRIPTS); do \
 		if [ "$$x" = "dummy" ]; then continue; fi; \
@@ -1006,6 +1007,7 @@ uninstall_programs:
 		fn=`basename $$x`; \
 		$(ECHO) "$(RM) $(DESTDIR)$(bindir)/$$fn"; \
 		$(RM) "$(DESTDIR)$(bindir)/$$fn"; \
+        $(RM) $(DESTDIR)$(bindir)/bin/tongsuo; \
 	done
 	-$(RMDIR) "$(DESTDIR)$(bindir)"
 
