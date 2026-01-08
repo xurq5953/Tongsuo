@@ -1899,6 +1899,11 @@ struct ssl_connection_st {
     int session_reused_type;
 # endif
 
+# ifndef OPENSSL_NO_STATUS
+    int (*status_callback)(unsigned char *p, unsigned int length, SSL_status* param);
+    SSL_status  status_param;
+# endif
+
 #ifndef OPENSSL_NO_COMP_ALG
     /* certificate compression preferences */
     int cert_comp_prefs[TLSEXT_comp_cert_limit];

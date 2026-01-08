@@ -566,6 +566,7 @@ my @disablables = (
     "rsa-multi-prime-key-compat",
     "session-reused-type",
     "optimize-chacha-choose",
+    "status",
     );
 foreach my $proto ((@tls, @dtls))
         {
@@ -633,6 +634,7 @@ our %disabled = ( # "what"         => "comment"
                   "zstd-dynamic"        => "default",
                   "ec_elgamal"          => "default",
                   "optimize-chacha-choose"     => "default",
+                  "status"              => "default",
                 );
 
 # Note: => pair form used for aesthetics, not to truly make a hash table

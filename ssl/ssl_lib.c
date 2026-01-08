@@ -8125,6 +8125,34 @@ int SSL_get_session_reused_type(SSL *s)
 }
 #endif
 
+#ifndef OPENSSL_NO_STATUS
+void SSL_set_status_callback(SSL *s,
+                             int (*status_callback)(unsigned char *p,
+                                                    unsigned int length,
+                                                    SSL_status *param),
+                             unsigned int ssl_status_enable, void *arg)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    if (sc != NULL) {
+        sc->status_callback = status_callback;
+        sc->status_param.arg = arg;
+        sc->status_param.ssl_status_enable = ssl_status_enable;
+
+        if (status_callback == NULL)
+            sc->status_param.ssl_status_enable = 0;
+    }
+}
+
+int (*SSL_get_status_callback(const SSL *s))(unsigned char *p,
+                                             unsigned int length, SSL_status *param)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    if (sc == NULL)
+        return 0;
+    return sc->status_callback;
+}
+#endif
+
 /* QUIC-specific methods which are supported on QUIC connections only. */
 int SSL_handle_events(SSL *s)
 {

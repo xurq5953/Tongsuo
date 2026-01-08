@@ -662,3 +662,6 @@ SSL_dup_cipher_list_by_id               662	3_5_0	EXIST::FUNCTION:DYNAMIC_CIPHER
 SSL_CTX_set_verify_cert_with_sni        663	3_5_0	EXIST::FUNCTION:VERIFY_SNI
 SSL_CTX_get_verify_cert_with_sni        664	3_5_0	EXIST::FUNCTION:VERIFY_SNI
 SSL_get_session_reused_type             665	3_5_0	EXIST::FUNCTION:SESSION_REUSED_TYPE
+SSL_set_status_callback                 666	3_5_0	EXIST::FUNCTION:STATUS
+SSL_get_status_callback                 667	3_5_0	EXIST::FUNCTION:STATUS
+
