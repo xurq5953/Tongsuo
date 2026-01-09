@@ -501,7 +501,7 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings)
     uint64_t tmp;
     int aloaddone = 0;
 
-   /* Applications depend on 0 being returned when cleanup was already done */
+    /* Applications depend on 0 being returned when cleanup was already done */
     if (stopped) {
         if (!(opts & OPENSSL_INIT_BASE_ONLY))
             ERR_raise(ERR_LIB_CRYPTO, ERR_R_INIT_FAIL);

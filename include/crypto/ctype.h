@@ -50,23 +50,16 @@
  */
 # define CTYPE_MASK_ascii   (~0)
 
-# ifdef CHARSET_EBCDIC
 int ossl_toascii(int c);
 int ossl_fromascii(int c);
-# else
-#  ifdef ossl_toascii
-#   undef ossl_toascii
-#  endif
-#  ifdef ossl_fromascii
-#   undef ossl_fromascii
-#  endif
-#  define ossl_toascii(c)       (c)
-#  define ossl_fromascii(c)     (c)
-# endif
 int ossl_ctype_check(int c, unsigned int mask);
 
 int ossl_tolower(int c);
 int ossl_toupper(int c);
+
+int ossl_isdigit(int c);
+int ossl_islower(int c);
+int ossl_isupper(int c);
 
 int ossl_isdigit(int c);
 int ossl_islower(int c);
