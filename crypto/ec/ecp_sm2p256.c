@@ -6,6 +6,7 @@
  * in the file LICENSE in the source distribution or at
  * https://www.openssl.org/source/license.html
  *
+ * The optimization of SM2 was also inspired by GuanZhi‘s work on GMSSL.
  */
 
 /*
