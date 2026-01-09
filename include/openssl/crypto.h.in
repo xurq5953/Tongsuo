@@ -175,6 +175,9 @@ const char *OpenSSL_version(int type);
 # define OPENSSL_CPU_INFO               9
 # define OPENSSL_WINCTX             	10
 # define TONGSUO_VERSION                11
+# ifdef SMTC_MODULE
+#  define TONGSUO_SMTC_INFO              11
+# endif
 
 const char *OPENSSL_info(int type);
 /*

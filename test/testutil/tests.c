@@ -243,6 +243,59 @@ DEFINE_COMPARISONS(double, double, "%g", double)
 DEFINE_COMPARISON(void *, ptr, eq, ==, "%p", void *)
 DEFINE_COMPARISON(void *, ptr, ne, !=, "%p", void *)
 
+static int double_eq(double a, double b)
+{
+    double precision = 0.000001;
+    int res;
+
+    if (a > b)
+        res = a - b < precision;
+    else
+        res = b - a < precision;
+
+    return res;
+}
+
+int test_double_eq(const char *file, int line, const char *s1, const char *s2,
+                   double a, double b)
+{
+    if (double_eq(a, b))
+        return 1;
+    test_fail_message(NULL, file, line, "double", s1, s2, "==",
+                      "[%g] compared to [%g]", a, b);
+    return 0;
+}
+
+int test_double_ne(const char *file, int line, const char *s1, const char *s2,
+                   double a, double b)
+{
+    if (!double_eq(a, b))
+        return 1;
+    test_fail_message(NULL, file, line, "double", s1, s2, "!=",
+                      "[%g] compared to [%g]", a, b);
+    return 0;
+}
+
+int test_double_le(const char *file, int line, const char *s1, const char *s2,
+                   double a, double b)
+{
+    if (a < b || double_eq(a, b))
+        return 1;
+    test_fail_message(NULL, file, line, "double", s1, s2, "<=",
+                      "[%g] compared to [%g]", a, b);
+    return 0;
+}
+
+int test_double_ge(const char *file, int line, const char *s1, const char *s2,
+                   double a, double b)
+{
+    if (a > b || double_eq(a, b))
+        return 1;
+    test_fail_message(NULL, file, line, "double", s1, s2, ">=",
+                      "[%g] compared to [%g]", a, b);
+    return 0;
+}
+
 int test_ptr_null(const char *file, int line, const char *s, const void *p)
 {
     if (p == NULL)

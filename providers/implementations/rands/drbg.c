@@ -216,8 +216,13 @@ static size_t get_entropy(PROV_DRBG *drbg, unsigned char **pout, int entropy,
          * In normal use (i.e. OpenSSL's own uses), this is never called.
          * This remains purely for legacy reasons.
          */
+#if defined(SMTC_MODULE)
+        return ossl_smtc_get_entropy(drbg, pout, entropy, min_len, max_len,
+                                     prediction_resistance);
+#else
         return ossl_prov_get_entropy(drbg->provctx, pout, entropy, min_len,
                                      max_len);
+#endif
 
     if (drbg->parent_get_seed == NULL) {
         ERR_raise(ERR_LIB_PROV, PROV_R_PARENT_CANNOT_SUPPLY_ENTROPY_SEED);

@@ -22,6 +22,9 @@
 typedef enum OPTION_choice {
     OPT_COMMON,
     OPT_B, OPT_D, OPT_E, OPT_M, OPT_F, OPT_O, OPT_P, OPT_V, OPT_A, OPT_R, OPT_C
+#ifdef SMTC_MODULE
+    ,OPT_S
+#endif
 #if defined(_WIN32)
     ,OPT_W
 #endif
@@ -43,6 +46,9 @@ const OPTIONS version_options[] = {
     {"r", OPT_R, '-', "Show random seeding options"},
     {"v", OPT_V, '-', "Show library version"},
     {"c", OPT_C, '-', "Show CPU settings info"},
+#ifdef SMTC_MODULE
+    {"s", OPT_S, '-', "Show smtc info"},
+#endif
 #if defined(_WIN32)
     {"w", OPT_W, '-', "Show Windows install context"},
 #endif
@@ -54,6 +60,9 @@ int version_main(int argc, char **argv)
     int ret = 1, dirty = 0, seed = 0;
     int cflags = 0, version = 0, date = 0, options = 0, platform = 0, dir = 0;
     int engdir = 0, moddir = 0, cpuinfo = 0, engines = 0;
+#ifdef SMTC_MODULE
+    int smtc = 0;
+#endif
 #if defined(_WIN32)
     int windows = 0;
 #endif
@@ -102,6 +111,11 @@ opthelp:
         case OPT_C:
             dirty = cpuinfo = 1;
             break;
+#ifdef SMTC_MODULE
+        case OPT_S:
+            dirty = smtc = 1;
+            break;
+#endif
 #if defined(_WIN32)
         case OPT_W:
             dirty = windows = 1;
@@ -164,6 +178,12 @@ opthelp:
         printf("\n");
 #endif
     }
+#ifdef SMTC_MODULE
+    if (smtc) {
+        printf("%s\n", OpenSSL_version(TONGSUO_VERSION));
+        printf("%s\n", OpenSSL_version(TONGSUO_SMTC_INFO));
+    }
+#endif
 #if defined(_WIN32)
     if (windows)
         printf("%s\n", OpenSSL_version(OPENSSL_WINCTX));

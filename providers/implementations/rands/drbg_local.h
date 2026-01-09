@@ -240,4 +240,10 @@ int ossl_drbg_set_ctx_params(PROV_DRBG *drbg, const OSSL_PARAM params[]);
 /* Confirm digest is allowed to be used with a DRBG */
 int ossl_drbg_verify_digest(PROV_DRBG *drbg, OSSL_LIB_CTX *libctx, const EVP_MD *md);
 
+#ifdef SMTC_MODULE
+size_t ossl_smtc_get_entropy(PROV_DRBG *drbg, unsigned char **pout, int entropy,
+                             size_t min_len, size_t max_len,
+                             int prediction_resistance);
+#endif
+
 #endif

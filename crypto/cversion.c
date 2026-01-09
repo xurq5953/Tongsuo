@@ -141,6 +141,10 @@ const char *OpenSSL_version(int t)
 #else
         return "OSSL_WINCTX: Undefined";
 #endif
+#ifdef SMTC_MODULE
+    case TONGSUO_SMTC_INFO:
+        return TONGSUO_SMTC_INFO_STR;
+#endif
     }
     return "not available";
 }

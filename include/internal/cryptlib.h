@@ -122,7 +122,9 @@ typedef struct ossl_ex_data_global_st {
 # define OSSL_LIB_CTX_DECODER_CACHE_INDEX           20
 # define OSSL_LIB_CTX_COMP_METHODS                  21
 # define OSSL_LIB_CTX_INDICATOR_CB_INDEX            22
-# define OSSL_LIB_CTX_MAX_INDEXES                   22
+# define OSSL_LIB_CTX_SMTC_PROV_INDEX               23
+# define OSSL_LIB_CTX_RAND_SMTC_CRNGT_INDEX         24
+# define OSSL_LIB_CTX_MAX_INDEXES                   25
 
 OSSL_LIB_CTX *ossl_lib_ctx_get_concrete(OSSL_LIB_CTX *ctx);
 int ossl_lib_ctx_is_default(OSSL_LIB_CTX *ctx);
