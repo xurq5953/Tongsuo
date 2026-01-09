@@ -5864,3 +5864,4 @@ X509_STORE_copy                         5686	3_0_3	EXIST::FUNCTION:
 X509_VERIFY_PARAM_copy                  5687	3_0_3	EXIST::FUNCTION:
 EVP_sm4_gcm                             5721	3_0_3	EXIST::FUNCTION:SM4
 EVP_sm4_ccm                             5722	3_0_3	EXIST::FUNCTION:SM4
+EC_POINT_get_curve_name                 5741	3_0_3	EXIST::FUNCTION:DEPRECATEDIN_3_0,EC
