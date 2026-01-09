@@ -786,6 +786,7 @@ SSL *ossl_ssl_connection_new_int(SSL_CTX *ctx, SSL *user_ssl,
     s->pha_enabled = ctx->pha_enabled;
 #ifndef OPENSSL_NO_NTLS
     s->enable_ntls = ctx->enable_ntls;
+    s->enable_force_ntls = ctx->enable_force_ntls;
 #endif
 #ifndef OPENSSL_NO_SM2
     s->enable_sm_tls13_strict = ctx->enable_sm_tls13_strict;
@@ -4124,6 +4125,7 @@ SSL_CTX *SSL_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq,
 
 #ifndef OPENSSL_NO_NTLS
     ret->enable_ntls = 0;
+    ret->enable_force_ntls = 0;
 #endif
 #ifndef OPENSSL_NO_SM2
     ret->enable_sm_tls13_strict = 0;
@@ -5432,6 +5434,7 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
 #ifndef OPENSSL_NO_NTLS
     /* Tag of NTLS */
     ret->enable_ntls = ctx->enable_ntls;
+    ret->enable_force_ntls = ctx->enable_force_ntls;
 #endif
 #ifndef OPENSSL_NO_SM2
     ret->enable_sm_tls13_strict = ctx->enable_sm_tls13_strict ;
@@ -8058,6 +8061,16 @@ void SSL_CTX_disable_ntls(SSL_CTX *ctx)
     ctx->enable_ntls = 0;
 }
 
+void SSL_CTX_enable_force_ntls(SSL_CTX *ctx)
+{
+    ctx->enable_force_ntls = 1;
+}
+
+void SSL_CTX_disable_force_ntls(SSL_CTX *ctx)
+{
+    ctx->enable_force_ntls = 0;
+}
+
 void SSL_enable_ntls(SSL *s)
 {
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
@@ -8076,6 +8089,26 @@ void SSL_disable_ntls(SSL *s)
         return;
 
     sc->enable_ntls = 0;
+}
+
+void SSL_enable_force_ntls(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return;
+
+    s->enable_force_ntls = 1;
+}
+
+void SSL_disable_force_ntls(SSL *s)
+{
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL)
+        return;
+
+    s->enable_force_ntls = 0;
 }
 #endif
 

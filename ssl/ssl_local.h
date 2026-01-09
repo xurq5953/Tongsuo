@@ -1167,6 +1167,7 @@ struct ssl_ctx_st {
 #ifndef OPENSSL_NO_NTLS
     /* Tag of NTLS */
     int enable_ntls;
+    int enable_force_ntls;
 #endif
 #ifndef OPENSSL_NO_SM2
     /*
@@ -1868,6 +1869,7 @@ struct ssl_connection_st {
 
 # ifndef OPENSSL_NO_NTLS
     int enable_ntls;
+    int enable_force_ntls;
 # endif
 
 # ifndef OPENSSL_NO_SKIP_SCSV
