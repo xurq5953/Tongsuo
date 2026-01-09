@@ -4996,11 +4996,13 @@ int ossl_ssl_get_error(const SSL *s, int i, int check_err)
 #endif
     {
         if (SSL_want_read(s)) {
+            bio = SSL_get_rbio(s);
 #ifndef OPENSSL_NO_NTLS
-        if (s->enable_ntls == 1 && SSL_IS_FIRST_HANDSHAKE(s))
+        if (s->enable_ntls == 1 && s->enable_force_ntls == 0
+            && SSL_IS_FIRST_HANDSHAKE(s)
+            && s->preread_len < sizeof(s->preread_buf) && !BIO_eof(bio))
             return SSL_ERROR_WANT_READ;
 #endif
-            bio = SSL_get_rbio(s);
             if (BIO_should_read(bio))
                 return SSL_ERROR_WANT_READ;
             else if (BIO_should_write(bio))

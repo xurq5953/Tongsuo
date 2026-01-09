@@ -772,6 +772,10 @@ typedef struct {
 #  define OPENSSL_CLIENT_MAX_KEY_SHARES 4
 # endif
 
+# ifndef OPENSSL_NO_NTLS
+#  define PREREAD_HEADER_LENGTH 3
+# endif
+
 struct ssl_ctx_st {
     OSSL_LIB_CTX *libctx;
 
@@ -1870,6 +1874,9 @@ struct ssl_connection_st {
 # ifndef OPENSSL_NO_NTLS
     int enable_ntls;
     int enable_force_ntls;
+
+    uint8_t preread_buf[PREREAD_HEADER_LENGTH];
+    size_t preread_len;
 # endif
 
 # ifndef OPENSSL_NO_SKIP_SCSV
