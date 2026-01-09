@@ -5872,3 +5872,5 @@ SM3_Transform                           5762	3_0_3	EXIST::FUNCTION:DEPRECATEDIN_
 X509_verify_ctx                         5763	3_0_3	EXIST::FUNCTION:
 X509_REQ_verify_ctx                     5764	3_0_3	EXIST::FUNCTION:
 X509_STORE_CTX_set0_vfyopts             5765	3_0_3	EXIST::FUNCTION:
+EVP_CIPHER_CTX_get_buf_len              5860	3_0_3	EXIST::FUNCTION:
+EVP_CIPHER_CTX_get_final_used           5861	3_0_3	EXIST::FUNCTION:
