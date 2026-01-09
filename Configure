@@ -1020,7 +1020,7 @@ while (@argvcopy)
                         {
                         $config{prefix}=$1;
                         }
-                if (/^--symbol-prefix=(.*)$/)
+                elsif (/^--symbol-prefix=(.*)$/)
                         {
                         $config{symbol_prefix}=$1;
                         }
