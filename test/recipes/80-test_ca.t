@@ -29,7 +29,7 @@ sub src_file {
 
 rmtree("demoCA", { safe => 0 });
 
-plan tests => 22;
+plan tests => 23;
 
 require_ok(srctop_file("test", "recipes", "tconversion.pl"));
 
@@ -66,7 +66,7 @@ require_ok(srctop_file("test", "recipes", "tconversion.pl"));
 }
 
 SKIP: {
-    skip "SM2 is not supported by this OpenSSL build", 1
+    skip "SM2 is not supported by this OpenSSL build", 2
         if disabled("sm2");
 
     is(yes(cmdstr(app(["openssl", "ca", "-config",
@@ -80,6 +80,18 @@ SKIP: {
                        "-keyfile", src_file("sm2-root.key")]))),
        0,
        "Signing SM2 certificate request");
+
+    is(yes(cmdstr(app(["openssl", "ca", "-config",
+                       $cnf,
+                       "-in", srctop_file("test", "certs", "sm2-noza-csr.pem"),
+                       "-out", "sm2-noza-test.crt",
+                       "-sigopt", "sm2-za:no",
+                       "-vfyopt", "sm2-za:no",
+                       "-md", "sm3",
+                       "-cert", srctop_file("test", "certs", "sm2-noza-root-cert.pem"),
+                       "-keyfile", srctop_file("test", "certs", "sm2-root.key")]))),
+       0,
+       "Signing SM2 certificate request without Za");
 }
 
 SKIP: {
@@ -102,7 +114,7 @@ SKIP: {
                        "-sigopt", "sm2_id:1234567812345678",
                        "-sm2-id", "1234567812345678",
                        "-md", "sm3",
-                       "-cert", srctop_file("test", "certs", "sm2-root.crt"),
+                       "-cert", srctop_file("test", "certs", "sm2-root-cert.pem"),
                        "-keyfile", srctop_file("test", "certs", "sm2-root.key")]))),
        0,
        "Signing SM2 certificate request (compat)");
