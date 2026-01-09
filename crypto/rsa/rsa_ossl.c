@@ -13,6 +13,10 @@
  */
 #include "internal/deprecated.h"
 
+#include <openssl/sha.h>
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+
 #include "internal/cryptlib.h"
 #include "crypto/bn.h"
 #include "rsa_local.h"
@@ -664,9 +668,20 @@ static int rsa_ossl_private_decrypt(int flen, const unsigned char *from,
             goto err;
     }
 
-    j = BN_bn2binpad(ret, buf, num);
-    if (j < 0)
-        goto err;
+    if (blinding) {
+        /*
+         * ossl_bn_rsa_do_unblind() combines blinding inversion and
+         * 0-padded BN BE serialization
+         */
+        j = ossl_bn_rsa_do_unblind(ret, blinding, unblind, rsa->n, ctx,
+                                   buf, num);
+        if (j == 0)
+            goto err;
+    } else {
+        j = BN_bn2binpad(ret, buf, num);
+        if (j < 0)
+            goto err;
+    }
 
     switch (padding) {
     case RSA_PKCS1_NO_IMPLICIT_REJECT_PADDING:
