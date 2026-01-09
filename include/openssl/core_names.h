@@ -49,8 +49,6 @@ extern "C" {
 # define OSSL_DIGEST_NAME_SM3            "SM3"
 
 /* Known MAC names */
-# define OSSL_MAC_NAME_BLAKE2BMAC    "BLAKE2BMAC"
-# define OSSL_MAC_NAME_BLAKE2SMAC    "BLAKE2SMAC"
 # define OSSL_MAC_NAME_CMAC          "CMAC"
 # define OSSL_MAC_NAME_GMAC          "GMAC"
 # define OSSL_MAC_NAME_HMAC          "HMAC"

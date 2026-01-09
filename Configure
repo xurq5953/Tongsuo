@@ -430,7 +430,6 @@ my @disablables = (
     "autoalginit",
     "autoerrinit",
     "autoload-config",
-    "blake2",
     "brotli",
     "brotli-dynamic",
     "buildtest-c++",
@@ -631,7 +630,7 @@ my @disable_cascades = (
     # "what"            => [ "cascade", ... ]
     "bulk"              => [ "shared", "dso",
                              "async", "atexit", "autoload-config",
-                             "blake2", "chacha",
+                             "chacha",
                              "cmac", "cms", "cmp", "comp", "ct",
                              "des", "dgram", "dh", "dsa",
                              "ec", "engine",
@@ -712,8 +711,6 @@ my @disable_cascades = (
 
     "threads"           => [ "thread-pool" ],
     "thread-pool"       => [ "default-thread-pool" ],
-
-    "blake2"            => [ "argon2" ],
 
     "deprecated-3.0"    => [ "engine", "srp" ],
 
