@@ -190,7 +190,6 @@ extern "C" {
 # define OSSL_CIPHER_PARAM_PADDING "padding"
 # define OSSL_CIPHER_PARAM_PIPELINE_AEAD_TAG "pipeline-tag"
 # define OSSL_CIPHER_PARAM_RANDOM_KEY "randkey"
-# define OSSL_CIPHER_PARAM_RC2_KEYBITS "keybits"
 # define OSSL_CIPHER_PARAM_ROUNDS "rounds"
 # define OSSL_CIPHER_PARAM_SPEED "speed"
 # define OSSL_CIPHER_PARAM_TLS1_MULTIBLOCK "tls-multi"
