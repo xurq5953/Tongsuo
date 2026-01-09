@@ -240,6 +240,7 @@ typedef struct nistp256_pre_comp_st NISTP256_PRE_COMP;
 typedef struct nistp384_pre_comp_st NISTP384_PRE_COMP;
 typedef struct nistp521_pre_comp_st NISTP521_PRE_COMP;
 typedef struct nistz256_pre_comp_st NISTZ256_PRE_COMP;
+typedef struct sm2p256_pre_comp_st SM2P256_PRE_COMP;
 typedef struct ec_pre_comp_st EC_PRE_COMP;
 
 struct ec_group_st {
@@ -300,6 +301,7 @@ struct ec_group_st {
     enum {
         PCT_none,
         PCT_nistp224, PCT_nistp256, PCT_nistp384, PCT_nistp521, PCT_nistz256,
+        PCT_sm2p256,
         PCT_ec
     } pre_comp_type;
     union {
@@ -308,6 +310,7 @@ struct ec_group_st {
         NISTP384_PRE_COMP *nistp384;
         NISTP521_PRE_COMP *nistp521;
         NISTZ256_PRE_COMP *nistz256;
+        SM2P256_PRE_COMP *sm2p256;
         EC_PRE_COMP *ec;
     } pre_comp;
 
@@ -381,6 +384,7 @@ NISTP384_PRE_COMP *ossl_ec_nistp384_pre_comp_dup(NISTP384_PRE_COMP *);
 NISTP521_PRE_COMP *EC_nistp521_pre_comp_dup(NISTP521_PRE_COMP *);
 NISTZ256_PRE_COMP *EC_nistz256_pre_comp_dup(NISTZ256_PRE_COMP *);
 NISTP256_PRE_COMP *EC_nistp256_pre_comp_dup(NISTP256_PRE_COMP *);
+SM2P256_PRE_COMP *EC_sm2p256_pre_comp_dup(SM2P256_PRE_COMP *);
 EC_PRE_COMP *EC_ec_pre_comp_dup(EC_PRE_COMP *);
 
 void EC_pre_comp_free(EC_GROUP *group);
@@ -638,6 +642,26 @@ int ossl_ec_GFp_nistp521_points_mul(const EC_GROUP *group, EC_POINT *r,
                                     const BIGNUM *scalars[], BN_CTX *ctx);
 int ossl_ec_GFp_nistp521_precompute_mult(EC_GROUP *group, BN_CTX *ctx);
 int ossl_ec_GFp_nistp521_have_precompute_mult(const EC_GROUP *group);
+
+/* method functions in ecp_sm2p256.c */
+int ossl_ec_GFp_sm2p256_group_init(EC_GROUP *group);
+int ossl_ec_GFp_sm2p256_group_set_curve(EC_GROUP *group, const BIGNUM *p,
+                                         const BIGNUM *a, const BIGNUM *n,
+                                         BN_CTX *);
+int ossl_ec_GFp_sm2p256_point_get_affine_coordinates(const EC_GROUP *group,
+                                                      const EC_POINT *point,
+                                                      BIGNUM *x, BIGNUM *y,
+                                                      BN_CTX *ctx);
+int ossl_ec_GFp_sm2p256_mul(const EC_GROUP *group, EC_POINT *r,
+                             const BIGNUM *scalar, size_t num,
+                             const EC_POINT *points[], const BIGNUM *scalars[],
+                             BN_CTX *);
+int ossl_ec_GFp_sm2p256_points_mul(const EC_GROUP *group, EC_POINT *r,
+                                    const BIGNUM *scalar, size_t num,
+                                    const EC_POINT *points[],
+                                    const BIGNUM *scalars[], BN_CTX *ctx);
+int ossl_ec_GFp_sm2p256_precompute_mult(EC_GROUP *group, BN_CTX *ctx);
+int ossl_ec_GFp_sm2p256_have_precompute_mult(const EC_GROUP *group);
 
 /* utility functions in ecp_nistputil.c */
 void ossl_ec_GFp_nistp_points_make_affine_internal(size_t num, void *point_array,
