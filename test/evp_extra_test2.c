@@ -570,6 +570,19 @@ static int test_sm2_tofrom_data_select(void)
     EVP_PKEY_free(key);
     return ret;
 }
+
+# ifndef OPENSSL_NO_SM2
+static int test_sm2_tofrom_data_select(void)
+{
+    int ret;
+    EVP_PKEY *key = NULL;
+
+    ret = TEST_ptr(key = EVP_PKEY_Q_keygen(mainctx, NULL, "SM2"))
+          && TEST_true(do_pkey_tofrom_data_select(key, "SM2"));
+    EVP_PKEY_free(key);
+    return ret;
+}
+# endif
 #endif
 
 static int test_rsa_tofrom_data_select(void)
@@ -1455,6 +1468,9 @@ int setup_tests(void)
     ADD_TEST(test_ec_tofrom_data_select);
 # ifndef OPENSSL_NO_ECX
     ADD_TEST(test_ecx_tofrom_data_select);
+# endif
+# ifndef OPENSSL_NO_SM2
+    ADD_TEST(test_sm2_tofrom_data_select);
 # endif
     ADD_TEST(test_ec_d2i_i2d_pubkey);
 #else

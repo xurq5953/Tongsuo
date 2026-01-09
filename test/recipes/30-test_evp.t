@@ -163,7 +163,7 @@ push @defltfiles, qw(evpkdf_argon2.txt) unless $no_argon2;
 plan tests =>
     + (scalar(@configs) * scalar(@files))
     + scalar(@defltfiles)
-    + 3; # error output tests
+    + 5; # error output tests
 
 foreach (@configs) {
     my $conf = srctop_file("test", $_);
@@ -228,8 +228,12 @@ SKIP: {
 }
 
 SKIP: {
-    skip "SM2 not disabled", 1 if !disabled("sm2");
+    skip "SM2 not disabled", 3 if !disabled("sm2");
 
     ok(test_errors(key => 'sm2.key', out => 'sm2.err'),
+       "expected error loading unsupported sm2 private key");
+    ok(test_errors(key => 'sm2_begin_ec.key', out => 'sm2.err'),
+       "expected error loading unsupported sm2 private key");
+    ok(test_errors(key => 'sm2_begin_sm2.key', out => 'sm2.err'),
        "expected error loading unsupported sm2 private key");
 }

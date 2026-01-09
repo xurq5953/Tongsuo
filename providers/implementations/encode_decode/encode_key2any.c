@@ -777,8 +777,9 @@ k2d_NOCTX(ec_prv, i2d_ECPrivateKey)
  * This leaves the distinction of SM2 keys to the EC group (which is found
  * in AlgorithmIdentified.params).
  */
-#  define sm2_evp_type          ec_evp_type
-#  define sm2_pem_type          "SM2"
+ /* Keep SM2 wrap in EC to be compatible with common implementations */
+#  define sm2_evp_type          EVP_PKEY_EC
+#  define sm2_pem_type          "EC"
 # endif
 #endif
 
