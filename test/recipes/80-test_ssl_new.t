@@ -46,9 +46,7 @@ if (defined $ENV{SSL_TESTS}) {
     # finds all files as expected.
     plan tests => 36;
 }
-map { s/;.*// } @conf_srcs if $^O eq "VMS";
 my @conf_files = map { basename($_, ".in") } @conf_srcs;
-map { s/\^// } @conf_files if $^O eq "VMS";
 
 # Some test results depend on the configuration of enabled protocols. We only
 # verify generated sources in the default configuration.
@@ -157,7 +155,7 @@ foreach my $conf (@conf_files) {
     subtest "Test configuration $conf" => sub {
         plan tests => 6 + ($no_fips ? 0 : 3);
         test_conf($conf,
-                  $conf_dependent_tests{$conf} || $^O eq "VMS" ?  0 : 1,
+                  $conf_dependent_tests{$conf} ? 0 : 1,
                   defined($skip{$conf}) ? $skip{$conf} : $no_tls,
                   "none");
         test_conf($conf,
