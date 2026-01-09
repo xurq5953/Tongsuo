@@ -5862,3 +5862,5 @@ DC_new_from_raw_byte_ex                 5649	3_0_3	EXIST::FUNCTION:DELEGATED_CRE
 DC_load_from_file_ex                    5650	3_0_3	EXIST::FUNCTION:DELEGATED_CREDENTIAL
 X509_STORE_copy                         5686	3_0_3	EXIST::FUNCTION:
 X509_VERIFY_PARAM_copy                  5687	3_0_3	EXIST::FUNCTION:
+EVP_sm4_gcm                             5721	3_0_3	EXIST::FUNCTION:SM4
+EVP_sm4_ccm                             5722	3_0_3	EXIST::FUNCTION:SM4
