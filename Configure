@@ -761,8 +761,8 @@ my @disable_cascades = (
 
     "http"              => [ "ocsp" ],
 
-    # SMTC does not support ct for now
-    sub { !$disabled{"smtc"}} => [ "ct" ],
+    # SMTC does not support ct, and only supports builtin for now
+    sub { !$disabled{"smtc"}} => [ "ct", "module" ],
     "sdf-lib"           => [ "sdf-lib-dynamic" ],
     );
 
