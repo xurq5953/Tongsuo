@@ -240,7 +240,7 @@ static const OSSL_ALGORITHM_CAPABLE deflt_ciphers[] = {
     ALG(PROV_NAMES_SM4_CFB, ossl_sm4128cfb128_functions),
     ALG(PROV_NAMES_SM4_XTS, ossl_sm4128xts_functions),
 #endif /* OPENSSL_NO_SM4 */
-#ifndef OPENSSL_NO_WBSM4
+#ifndef OPENSSL_NO_WBSM4_XIAOLAI
     ALG(PROV_NAMES_WBSM4_XIAOLAI_ECB, ossl_wbsm4_xiaolai1225984ecb_functions),
     ALG(PROV_NAMES_WBSM4_XIAOLAI_CBC, ossl_wbsm4_xiaolai1225984cbc_functions),
     ALG(PROV_NAMES_WBSM4_XIAOLAI_CTR, ossl_wbsm4_xiaolai1225984ctr_functions),
@@ -248,7 +248,8 @@ static const OSSL_ALGORITHM_CAPABLE deflt_ciphers[] = {
     ALG(PROV_NAMES_WBSM4_XIAOLAI_CFB, ossl_wbsm4_xiaolai1225984cfb128_functions),
     ALG(PROV_NAMES_WBSM4_XIAOLAI_GCM, ossl_wbsm4_xiaolai1225984gcm_functions),
     ALG(PROV_NAMES_WBSM4_XIAOLAI_CCM, ossl_wbsm4_xiaolai1225984ccm_functions),
-
+#endif /* OPENSSL_NO_WBSM4_XIAOLAI */
+#ifndef OPENSSL_NO_WBSM4_BAIWU
     ALG(PROV_NAMES_WBSM4_BAIWU_ECB, ossl_wbsm4_baiwu272638208ecb_functions),
     ALG(PROV_NAMES_WBSM4_BAIWU_CBC, ossl_wbsm4_baiwu272638208cbc_functions),
     ALG(PROV_NAMES_WBSM4_BAIWU_CTR, ossl_wbsm4_baiwu272638208ctr_functions),
@@ -256,7 +257,8 @@ static const OSSL_ALGORITHM_CAPABLE deflt_ciphers[] = {
     ALG(PROV_NAMES_WBSM4_BAIWU_CFB, ossl_wbsm4_baiwu272638208cfb128_functions),
     ALG(PROV_NAMES_WBSM4_BAIWU_GCM, ossl_wbsm4_baiwu272638208gcm_functions),
     ALG(PROV_NAMES_WBSM4_BAIWU_CCM, ossl_wbsm4_baiwu272638208ccm_functions),
-
+#endif /* OPENSSL_NO_WBSM4_BAIWU */
+#ifndef OPENSSL_NO_WBSM4_WSISE
     ALG(PROV_NAMES_WBSM4_WSISE_ECB, ossl_wbsm4_wsise2274560ecb_functions),
     ALG(PROV_NAMES_WBSM4_WSISE_CBC, ossl_wbsm4_wsise2274560cbc_functions),
     ALG(PROV_NAMES_WBSM4_WSISE_CTR, ossl_wbsm4_wsise2274560ctr_functions),
@@ -264,7 +266,7 @@ static const OSSL_ALGORITHM_CAPABLE deflt_ciphers[] = {
     ALG(PROV_NAMES_WBSM4_WSISE_CFB, ossl_wbsm4_wsise2274560cfb128_functions),
     ALG(PROV_NAMES_WBSM4_WSISE_GCM, ossl_wbsm4_wsise2274560gcm_functions),
     ALG(PROV_NAMES_WBSM4_WSISE_CCM, ossl_wbsm4_wsise2274560ccm_functions),
-#endif /* OPENSSL_NO_WBSM4 */
+#endif /* OPENSSL_NO_WBSM4_WSISE */
 #ifndef OPENSSL_NO_CHACHA
     ALG(PROV_NAMES_ChaCha20, ossl_chacha20_functions),
 # ifndef OPENSSL_NO_POLY1305
@@ -316,7 +318,8 @@ static const OSSL_ALGORITHM deflt_kdfs[] = {
     { PROV_NAMES_KRB5KDF, "provider=default", ossl_kdf_krb5kdf_functions },
     { PROV_NAMES_HMAC_DRBG_KDF, "provider=default",
       ossl_kdf_hmac_drbg_functions },
-#ifndef OPENSSL_NO_WBSM4
+#if !defined(OPENSSL_NO_WBSM4_XIAOLAI) || !defined(OPENSSL_NO_WBSM4_BAIWU) || \
+    !defined(OPENSSL_NO_WBSM4_WSISE)
     { PROV_NAMES_WBSM4KDF, "provider=default", ossl_kdf_wbsm4_functions },
 #endif
 #ifndef OPENSSL_NO_ARGON2
