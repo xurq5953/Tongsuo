@@ -21,6 +21,8 @@ extern "C" {
 
 /* SSL/TLS uses a 2 byte unsigned version number */
 # define NTLS1_1_VERSION                 0x0101
+# define NTLS_MAX_VERSION                NTLS1_1_VERSION
+
 # define SSL3_VERSION                    0x0300
 # define TLS1_VERSION                    0x0301
 # define TLS1_1_VERSION                  0x0302
