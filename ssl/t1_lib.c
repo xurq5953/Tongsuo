@@ -1102,13 +1102,7 @@ int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
     uint16_t *glist = NULL, *kslist = NULL;
     size_t *tpllist = NULL;
     size_t i;
-    /*
-     * Bitmap of groups included to detect duplicates: two variables are added
-     * to detect duplicates as some values are more than 32.
-     */
-    unsigned long *dup_list = NULL;
-    unsigned long dup_list_egrp = 0;
-    unsigned long dup_list_dhgrp = 0;
+    uint8_t bitmap[64] = { 0 };
 
     if (ngroups == 0) {
         ERR_raise(ERR_LIB_SSL, SSL_R_BAD_LENGTH);
@@ -1121,20 +1115,19 @@ int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
     if ((tpllist = OPENSSL_malloc(1 * sizeof(*tpllist))) == NULL)
         goto err;
     for (i = 0; i < ngroups; i++) {
-        unsigned long idmask;
         uint16_t id;
         id = tls1_nid2group_id(groups[i]);
         if (ngroups == 1) {
             glist[i] = id;
             break;
         }
-        if ((id & 0x00FF) >= (sizeof(unsigned long) * 8))
+        if (id == 0 || id >= sizeof(bitmap) * 8)
             goto err;
-        idmask = 1L << (id & 0x00FF);
-        dup_list = (id < 0x100) ? &dup_list_egrp : &dup_list_dhgrp;
-        if (!id || ((*dup_list) & idmask))
+
+        if (bitmap[id / 8] & (1 << (id % 8)))
             goto err;
-        *dup_list |= idmask;
+
+        bitmap[id / 8] |= 1 << (id % 8);
         glist[i] = id;
     }
     OPENSSL_free(*grpext);
