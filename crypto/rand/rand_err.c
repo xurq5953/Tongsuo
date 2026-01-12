@@ -51,6 +51,8 @@ static const ERR_STRING_DATA RAND_str_reasons[] = {
     {ERR_PACK(ERR_LIB_RAND, 0, RAND_R_INSUFFICIENT_DRBG_STRENGTH),
      "insufficient drbg strength"},
     {ERR_PACK(ERR_LIB_RAND, 0, RAND_R_INTERNAL_ERROR), "internal error"},
+    {ERR_PACK(ERR_LIB_RAND, 0, RAND_R_INVALID_ENTROPY_SOURCE),
+    "invalid entropy source"},
     {ERR_PACK(ERR_LIB_RAND, 0, RAND_R_INVALID_PROPERTY_QUERY),
      "invalid property query"},
     {ERR_PACK(ERR_LIB_RAND, 0, RAND_R_IN_ERROR_STATE), "in error state"},

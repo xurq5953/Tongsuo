@@ -41,6 +41,7 @@
 # define RAND_R_GENERATE_ERROR                            112
 # define RAND_R_INSUFFICIENT_DRBG_STRENGTH                139
 # define RAND_R_INTERNAL_ERROR                            113
+# define RAND_R_INVALID_ENTROPY_SOURCE                    145
 # define RAND_R_INVALID_PROPERTY_QUERY                    137
 # define RAND_R_IN_ERROR_STATE                            114
 # define RAND_R_NOT_A_REGULAR_FILE                        122
