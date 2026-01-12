@@ -285,6 +285,12 @@ OSSL_CORE_MAKE_FUNC(int, provider_random_bytes, (void *provctx, int which,
                                                  void *buf, size_t n,
                                                  unsigned int strength))
 
+# define OSSL_FUNC_PROVIDER_STATUS             1033
+OSSL_CORE_MAKE_FUNC(int, provider_status, (void *provctx))
+
+# define OSSL_FUNC_PROVIDER_RESET              1034
+OSSL_CORE_MAKE_FUNC(int, provider_reset, (void *provctx))
+
 /* Libssl related functions */
 #define OSSL_FUNC_SSL_QUIC_TLS_CRYPTO_SEND          2001
 OSSL_CORE_MAKE_FUNC(int, SSL_QUIC_TLS_crypto_send,

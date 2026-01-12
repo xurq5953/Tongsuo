@@ -34,6 +34,11 @@ DEFINE_STACK_OF(EX_CALLBACK)
 typedef struct mem_st MEM;
 DEFINE_LHASH_OF_EX(MEM);
 
+# ifdef SMTC_MODULE
+#  define SMTC_MODULE_CONF       OPENSSLDIR "/smtcmodule.cnf"
+#  define SMTC_AUTH_KEK          OPENSSLDIR "/auth_kek.pem"
+# endif
+
 void OPENSSL_cpuid_setup(void);
 #if defined(__i386)   || defined(__i386__)   || defined(_M_IX86) || \
     defined(__x86_64) || defined(__x86_64__) || \

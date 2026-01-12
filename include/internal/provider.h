@@ -86,6 +86,8 @@ int ossl_provider_get_capabilities(const OSSL_PROVIDER *prov,
                                    const char *capability,
                                    OSSL_CALLBACK *cb,
                                    void *arg);
+int ossl_provider_reset(OSSL_PROVIDER *prov);
+int ossl_provider_status(const OSSL_PROVIDER *prov);
 int ossl_provider_self_test(const OSSL_PROVIDER *prov);
 int ossl_provider_random_bytes(const OSSL_PROVIDER *prov, int which,
                                void *buf, size_t n, unsigned int strength);

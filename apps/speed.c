@@ -30,6 +30,7 @@
 #define FFDH_SECONDS    PKEY_SECONDS
 #define KEM_SECONDS     PKEY_SECONDS
 #define SIG_SECONDS     PKEY_SECONDS
+#define KEYGEN_SECONDS  PKEY_SECONDS
 
 #define MAX_ALGNAME_SUFFIX 100
 
@@ -53,6 +54,8 @@
 #include <openssl/core_names.h>
 #include <openssl/async.h>
 #include <openssl/provider.h>
+#include <openssl/sdf.h>
+#include <openssl/safestack.h>
 #if !defined(OPENSSL_SYS_MSDOS)
 # include <unistd.h>
 #endif
@@ -130,6 +133,7 @@ typedef struct openssl_speed_sec_st {
     int kem;
     int sig;
     int ec_elgamal;
+    int keygen;
 } openssl_speed_sec_t;
 
 static volatile int run = 0;
@@ -263,7 +267,7 @@ typedef enum OPTION_choice {
     OPT_ELAPSED, OPT_EVP, OPT_HMAC, OPT_DECRYPT, OPT_ENGINE, OPT_MULTI,
     OPT_MR, OPT_MB, OPT_MISALIGN, OPT_ASYNCJOBS, OPT_R_ENUM, OPT_PROV_ENUM,
     OPT_CONFIG, OPT_PRIMES, OPT_SECONDS, OPT_BYTES, OPT_AEAD, OPT_CMAC,
-    OPT_MLOCK, OPT_TESTMODE, OPT_KEM, OPT_SIG
+    OPT_MLOCK, OPT_TESTMODE, OPT_KEM, OPT_SIG, OPT_KEYGEN, OPT_SDF
 } OPTION_CHOICE;
 
 const OPTIONS speed_options[] = {
@@ -305,6 +309,8 @@ const OPTIONS speed_options[] = {
      "Benchmark KEM algorithms"},
     {"signature-algorithms", OPT_SIG, '-',
      "Benchmark signature algorithms"},
+    {"keygen", OPT_KEYGEN, 's', "Time the key generation using the specified algorithm"},
+    {"sdf", OPT_SDF, 's', "Time the SDF operations using the specified operation"},
 
     OPT_SECTION("Timing"),
     {"elapsed", OPT_ELAPSED, '-',
@@ -332,7 +338,7 @@ enum {
     D_CBC_128_AES, D_CBC_192_AES, D_CBC_256_AES,
     D_CBC_128_CML, D_CBC_192_CML, D_CBC_256_CML,
     D_EVP, D_GHASH, D_RAND, D_EVP_CMAC, D_KMAC128, D_KMAC256,
-    D_SM3, D_CBC_SM4,
+    D_SM3, D_CBC_SM4, D_ECB_SM4,
     D_EEA3_128_ZUC, D_EIA3_128_ZUC, D_SM2_ENCRYPT, D_SM2_DECRYPT,
     D_SM2_THRESHOLD_DECRYPT, ALGOR_NUM
 };
@@ -344,7 +350,7 @@ static const char *names[ALGOR_NUM] = {
     "rc5-cbc",
     "aes-128-cbc", "aes-192-cbc", "aes-256-cbc",
     "evp", "ghash", "rand", "cmac", "kmac128", "kmac256",
-    "sm3", "sm4", "zuc-128-eea3", "zuc-128-eia3",
+    "sm3", "sm4-cbc", "sm4-ecb", "zuc-128-eea3", "zuc-128-eia3",
     "sm2-encrypt", "sm2-decrypt", "sm2-thr-dec",
 };
 
@@ -373,6 +379,7 @@ static const OPT_PAIR doit_choices[] = {
 #ifndef OPENSSL_NO_SM4
     {"sm4-cbc", D_CBC_SM4},
     {"sm4", D_CBC_SM4},
+    {"sm4-ecb", D_ECB_SM4},
 #endif
 #ifndef OPENSSL_NO_ZUC
     {"zuc-128-eea3", D_EEA3_128_ZUC},
@@ -613,8 +620,33 @@ static size_t sigs_algs_len = 0;
 static char *sigs_algname[MAX_SIG_NUM] = { NULL };
 static double sigs_results[MAX_SIG_NUM][3];  /* keygen, sign, verify */
 
+enum {
+    R_SM2, KEYGEN_NUM
+};
+static const OPT_PAIR keygen_choices[KEYGEN_NUM] = {
+    {"sm2", R_SM2},
+};
+
+static double keygen_results[KEYGEN_NUM];
+
+enum {
+    R_GenerateKey, SDF_NUM
+};
+static const OPT_PAIR sdf_choices[SDF_NUM] = {
+    {"GenerateKey", R_GenerateKey},
+};
+
+static double sdf_results[SDF_NUM];
+
 #define COND(unused_cond) (run && count < (testmode ? 1 : INT_MAX))
 #define COUNT(d) (count)
+
+typedef struct {
+    void *hSessionHandle;
+    void *hKeyHandle;
+} HANDLE_PAIR;
+
+DEFINE_STACK_OF(HANDLE_PAIR)
 
 #define TAG_LEN 16 /* 16 bytes tag length works for all AEAD modes */
 #define AEAD_IVLEN 12 /* 12 bytes iv length works for all AEAD modes */
@@ -696,6 +728,10 @@ typedef struct loopargs_st {
     size_t sig_max_sig_len[MAX_SIG_NUM];
     size_t sig_act_sig_len[MAX_SIG_NUM];
     unsigned char *sig_sig[MAX_SIG_NUM];
+
+    void *hDeviceHandle;
+    void *hSessionHandle;
+    STACK_OF(HANDLE_PAIR) *key_handles;
 } loopargs_t;
 static int run_benchmark(int async_jobs, int (*loop_function) (void *),
                          loopargs_t *loopargs);
@@ -1580,6 +1616,24 @@ static int SM2_decrypt_loop(void *args)
 
     return count;
 }
+
+static int SM2_keygen_loop(void *args)
+{
+    int count;
+
+    for (count = 0; COND(keygen_results[testnum]); count++) {
+        if (EVP_PKEY_Q_keygen(app_get0_libctx(), app_get0_propq(), "SM2")
+                == NULL) {
+            BIO_printf(bio_err, "SM2 keygen failure\n");
+            ERR_print_errors(bio_err);
+            count = -1;
+            break;
+        }
+    }
+
+    return count;
+}
+
 # ifndef OPENSSL_NO_SM2_THRESHOLD
 static long sm2_threshold_c[2];
 
@@ -2265,7 +2319,7 @@ int speed_main(int argc, char **argv)
     OPTION_CHOICE o;
     int async_init = 0, multiblock = 0, pr_header = 0;
     uint8_t doit[ALGOR_NUM] = { 0 };
-    int ret = 1, misalign = 0, lengths_single = 0;
+    int ret = 1, misalign = 0, lengths_single = 0, keygen = 0;
     STACK_OF(EVP_KEM) *kem_stack = NULL;
     STACK_OF(EVP_SIGNATURE) *sig_stack = NULL;
     long count = 0;
@@ -2285,7 +2339,7 @@ int speed_main(int argc, char **argv)
                                     ECDSA_SECONDS, ECDH_SECONDS,
                                     EdDSA_SECONDS, SM2_SECONDS,
                                     FFDH_SECONDS, KEM_SECONDS,
-                                    SIG_SECONDS };
+                                    SIG_SECONDS, KEYGEN_SECONDS };
 
     static const unsigned char key32[32] = {
         0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
@@ -2429,6 +2483,9 @@ int speed_main(int argc, char **argv)
 #ifndef OPENSSL_NO_ECX
     uint8_t eddsa_doit[EdDSA_NUM] = { 0 };
 #endif /* OPENSSL_NO_ECX */
+
+    uint8_t keygen_doit[KEYGEN_NUM] = { 0 };
+    uint8_t sdf_doit[SDF_NUM] = { 0 };
 
     uint8_t kems_doit[MAX_KEM_NUM] = { 0 };
     uint8_t sigs_doit[MAX_SIG_NUM] = { 0 };
@@ -2584,7 +2641,8 @@ int speed_main(int argc, char **argv)
             seconds.sym = seconds.rsa = seconds.dsa = seconds.ecdsa
                         = seconds.ecdh = seconds.eddsa
                         = seconds.sm2 = seconds.ffdh
-                        = seconds.kem = seconds.sig = opt_int_arg();
+                        = seconds.kem = seconds.sig 
+                        = seconds.keygen = opt_int_arg();
             break;
         case OPT_BYTES:
             lengths_single = opt_int_arg();
@@ -2593,6 +2651,22 @@ int speed_main(int argc, char **argv)
             break;
         case OPT_AEAD:
             aead = 1;
+            break;
+        case OPT_KEYGEN:
+            keygen = 1;
+            if (opt_found(opt_arg(), keygen_choices, &i)) {
+                keygen_doit[i] = 1;
+                break;
+            }
+
+            break;
+        case OPT_SDF:
+            sdf = 1;
+            if (opt_found(opt_arg(), sdf_choices, &i)) {
+                sdf_doit[i] = 1;
+                break;
+            }
+
             break;
         case OPT_KEM:
             do_kems = 1;
@@ -2967,6 +3041,7 @@ int speed_main(int argc, char **argv)
         loopargs[i].secret_ff_a = app_malloc(MAX_FFDH_SIZE, "FFDH secret a");
         loopargs[i].secret_ff_b = app_malloc(MAX_FFDH_SIZE, "FFDH secret b");
 #endif
+        loopargs[i].key_handles = sk_HANDLE_PAIR_new_null();
     }
 
 #ifndef NO_FORK
@@ -2993,7 +3068,8 @@ int speed_main(int argc, char **argv)
 
     /* No parameters; turn on everything. */
     if (argc == 0 && !doit[D_EVP] && !doit[D_HMAC]
-        && !doit[D_EVP_CMAC] && !do_kems && !do_sigs) {
+        && !doit[D_EVP_CMAC] && !do_kems && !do_sigs
+        && !keygen && !sdf ) {
         memset(doit, 1, sizeof(doit));
         doit[D_EVP] = doit[D_EVP_CMAC] = 0;
         ERR_set_mark();
@@ -3047,6 +3123,8 @@ int speed_main(int argc, char **argv)
         memset(sm2_threshold_doit, 1, sizeof(sm2_threshold_doit));
 # endif
 #endif
+        memset(keygen_doit, 1, sizeof(keygen_doit));
+        memset(sdf_doit, 1, sizeof(sdf_doit));
         memset(kems_doit, 1, sizeof(kems_doit));
         do_kems = 1;
         memset(sigs_doit, 1, sizeof(sigs_doit));
@@ -3400,27 +3478,31 @@ int speed_main(int argc, char **argv)
     }
 
 #ifndef OPENSSL_NO_SM4
-    if (doit[D_CBC_SM4]) {
-        int st = 1;
+    for (k = 0; k < 2; k++) {
+        algindex = D_CBC_SM4 + k;
 
-        keylen = 16;
-        for (i = 0; st && i < loopargs_len; i++) {
-            loopargs[i].ctx = init_evp_cipher_ctx(names[D_CBC_SM4],
-                                                  key32, keylen);
-            st = loopargs[i].ctx != NULL;
-        }
+        if (doit[algindex]) {
+            int st = 1;
 
-        for (testnum = 0; st && testnum < size_num; testnum++) {
-            print_message(names[D_CBC_SM4], c[D_CBC_SM4][testnum],
-                          lengths[testnum], seconds.sym);
-            Time_F(START);
-            count =
-                run_benchmark(async_jobs, EVP_Cipher_loop, loopargs);
-            d = Time_F(STOP);
-            print_result(D_CBC_SM4, testnum, count, d);
+            keylen = 16;
+            for (i = 0; st && i < loopargs_len; i++) {
+                loopargs[i].ctx = init_evp_cipher_ctx(names[algindex],
+                                                      key32, keylen);
+                st = loopargs[i].ctx != NULL;
+            }
+
+            for (testnum = 0; st && testnum < size_num; testnum++) {
+                print_message(names[algindex], c[algindex][testnum],
+                            lengths[testnum], seconds.sym);
+                Time_F(START);
+                count =
+                    run_benchmark(async_jobs, EVP_Cipher_loop, loopargs);
+                d = Time_F(STOP);
+                print_result(algindex, testnum, count, d);
+            }
+            for (i = 0; i < loopargs_len; i++)
+                EVP_CIPHER_CTX_free(loopargs[i].ctx);
         }
-        for (i = 0; i < loopargs_len; i++)
-            EVP_CIPHER_CTX_free(loopargs[i].ctx);
     }
 #endif
 
@@ -4351,47 +4433,57 @@ int speed_main(int argc, char **argv)
 
         for (i = 0; st && i < loopargs_len; i++) {
             EVP_PKEY *pkey = NULL, *pubkey = NULL;
-            OSSL_PARAM *pub_params = NULL;
             EVP_PKEY_CTX *ctx = NULL;
+            BIO *tmpbio = NULL;
             st = 0;
 
             pkey = EVP_PKEY_Q_keygen(app_get0_libctx(), app_get0_propq(), "SM2");
             if (pkey == NULL)
                 break;
 
-            if (!EVP_PKEY_todata(pkey, EVP_PKEY_PUBLIC_KEY, &pub_params)) {
-                EVP_PKEY_free(pkey);
+            if (!EVP_PKEY_set_alias_type(pkey, EVP_PKEY_SM2))
                 break;
-            }
 
-            ctx = EVP_PKEY_CTX_new_from_name(NULL, "SM2", NULL);
+            ctx = EVP_PKEY_CTX_new(pkey, NULL);
             if (ctx == NULL) {
                 EVP_PKEY_free(pkey);
                 break;
             }
 
-            if (EVP_PKEY_fromdata_init(ctx) <= 0
-                || EVP_PKEY_fromdata(ctx, &pubkey, EVP_PKEY_PUBLIC_KEY,
-                                     pub_params) <= 0) {
+            tmpbio = BIO_new(BIO_s_mem());
+            if (tmpbio == NULL)
+                break;
+
+            if (!PEM_write_bio_PUBKEY(tmpbio, pkey)) {
                 EVP_PKEY_free(pkey);
                 EVP_PKEY_CTX_free(ctx);
+                BIO_free(tmpbio);
+                break;
+            }
+
+            if (!PEM_read_bio_PUBKEY(tmpbio, &pubkey, NULL, NULL)) {
+                EVP_PKEY_free(pkey);
+                EVP_PKEY_CTX_free(ctx);
+                BIO_free(tmpbio);
                 break;
             }
 
             EVP_PKEY_CTX_free(ctx);
+            BIO_free(tmpbio);
 
             loopargs[i].sm2_enc_pctx = EVP_PKEY_CTX_new(pubkey, NULL);
             if (loopargs[i].sm2_enc_pctx == NULL) {
                 EVP_PKEY_free(pkey);
+                EVP_PKEY_free(pubkey);
                 break;
             }
+            EVP_PKEY_free(pubkey);
 
             loopargs[i].sm2_dec_pctx = EVP_PKEY_CTX_new(pkey, NULL);
             if (loopargs[i].sm2_dec_pctx == NULL) {
                 EVP_PKEY_free(pkey);
                 break;
             }
-
             EVP_PKEY_free(pkey);
 
             if (EVP_PKEY_encrypt_init(loopargs[i].sm2_enc_pctx) <= 0)
@@ -4591,7 +4683,6 @@ int speed_main(int argc, char **argv)
         for (i = 0; i < loopargs_len; i++) {
             EVP_PKEY_CTX *sm2_pctx = NULL;
             EVP_PKEY_CTX *sm2_vfy_pctx = NULL;
-            EVP_PKEY_CTX *pctx = NULL;
             st = 0;
 
             loopargs[i].sm2_ctx[testnum] = EVP_MD_CTX_new();
@@ -4602,16 +4693,12 @@ int speed_main(int argc, char **argv)
 
             sm2_pkey = NULL;
 
-            st = !((pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_SM2, NULL)) == NULL
-                || EVP_PKEY_keygen_init(pctx) <= 0
-                || EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx,
-                    sm2_curves[testnum].nid) <= 0
-                || EVP_PKEY_keygen(pctx, &sm2_pkey) <= 0);
-            EVP_PKEY_CTX_free(pctx);
-            if (st == 0)
+            sm2_pkey = EVP_PKEY_Q_keygen(app_get0_libctx(), app_get0_propq(), "SM2");
+            if (sm2_pkey == NULL)
                 break;
 
-            st = 0; /* set back to zero */
+            if (!EVP_PKEY_set_alias_type(sm2_pkey, EVP_PKEY_SM2))
+                break;
             /* attach it sooner to rely on main final cleanup */
             loopargs[i].sm2_pkey[testnum] = sm2_pkey;
             loopargs[i].sigsize = EVP_PKEY_get_size(sm2_pkey);
@@ -5447,6 +5534,73 @@ int speed_main(int argc, char **argv)
     }
 #endif                         /* OPENSSL_NO_EC_ELGAMAL */
 
+    for (testnum = 0; testnum < KEYGEN_NUM; testnum++) {
+        if (!keygen_doit[testnum])
+            continue;
+
+        if (testnum == R_SM2) {
+            pkey_print_message("keygen", "sm2", 0, 128, seconds.keygen);
+            Time_F(START);
+#ifndef OPENSSL_NO_SM2
+            count = run_benchmark(async_jobs, SM2_keygen_loop, loopargs);
+#else
+            count = 0;
+#endif
+            d = Time_F(STOP);
+            BIO_printf(bio_err,
+                       mr ? "+F14:%ld:%s:%.2f\n"
+                       : "%ld %s keygen in %.2fs\n",
+                       count, keygen_choices[testnum].name, d);
+            keygen_results[testnum] = (double)count / d;
+        }
+    }
+
+    for (testnum = 0; testnum < SDF_NUM; testnum++) {
+        int st = 1;
+        int res;
+
+        if (!sdf_doit[testnum])
+            continue;
+
+        for (i = 0; i < loopargs_len; i++) {
+            st = 0;
+
+            res = TSAPI_SDF_OpenDevice(&loopargs[i].hDeviceHandle);
+            if (res != OSSL_SDR_OK) {
+                BIO_printf(bio_err, "TSAPI_SDF_OpenDevice failed with %d\n", ret);
+                break;
+            }
+
+            res = TSAPI_SDF_OpenSession(loopargs[i].hDeviceHandle,
+                                        &loopargs[i].hSessionHandle);
+            if (res != OSSL_SDR_OK) {
+                BIO_printf(bio_err, "TSAPI_SDF_OpenSession failed with %d\n", ret);
+                break;
+            }
+
+            st = 1;
+        }
+
+        if (st == 0) {
+            BIO_printf(bio_err, "SDF failure.\n");
+            op_count = 1;
+        } else {
+
+            if (testnum == R_GenerateKey) {
+                pkey_print_message("GenerateKey", "sm4", 0, 128,
+                                   seconds.keygen);
+                Time_F(START);
+                count = run_benchmark(async_jobs, SDF_GenerateKey_loop, loopargs);
+                d = Time_F(STOP);
+                BIO_printf(bio_err,
+                        mr ? "+F15:%ld:%s:%.2f\n"
+                        : "%ld %s keygen in %.2fs\n",
+                        count, sdf_choices[testnum].name, d);
+                sdf_results[testnum] = (double)count / d;
+            }
+        }
+    }
+
 #ifndef NO_FORK
  show_res:
 #endif
@@ -5725,6 +5879,49 @@ int speed_main(int argc, char **argv)
         }
     }
 #endif
+
+    testnum = 1;
+    for (k = 0; k < KEYGEN_NUM; k++) {
+        if (!keygen_doit[k])
+            continue;
+
+        if (testnum && !mr) {
+            printf("%30sop      op/s\n", " ");
+            testnum = 0;
+        }
+
+        if (mr)
+            printf("+F14:%u:%s:%f:%f\n",
+                   k, keygen_choices[k].name, keygen_results[k],
+                   1.0 / keygen_results[k]);
+        else
+            printf("128 bits keygen (%s) %8.4fs %8.1f\n",
+                   keygen_choices[k].name, 1.0 / keygen_results[k],
+                   keygen_results[k]);
+    }
+
+    testnum = 1;
+    for (k = 0; k < SDF_NUM; k++) {
+        if (!sdf_doit[k])
+            continue;
+
+        if (testnum && !mr) {
+            printf("%30sop      op/s\n", " ");
+            testnum = 0;
+        }
+
+        if (k == R_GenerateKey) {
+            if (mr)
+                printf("+F15:%u:%s:%f:%f\n",
+                       k, sdf_choices[k].name, sdf_results[k],
+                       1.0 / sdf_results[k]);
+            else
+                printf("128 bits keygen (%s) %8.4fs %8.1f\n",
+                       sdf_choices[k].name, 1.0 / sdf_results[k],
+                       sdf_results[k]);
+        }
+    }
+
     ret = 0;
 
  end:
@@ -5825,6 +6022,14 @@ int speed_main(int argc, char **argv)
         }
         OPENSSL_free(loopargs[i].secret_a);
         OPENSSL_free(loopargs[i].secret_b);
+
+        sk_HANDLE_PAIR_pop_free(loopargs[i].key_handles, sdf_destroy_key);
+
+        if (loopargs[i].hSessionHandle != NULL)
+            TSAPI_SDF_CloseSession(loopargs[i].hSessionHandle);
+
+        if (loopargs[i].hDeviceHandle != NULL)
+            TSAPI_SDF_CloseDevice(loopargs[i].hDeviceHandle);
     }
     OPENSSL_free(evp_hmac_name);
     OPENSSL_free(evp_cmac_name);

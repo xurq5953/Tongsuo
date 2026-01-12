@@ -34,6 +34,7 @@
 #include <openssl/trace.h>
 #include <openssl/ssl.h> /* for OPENSSL_INIT_(NO_)?LOAD_SSL_STRINGS */
 #include "crypto/ctype.h"
+#include "internal/sdf.h"
 #include "sslerr.h"
 
 static int stopped = 0;
@@ -484,6 +485,9 @@ void OPENSSL_cleanup(void)
     OSSL_TRACE(INIT, "OPENSSL_cleanup: OSSL_CMP_log_close()\n");
     OSSL_CMP_log_close();
 #endif
+
+    OSSL_TRACE(INIT, "OPENSSL_cleanup: ossl_sdf_lib_cleanup()\n");
+    ossl_sdf_lib_cleanup();
 
     OSSL_TRACE(INIT, "OPENSSL_cleanup: ossl_trace_cleanup()\n");
     ossl_trace_cleanup();

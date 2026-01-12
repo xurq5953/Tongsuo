@@ -54,6 +54,34 @@ size_t ossl_rand_get_user_entropy(OSSL_LIB_CTX *ctx,
         return ossl_rand_get_entropy(ctx, pout, entropy, min_len, max_len);
 }
 
+size_t ossl_rand_get_entropy_from_source(unsigned int source,
+                                         unsigned char **pout, int entropy,
+                                         size_t min_len, size_t max_len)
+{
+    size_t ret = 0;
+    size_t entropy_available;
+    RAND_POOL *pool;
+
+    pool = ossl_rand_pool_new(entropy, 1, min_len, max_len);
+    if (pool == NULL) {
+        ERR_raise(ERR_LIB_RAND, ERR_R_MALLOC_FAILURE);
+        return 0;
+    }
+
+    pool->entropy_source = source;
+
+    /* Get entropy by polling system entropy sources. */
+    entropy_available = ossl_pool_acquire_entropy(pool);
+
+    if (entropy_available > 0) {
+        ret   = ossl_rand_pool_length(pool);
+        *pout = ossl_rand_pool_detach(pool);
+    }
+
+    ossl_rand_pool_free(pool);
+    return ret;
+}
+
 void ossl_rand_cleanup_entropy(ossl_unused OSSL_LIB_CTX *ctx,
                                unsigned char *buf, size_t len)
 {

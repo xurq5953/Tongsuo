@@ -29,7 +29,6 @@ use lib srctop_dir('Configurations');
 use lib bldtop_dir('.');
 
 my $no_fips = disabled('fips') || ($ENV{NO_FIPS} // 0);
-my $no_smtc = disabled('smtc') || disabled('smtc-debug');
 
 $ENV{TEST_CERTS_DIR} = srctop_dir("test", "certs");
 $ENV{TEST_RUNS_DIR} = catdir(result_dir(), "..", "test_dc_sign");
@@ -139,21 +138,8 @@ my %skip = (
   "29-dtls-sctp-label-bug.cnf" => disabled("sctp") || disabled("sock"),
   "30-tls13-sm.cnf" => disabled("sm2") || disabled("sm3") || disabled("sm4")
                         || disabled("tls1_3") || !$no_fips,
-  "31-ntls.cnf" => disabled("ntls") || disabled("sm2") || disabled("sm3")
-                    || disabled("sm4") || !$no_fips,
   "32-compressed-certificate.cnf" => disabled("comp") || disabled("tls1_3"),
-  "33-ntls-force-ntls.cnf" => disabled("ntls") || disabled("sm2")
-                                || disabled("sm3") || disabled("sm4")
-                                || !$no_fips || !disabled("smtc"),
   "38-delegated-credential.cnf" => disabled("delegated-credential"),
-  "39-ntls-sni-ticket.cnf" => disabled("ntls") || disabled("sm2")
-                                || disabled("sm3") || disabled("sm4")
-                                || !$no_fips,
-  "40-ntls_client_auth.cnf" => disabled("ntls") || disabled("sm2")
-                                || disabled("sm3") || disabled("sm4")
-                                || !$no_fips,
-  "41-ntls-alpn.cnf" => disabled("ntls") || disabled("sm2")
-                         || disabled("sm3") || disabled("sm4") || !$no_fips,
 );
 
 foreach my $conf (@conf_files) {
@@ -172,10 +158,6 @@ foreach my $conf (@conf_files) {
                   0,
                   defined($skip{$conf}) ? $skip{$conf} : $no_tls,
                   "fips") unless $no_fips;
-        test_conf($conf,
-                  0,
-                  defined($skip{$conf}) ? $skip{$conf} : $no_tls,
-                  "smtc") unless ($conf !~ /^[0-9]+-ntls/ || $no_smtc);
     };
 }
 
