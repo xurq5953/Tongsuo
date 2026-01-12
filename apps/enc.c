@@ -434,8 +434,7 @@ int enc_main(int argc, char **argv)
 
 #ifndef OPENSSL_NO_WBSM4
     if (rawkey != NULL) {
-        if (cipher != NULL && rawkeylen != EVP_CIPHER_key_length(cipher))
-        {
+        if (cipher != NULL && rawkeylen != EVP_CIPHER_key_length(cipher)) {
             BIO_printf(bio_err, "invalid raw key length: %d, need: %d\n",
                       rawkeylen, EVP_CIPHER_key_length(cipher));
             goto end;
@@ -744,8 +743,7 @@ int enc_main(int argc, char **argv)
 
 #ifndef OPENSSL_NO_WBSM4
         if (rawkey) {
-            if (!EVP_CipherInit_ex(ctx, NULL, NULL, rawkey, iv, enc))
-            {
+            if (!EVP_CipherInit_ex(ctx, NULL, NULL, rawkey, iv, enc)) {
                 BIO_printf(bio_err, "Error setting cipher %s\n",
                            EVP_CIPHER_get0_name(cipher));
                 ERR_print_errors(bio_err);
@@ -767,8 +765,7 @@ int enc_main(int argc, char **argv)
                 printf("\n");
             }
 #ifndef OPENSSL_NO_WBSM4
-            if (rawkey)
-            {
+            if (rawkey) {
                 printf("key=");
                 for (i = 0; i < EVP_CIPHER_get_key_length(cipher) && i < 32; i++)
                     printf("%02X", rawkey[i]);
