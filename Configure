@@ -522,6 +522,7 @@ my @disablables = (
     "slh-dsa",
     "sm2",
     "sm2-precomp",
+    "sm2_threshold",
     "sm3",
     "sm4",
     "zuc",
@@ -616,6 +617,7 @@ our %disabled = ( # "what"         => "comment"
                   "ntls"                => "default",
                   "rc5"                 => "default",
                   "sctp"                => "default",
+                  "sm2_threshold"       => "default",
                   "ssl3"                => "default",
                   "ssl3-method"         => "default",
                   "sslkeylog"           => "default",
@@ -665,6 +667,7 @@ my @disable_cascades = (
     "zstd"              => [ "zstd-dynamic" ],
     "deprecated"        => [ "tls-deprecated-ec" ],
     "ec"                => [ qw(ec2m ecdsa ecdh sm2 ecx tls-deprecated-ec) ],
+    "sm2"               => [ "sm2_threshold" ],
     "dgram"             => [ "dtls", "quic", "sctp" ],
     "sock"              => [ "dgram", "tfo" ],
     "dtls"              => [ @dtls ],
@@ -1216,6 +1219,12 @@ while (@argvcopy)
 # If enable-ec_elgamal has been set, we must set the api to 1.1.1 and disable deperated.
 if (!defined($disabled{'ec_elgamal'})) {
     die "ec_elgamal only supports api with 1.1.1\n"
+        if ($config{api} && $config{api} != $apitable->{"1.1.1"});
+    $config{api}=$apitable->{"1.1.1"};
+}
+
+if (!defined($disabled{'sm2_threshold'})) {
+    die "sm2_threshold only supports api with 1.1.1\n"
         if ($config{api} && $config{api} != $apitable->{"1.1.1"});
     $config{api}=$apitable->{"1.1.1"};
 }
