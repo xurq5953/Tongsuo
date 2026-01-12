@@ -31,7 +31,7 @@ use lib bldtop_dir('.');
 my $no_fips = disabled('fips') || ($ENV{NO_FIPS} // 0);
 
 $ENV{TEST_CERTS_DIR} = srctop_dir("test", "certs");
-$ENV{TEST_RUNS_DIR} = catdir(result_dir(), "..", "test_dc_sign");
+$ENV{TEST_RUNS_DIR} = catdir(result_dir(), "..", "test_ssl_new");
 
 my @conf_srcs = ();
 if (defined $ENV{SSL_TESTS}) {
@@ -103,6 +103,12 @@ my %conf_dependent_tests = (
   "40-ntls_client_auth.cnf" => disabled("ntls"),
   "41-ntls-alpn.cnf" => disabled("ntls"),
 );
+
+if (!disabled("delegated-credential")) {
+    run(perltest(["run_tests.pl", "test_dc_sign"],
+        interpreter_args => [ "-I", srctop_dir("util", "perl")],
+        stdout => devnull()));
+}
 
 # Add your test here if it should be skipped for some compile-time
 # configurations. Default is $no_tls but some tests have different skip
@@ -189,12 +195,6 @@ sub test_conf {
       # Test 3. Run the test.
       skip "No tests available; skipping tests", 1 if $skip;
       skip "Stale sources; skipping tests", 1 if !$run_test;
-
-      if ($conf eq "38-delegated-credential.cnf") {
-          run(perltest(["run_tests.pl", "test_dc_sign"],
-              interpreter_args => [ "-I", srctop_dir("util", "perl")],
-              stdout => devnull()));
-      }
 
       my $msg = "running CTLOG_FILE=test/ct/log_list.cnf". # $ENV{CTLOG_FILE}.
           " TEST_CERTS_DIR=test/certs". # $ENV{TEST_CERTS_DIR}.
