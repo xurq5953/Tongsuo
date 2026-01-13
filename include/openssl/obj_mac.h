@@ -1174,6 +1174,11 @@
 #define NID_zuc_128_eea3                1488
 #define OBJ_zuc_128_eea3                OBJ_sm_scheme,801L
 
+#define SN_zuc_128_eia3         "ZUC-128-EIA3"
+#define LN_zuc_128_eia3         "zuc-128-eia3"
+#define NID_zuc_128_eia3                1492
+#define OBJ_zuc_128_eia3                OBJ_sm_scheme,802L
+
 #define LN_hmacWithSM3          "hmacWithSM3"
 #define NID_hmacWithSM3         1281
 #define OBJ_hmacWithSM3         OBJ_sm3,3L,1L
@@ -1292,40 +1297,6 @@
 #define LN_ms_app_policies              "Microsoft Application Policies Extension"
 #define NID_ms_app_policies             1294
 #define OBJ_ms_app_policies             OBJ_ms_corp,21L,10L
-
-#define SN_idea_cbc             "IDEA-CBC"
-#define LN_idea_cbc             "idea-cbc"
-#define NID_idea_cbc            34
-#define OBJ_idea_cbc            1L,3L,6L,1L,4L,1L,188L,7L,1L,1L,2L
-
-#define SN_idea_ecb             "IDEA-ECB"
-#define LN_idea_ecb             "idea-ecb"
-#define NID_idea_ecb            36
-
-#define SN_idea_cfb64           "IDEA-CFB"
-#define LN_idea_cfb64           "idea-cfb"
-#define NID_idea_cfb64          35
-
-#define SN_idea_ofb64           "IDEA-OFB"
-#define LN_idea_ofb64           "idea-ofb"
-#define NID_idea_ofb64          46
-
-#define SN_bf_cbc               "BF-CBC"
-#define LN_bf_cbc               "bf-cbc"
-#define NID_bf_cbc              91
-#define OBJ_bf_cbc              1L,3L,6L,1L,4L,1L,3029L,1L,2L
-
-#define SN_bf_ecb               "BF-ECB"
-#define LN_bf_ecb               "bf-ecb"
-#define NID_bf_ecb              92
-
-#define SN_bf_cfb64             "BF-CFB"
-#define LN_bf_cfb64             "bf-cfb"
-#define NID_bf_cfb64            93
-
-#define SN_bf_ofb64             "BF-OFB"
-#define LN_bf_ofb64             "bf-ofb"
-#define NID_bf_ofb64            94
 
 #define SN_id_pkix              "PKIX"
 #define NID_id_pkix             127
@@ -2758,6 +2729,11 @@
 #define LN_associated_information               "X509v3 Associated Information"
 #define NID_associated_information              1319
 #define OBJ_associated_information              OBJ_id_ce,75L
+
+#define SN_delegation_usage             "delegationUsage"
+#define LN_delegation_usage             "X509v3 Delegation Usage"
+#define NID_delegation_usage            1493
+#define OBJ_delegation_usage            1L,3L,6L,1L,4L,1L,44363L,44L
 
 #define SN_anyExtendedKeyUsage          "anyExtendedKeyUsage"
 #define LN_anyExtendedKeyUsage          "Any Extended Key Usage"
@@ -4892,6 +4868,90 @@
 #define NID_oracle_jdk_trustedkeyusage          1283
 #define OBJ_oracle_jdk_trustedkeyusage          OBJ_oracle,746875L,1L,1L
 
+#define SN_wbsm4_xiaolai_ecb            "WBSM4-XIAOLAI-ECB"
+#define LN_wbsm4_xiaolai_ecb            "wbsm4-xiaolai-ecb"
+#define NID_wbsm4_xiaolai_ecb           1494
+
+#define SN_wbsm4_xiaolai_cbc            "WBSM4-XIAOLAI-CBC"
+#define LN_wbsm4_xiaolai_cbc            "wbsm4-xiaolai-cbc"
+#define NID_wbsm4_xiaolai_cbc           1495
+
+#define SN_wbsm4_xiaolai_ofb128         "WBSM4-XIAOLAI-OFB"
+#define LN_wbsm4_xiaolai_ofb128         "wbsm4-xiaolai-ofb"
+#define NID_wbsm4_xiaolai_ofb128                1496
+
+#define SN_wbsm4_xiaolai_cfb128         "WBSM4-XIAOLAI-CFB"
+#define LN_wbsm4_xiaolai_cfb128         "wbsm4-xiaolai-cfb"
+#define NID_wbsm4_xiaolai_cfb128                1497
+
+#define SN_wbsm4_xiaolai_ctr            "WBSM4-XIAOLAI-CTR"
+#define LN_wbsm4_xiaolai_ctr            "wbsm4-xiaolai-ctr"
+#define NID_wbsm4_xiaolai_ctr           1498
+
+#define SN_wbsm4_xiaolai_gcm            "WBSM4-XIAOLAI-GCM"
+#define LN_wbsm4_xiaolai_gcm            "wbsm4-xiaolai-gcm"
+#define NID_wbsm4_xiaolai_gcm           1499
+
+#define SN_wbsm4_xiaolai_ccm            "WBSM4-XIAOLAI-CCM"
+#define LN_wbsm4_xiaolai_ccm            "wbsm4-xiaolai-ccm"
+#define NID_wbsm4_xiaolai_ccm           1500
+
+#define SN_wbsm4_baiwu_ecb              "WBSM4-BAIWU-ECB"
+#define LN_wbsm4_baiwu_ecb              "wbsm4-baiwu-ecb"
+#define NID_wbsm4_baiwu_ecb             1501
+
+#define SN_wbsm4_baiwu_cbc              "WBSM4-BAIWU-CBC"
+#define LN_wbsm4_baiwu_cbc              "wbsm4-baiwu-cbc"
+#define NID_wbsm4_baiwu_cbc             1502
+
+#define SN_wbsm4_baiwu_ofb128           "WBSM4-BAIWU-OFB"
+#define LN_wbsm4_baiwu_ofb128           "wbsm4-baiwu-ofb"
+#define NID_wbsm4_baiwu_ofb128          1503
+
+#define SN_wbsm4_baiwu_cfb128           "WBSM4-BAIWU-CFB"
+#define LN_wbsm4_baiwu_cfb128           "wbsm4-baiwu-cfb"
+#define NID_wbsm4_baiwu_cfb128          1504
+
+#define SN_wbsm4_baiwu_ctr              "WBSM4-BAIWU-CTR"
+#define LN_wbsm4_baiwu_ctr              "wbsm4-baiwu-ctr"
+#define NID_wbsm4_baiwu_ctr             1505
+
+#define SN_wbsm4_baiwu_gcm              "WBSM4-BAIWU-GCM"
+#define LN_wbsm4_baiwu_gcm              "wbsm4-baiwu-gcm"
+#define NID_wbsm4_baiwu_gcm             1506
+
+#define SN_wbsm4_baiwu_ccm              "WBSM4-BAIWU-CCM"
+#define LN_wbsm4_baiwu_ccm              "wbsm4-baiwu-ccm"
+#define NID_wbsm4_baiwu_ccm             1507
+
+#define SN_wbsm4_wsise_ecb              "WBSM4-WSISE-ECB"
+#define LN_wbsm4_wsise_ecb              "wbsm4-wsise-ecb"
+#define NID_wbsm4_wsise_ecb             1508
+
+#define SN_wbsm4_wsise_cbc              "WBSM4-WSISE-CBC"
+#define LN_wbsm4_wsise_cbc              "wbsm4-wsise-cbc"
+#define NID_wbsm4_wsise_cbc             1509
+
+#define SN_wbsm4_wsise_ofb128           "WBSM4-WSISE-OFB"
+#define LN_wbsm4_wsise_ofb128           "wbsm4-wsise-ofb"
+#define NID_wbsm4_wsise_ofb128          1510
+
+#define SN_wbsm4_wsise_cfb128           "WBSM4-WSISE-CFB"
+#define LN_wbsm4_wsise_cfb128           "wbsm4-wsise-cfb"
+#define NID_wbsm4_wsise_cfb128          1511
+
+#define SN_wbsm4_wsise_ctr              "WBSM4-WSISE-CTR"
+#define LN_wbsm4_wsise_ctr              "wbsm4-wsise-ctr"
+#define NID_wbsm4_wsise_ctr             1512
+
+#define SN_wbsm4_wsise_gcm              "WBSM4-WSISE-GCM"
+#define LN_wbsm4_wsise_gcm              "wbsm4-wsise-gcm"
+#define NID_wbsm4_wsise_gcm             1513
+
+#define SN_wbsm4_wsise_ccm              "WBSM4-WSISE-CCM"
+#define LN_wbsm4_wsise_ccm              "wbsm4-wsise-ccm"
+#define NID_wbsm4_wsise_ccm             1514
+
 #define SN_brotli               "brotli"
 #define LN_brotli               "Brotli compression"
 #define NID_brotli              1288
@@ -5567,49 +5627,3 @@
 #define OBJ_ML_KEM_1024         OBJ_nistKems,3L
 
 #endif /* OPENSSL_OBJ_MAC_H */
-
-#ifndef OPENSSL_NO_DEPRECATED_3_0
-
-#define SN_id_tc26_cipher_gostr3412_2015_magma_ctracpkm                 SN_magma_ctr_acpkm
-#define NID_id_tc26_cipher_gostr3412_2015_magma_ctracpkm                NID_magma_ctr_acpkm
-#define OBJ_id_tc26_cipher_gostr3412_2015_magma_ctracpkm                OBJ_magma_ctr_acpkm
-
-#define SN_id_tc26_cipher_gostr3412_2015_magma_ctracpkm_omac            SN_magma_ctr_acpkm_omac
-#define NID_id_tc26_cipher_gostr3412_2015_magma_ctracpkm_omac           NID_magma_ctr_acpkm_omac
-#define OBJ_id_tc26_cipher_gostr3412_2015_magma_ctracpkm_omac           OBJ_magma_ctr_acpkm_omac
-
-#define SN_id_tc26_cipher_gostr3412_2015_kuznyechik_ctracpkm            SN_kuznyechik_ctr_acpkm
-#define NID_id_tc26_cipher_gostr3412_2015_kuznyechik_ctracpkm           NID_kuznyechik_ctr_acpkm
-#define OBJ_id_tc26_cipher_gostr3412_2015_kuznyechik_ctracpkm           OBJ_kuznyechik_ctr_acpkm
-
-#define SN_id_tc26_cipher_gostr3412_2015_kuznyechik_ctracpkm_omac               SN_kuznyechik_ctr_acpkm_omac
-#define NID_id_tc26_cipher_gostr3412_2015_kuznyechik_ctracpkm_omac              NID_kuznyechik_ctr_acpkm_omac
-#define OBJ_id_tc26_cipher_gostr3412_2015_kuznyechik_ctracpkm_omac              OBJ_kuznyechik_ctr_acpkm_omac
-
-#define SN_id_tc26_wrap_gostr3412_2015_magma_kexp15             SN_magma_kexp15
-#define NID_id_tc26_wrap_gostr3412_2015_magma_kexp15            NID_magma_kexp15
-#define OBJ_id_tc26_wrap_gostr3412_2015_magma_kexp15            OBJ_magma_kexp15
-
-#define SN_id_tc26_wrap_gostr3412_2015_kuznyechik_kexp15                SN_kuznyechik_kexp15
-#define NID_id_tc26_wrap_gostr3412_2015_kuznyechik_kexp15               NID_kuznyechik_kexp15
-#define OBJ_id_tc26_wrap_gostr3412_2015_kuznyechik_kexp15               OBJ_kuznyechik_kexp15
-
-#define SN_grasshopper_ecb              SN_kuznyechik_ecb
-#define NID_grasshopper_ecb             NID_kuznyechik_ecb
-
-#define SN_grasshopper_ctr              SN_kuznyechik_ctr
-#define NID_grasshopper_ctr             NID_kuznyechik_ctr
-
-#define SN_grasshopper_ofb              SN_kuznyechik_ofb
-#define NID_grasshopper_ofb             NID_kuznyechik_ofb
-
-#define SN_grasshopper_cbc              SN_kuznyechik_cbc
-#define NID_grasshopper_cbc             NID_kuznyechik_cbc
-
-#define SN_grasshopper_cfb              SN_kuznyechik_cfb
-#define NID_grasshopper_cfb             NID_kuznyechik_cfb
-
-#define SN_grasshopper_mac              SN_kuznyechik_mac
-#define NID_grasshopper_mac             NID_kuznyechik_mac
-
-#endif  /* OPENSSL_NO_DEPRECATED_3_0 */

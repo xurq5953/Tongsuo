@@ -963,7 +963,7 @@ uninstall_runtime_libs:
 
 # It's important that generate_buildinfo comes after ordinals, as ordinals
 # is sensitive to build.info changes.
-update: generate errors ordinals generate_buildinfo ## Update errors, ordinals and build info
+update: generate errors ordinals ## Update errors, ordinals and build info
 
 .PHONY: generate generate_apps generate_crypto_bn generate_crypto_objects \
           generate_crypto_conf generate_crypto_asn1 generate_fuzz_oids
