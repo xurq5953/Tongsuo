@@ -8419,10 +8419,14 @@ int SSL_get_alert_level(SSL *ssl, int *level, int *desc)
 }
 
 #ifndef OPENSSL_NO_SKIP_SCSV
-void SSL_set_skip_scsv(SSL_CONNECTION *s, int skip_scsv)
+void SSL_set_skip_scsv(SSL *s, int skip_scsv)
 {
-    if (s)
-        s->skip_scsv = skip_scsv;
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+
+    if (sc == NULL)
+        return ;
+    
+    sc->skip_scsv = skip_scsv;
 }
 #endif
 
