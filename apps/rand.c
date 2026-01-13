@@ -226,7 +226,7 @@ int rand_main(int argc, char **argv)
             p = ent_buf;
             chunk = ent_len;
         } else {
-            p = buf
+            p = buf;
         }
         
         if (format != FORMAT_TEXT) {

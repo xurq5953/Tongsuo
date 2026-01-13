@@ -1729,7 +1729,7 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
     SSL *ussl = SSL_CONNECTION_GET_USER_SSL(s);
 
 #ifndef OPENSSL_NO_SESSION_LOOKUP
-    if (SSL_want_sess_lookup(s))
+    if (SSL_want_sess_lookup(ssl))
         goto query_session_reentry;
 #endif
 
@@ -1904,6 +1904,10 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
 
             if (!tls1_set_groups(&s->ext.supportedgroups,
                                  &s->ext.supportedgroups_len,
+                                 &s->ext.keyshares,
+                                 &s->ext.keyshares_len,
+                                 &s->ext.tuples,
+                                 &s->ext.tuples_len,
                                  &sm2_group, 1)) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
                 goto err;
@@ -2054,7 +2058,7 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
      * For the key_share extension, a KeyShareEntry for the "curveSM2"
      * group MUST be included.
      */
-    if (SSL_IS_TLS13(s) && s->enable_sm_tls13_strict == 1) {
+    if (SSL_CONNECTION_IS_TLS13(s) && s->enable_sm_tls13_strict == 1) {
         const SSL_CIPHER *cipher = s->s3.tmp.new_cipher;
 
         if (cipher->id == TLS1_3_CK_SM4_GCM_SM3

@@ -1858,6 +1858,7 @@ static int EC_ELGAMAL_loop(void *args)
 
     return count;
 }
+#endif
 
 static int KEM_keygen_loop(void *args)
 {
@@ -1998,6 +1999,43 @@ static int check_block_size(EVP_CIPHER_CTX *ctx, int length)
         return 0;
     }
     return 1;
+}
+
+static void sdf_destroy_key(HANDLE_PAIR *pair)
+{
+    (void)TSAPI_SDF_DestroyKey(pair->hSessionHandle, pair->hKeyHandle);
+}
+
+static int SDF_GenerateKey_loop(void *args)
+{
+    HANDLE_PAIR *pair = NULL;
+    loopargs_t *tempargs = *(loopargs_t **)args;
+    void *hSessionHandle = tempargs->hSessionHandle;
+    void *pkeyHandle = NULL;
+    int ret, count;
+
+    for (count = 0; COND(1); count++) {
+        ret = TSAPI_SDF_GenerateKey(hSessionHandle, OSSL_SDFE_SYM_KEY_TYPE_SM4,
+                                    1, 16, &pkeyHandle);
+        if (ret != OSSL_SDR_OK) {
+            BIO_printf(bio_err, "SDF_GenerateKey failed with %d\n", ret);
+            count = -1;
+            break;
+        }
+
+        pair = OPENSSL_zalloc(sizeof(HANDLE_PAIR));
+        if (pair == NULL) {
+            BIO_printf(bio_err, "Memory allocation failed\n");
+            count = -1;
+            break;
+        }
+        pair->hSessionHandle = hSessionHandle;
+        pair->hKeyHandle = pkeyHandle;
+
+        sk_HANDLE_PAIR_push(tempargs->key_handles, pair);
+    }
+
+    return count;
 }
 
 static int run_benchmark(int async_jobs,
@@ -2342,6 +2380,7 @@ int speed_main(int argc, char **argv)
     int async_init = 0, multiblock = 0, pr_header = 0;
     uint8_t doit[ALGOR_NUM] = { 0 };
     int ret = 1, misalign = 0, lengths_single = 0, keygen = 0;
+    int sdf = 0;
     STACK_OF(EVP_KEM) *kem_stack = NULL;
     STACK_OF(EVP_SIGNATURE) *sig_stack = NULL;
     long count = 0;
@@ -3357,8 +3396,7 @@ int speed_main(int argc, char **argv)
 #ifndef OPENSSL_NO_SM3
     if (doit[D_SM3]) {
         for (testnum = 0; testnum < size_num; testnum++) {
-            print_message(names[D_SM3], c[D_SM3][testnum],
-                          lengths[testnum], seconds.sym);
+            print_message(names[D_SM3], lengths[testnum], seconds.sym);
             Time_F(START);
             count = run_benchmark(async_jobs, EVP_Digest_SM3_loop, loopargs);
             d = Time_F(STOP);
@@ -3514,8 +3552,7 @@ int speed_main(int argc, char **argv)
             }
 
             for (testnum = 0; st && testnum < size_num; testnum++) {
-                print_message(names[algindex], c[algindex][testnum],
-                            lengths[testnum], seconds.sym);
+                print_message(names[algindex], lengths[testnum], seconds.sym);
                 Time_F(START);
                 count =
                     run_benchmark(async_jobs, EVP_Cipher_loop, loopargs);
@@ -3651,8 +3688,7 @@ int speed_main(int argc, char **argv)
         }
 
         for (testnum = 0; st && testnum < size_num; testnum++) {
-            print_message(names[D_EEA3_128_ZUC], c[D_EEA3_128_ZUC][testnum],
-                          lengths[testnum], seconds.sym);
+            print_message(names[D_EEA3_128_ZUC], lengths[testnum], seconds.sym);
             Time_F(START);
             count =
                 run_benchmark(async_jobs, EVP_Cipher_loop, loopargs);
@@ -3690,8 +3726,7 @@ int speed_main(int argc, char **argv)
         }
 
         for (testnum = 0; testnum < size_num; testnum++) {
-            print_message(names[D_EIA3_128_ZUC], c[D_EIA3_128_ZUC][testnum], lengths[testnum],
-                          seconds.sym);
+            print_message(names[D_EIA3_128_ZUC], lengths[testnum], seconds.sym);
             Time_F(START);
             count = run_benchmark(async_jobs, ZUC_128_EIA3_loop, loopargs);
             d = Time_F(STOP);
@@ -4630,17 +4665,14 @@ int speed_main(int argc, char **argv)
 
         for (testnum = 0; st && testnum < size_num; testnum++) {
             algindex = D_SM2_ENCRYPT;
-            print_message(names[D_SM2_ENCRYPT], c[D_SM2_ENCRYPT][testnum],
-                          lengths[testnum], seconds.sym);
+            print_message(names[D_SM2_ENCRYPT], lengths[testnum], seconds.sym);
             Time_F(START);
             count = run_benchmark(async_jobs, SM2_encrypt_loop, loopargs);
             d = Time_F(STOP);
             print_result(D_SM2_ENCRYPT, testnum, count, d);
 
             algindex = D_SM2_DECRYPT;
-            print_message(names[D_SM2_DECRYPT],
-                          c[D_SM2_DECRYPT][testnum],
-                          lengths[testnum], seconds.sym);
+            print_message(names[D_SM2_DECRYPT], lengths[testnum], seconds.sym);
             Time_F(START);
             count =
                 run_benchmark(async_jobs, SM2_decrypt_loop, loopargs);
@@ -5672,7 +5704,7 @@ int speed_main(int argc, char **argv)
             continue;
 
         if (testnum == R_SM2) {
-            pkey_print_message("keygen", "sm2", 0, 128, seconds.keygen);
+            pkey_print_message("keygen", "sm2", 128, seconds.keygen);
             Time_F(START);
 #ifndef OPENSSL_NO_SM2
             count = run_benchmark(async_jobs, SM2_keygen_loop, loopargs);
@@ -5720,7 +5752,7 @@ int speed_main(int argc, char **argv)
         } else {
 
             if (testnum == R_GenerateKey) {
-                pkey_print_message("GenerateKey", "sm4", 0, 128,
+                pkey_print_message("GenerateKey", "sm4", 128,
                                    seconds.keygen);
                 Time_F(START);
                 count = run_benchmark(async_jobs, SDF_GenerateKey_loop, loopargs);

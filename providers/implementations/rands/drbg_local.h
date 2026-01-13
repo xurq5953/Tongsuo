@@ -61,6 +61,7 @@
 # else
 #  define DRBG_DEFAULT_PERS_STRING      "OpenSSL NIST SP 800-90A DRBG"
 # endif
+#endif
 
 typedef struct prov_drbg_st PROV_DRBG;
 

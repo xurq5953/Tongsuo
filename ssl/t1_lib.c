@@ -1992,9 +1992,11 @@ static const uint16_t suiteb_sigalgs[] = {
 
 static const SIGALG_LOOKUP sigalg_lookup_tbl[] = {
 #if (!defined OPENSSL_NO_SM2) && (!defined OPENSSL_NO_SM3)
-    {"sm2sig_sm3", TLSEXT_SIGALG_sm2sig_sm3,
+    {TLSEXT_SIGALG_sm2sig_sm3_name,
+     "sm2sig_sm3", TLSEXT_SIGALG_sm2sig_sm3,
      NID_sm3, SSL_MD_SM3_IDX, EVP_PKEY_SM2, SSL_PKEY_SM2,
-     NID_SM2_with_SM3, NID_sm2, 1},
+     NID_SM2_with_SM3, NID_sm2, 1, 0,
+     TLS1_2_VERSION, 0, DTLS1_2_VERSION, 0},
 #endif
     {TLSEXT_SIGALG_ecdsa_secp256r1_sha256_name,
      "ECDSA+SHA256", TLSEXT_SIGALG_ecdsa_secp256r1_sha256,
@@ -3191,8 +3193,8 @@ SSL_TICKET_STATUS tls_decrypt_ticket(SSL_CONNECTION *s,
                 goto end;
             }
 
-            aes256cbc = EVP_CIPHER_fetch(s->ctx->libctx, "AES-256-CBC",
-                                        s->ctx->propq);
+            aes256cbc = EVP_CIPHER_fetch(sctx->libctx, "AES-256-CBC",
+                                        sctx->propq);
             if (aes256cbc == NULL
                 || ssl_hmac_init(hctx, tctx->ext.secure->tick_hmac_key,
                                 sizeof(tctx->ext.secure->tick_hmac_key),
@@ -4618,7 +4620,7 @@ static const SIGALG_LOOKUP *find_sig_alg(SSL_CONNECTION *s, X509 *x,
          * the only valid signature algorithm present in
          * "signature_algorithms" extension MUST be "sm2sig_sm3".
          */
-        if (SSL_IS_TLS13(s) && s->enable_sm_tls13_strict == 1 && s->server) {
+        if (SSL_CONNECTION_IS_TLS13(s) && s->enable_sm_tls13_strict == 1 && s->server) {
             const SSL_CIPHER *cipher = s->s3.tmp.new_cipher;
 
             if (cipher != NULL &&
@@ -5177,7 +5179,7 @@ const SIGALG_LOOKUP *ssl_sigalg_lookup_by_pkey_and_hash(EVP_PKEY *pkey,
     size_t i, sig_idx;
     const SIGALG_LOOKUP *lu = NULL;
 
-    if (ssl_cert_lookup_by_pkey(pkey, &sig_idx) == NULL) {
+    if (ssl_cert_lookup_by_pkey(pkey, &sig_idx, NULL) == NULL) {
         ERR_raise(ERR_LIB_SSL, SSL_R_UNKNOWN_CERTIFICATE_TYPE);
         return 0;
     }
@@ -5227,7 +5229,7 @@ const SIGALG_LOOKUP *ssl_sigalg_lookup(uint16_t sigalg)
     for (i = 0, lu = sigalg_lookup_tbl; i < OSSL_NELEM(sigalg_lookup_tbl);
          i++, lu++) {
         if (lu->sigalg == sigalg) {
-            if (!lu->enabled)
+            if (!lu->available)
                 return NULL;
             return lu;
         }

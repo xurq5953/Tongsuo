@@ -257,7 +257,7 @@ EXT_RETURN tls_construct_ctos_supported_groups(SSL_CONNECTION *s, WPACKET *pkt,
      * KeyShareEntry for the "curveSM2" group because only one KeyShareEntry is
      * sent now.
      */
-    if (!SSL_IS_DTLS(s) && max_version >= TLS1_3_VERSION
+    if (!SSL_CONNECTION_IS_DTLS(s) && max_version >= TLS1_3_VERSION
         && s->enable_sm_tls13_strict == 1) {
         int sm2_idx = -1;
 
@@ -285,6 +285,10 @@ EXT_RETURN tls_construct_ctos_supported_groups(SSL_CONNECTION *s, WPACKET *pkt,
 
             if (!tls1_set_groups(&s->ext.supportedgroups,
                                  &s->ext.supportedgroups_len,
+                                 &s->ext.keyshares,
+                                 &s->ext.keyshares_len,
+                                 &s->ext.tuples,
+                                 &s->ext.tuples_len,
                                  groups, num_groups)) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
                 OPENSSL_free(groups);

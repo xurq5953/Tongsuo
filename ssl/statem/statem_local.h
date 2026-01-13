@@ -411,6 +411,8 @@ EXT_RETURN tls_construct_stoc_psk(SSL_CONNECTION *s, WPACKET *pkt,
                                   unsigned int context,
                                   X509 *x, size_t chainidx);
 
+#define TLSEXT_TYPE_cryptopro_bug      0xfde8
+
 /* Client Extension processing */
 EXT_RETURN tls_construct_ctos_renegotiate(SSL_CONNECTION *s, WPACKET *pkt,
                                           unsigned int context,
@@ -593,4 +595,4 @@ EXT_RETURN tls_construct_delegated_credential_raw(SSL *s, WPACKET *pkt, unsigned
                                                   X509 *x, size_t chainidx);
 EXT_RETURN tls_construct_delegated_credential_request(SSL *s, WPACKET *pkt, unsigned int context,
                                                       X509 *x, size_t chainidx);
-+#endif
+#endif

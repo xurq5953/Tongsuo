@@ -1371,6 +1371,10 @@ const SSL_CERT_LOOKUP *ssl_cert_lookup_by_pkey(const EVP_PKEY *pk, size_t *pidx,
             return tmp_lu;
         }
     }
+
+    if(ctx == NULL)
+        return NULL;
+
     /* check provider-loaded pk types */
     for (i = 0; i < ctx->sigalg_list_len; i++) {
         SSL_CERT_LOOKUP *tmp_lu = &(ctx->ssl_cert_info[i]);

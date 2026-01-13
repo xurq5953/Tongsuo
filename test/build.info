@@ -576,7 +576,7 @@ IF[{- !$disabled{tests} -}]
 
   SOURCE[babasslapitest]=babasslapitest.c helpers/ssltestlib.c
   INCLUDE[babasslapitest]=../include ../apps/include ..
-  DEPEND[babasslapitest]=../libcrypto ../libssl libtestutil.a
+  DEPEND[babasslapitest]=../libcrypto.a ../libssl.a libtestutil.a
 
   SOURCE[defltfips_test]=defltfips_test.c
   INCLUDE[defltfips_test]=../include  ../apps/include

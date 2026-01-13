@@ -243,6 +243,7 @@ DEFINE_COMPARISONS(double, double, "%g", double)
 DEFINE_COMPARISON(void *, ptr, eq, ==, "%p", void *)
 DEFINE_COMPARISON(void *, ptr, ne, !=, "%p", void *)
 
+/*
 static int double_eq(double a, double b)
 {
     double precision = 0.000001;
@@ -295,7 +296,7 @@ int test_double_ge(const char *file, int line, const char *s1, const char *s2,
                       "[%g] compared to [%g]", a, b);
     return 0;
 }
-
+*/
 int test_ptr_null(const char *file, int line, const char *s, const void *p)
 {
     if (p == NULL)

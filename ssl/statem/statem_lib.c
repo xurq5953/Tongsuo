@@ -350,8 +350,8 @@ CON_FUNC_RETURN tls_construct_cert_verify(SSL_CONNECTION *s, WPACKET *pkt)
 #ifndef OPENSSL_NO_SM2
     if (EVP_PKEY_is_sm2(pkey)) {
         if (pkey != NULL) {
-            pctx = EVP_PKEY_CTX_new_from_pkey(s->ctx->libctx, pkey,
-                                              s->ctx->propq);
+            pctx = EVP_PKEY_CTX_new_from_pkey(sctx->libctx, pkey,
+                                              sctx->propq);
             if (pctx == NULL) {
                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
                 goto err;

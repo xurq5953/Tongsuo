@@ -1257,7 +1257,7 @@ int ssl_set_new_record_layer(SSL_CONNECTION *s, int version,
     BIO *thisbio;
     SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(s);
     const OSSL_RECORD_METHOD *meth;
-    int use_etm, stream_mac = 0, tlstree = 0;
+    int use_etm;
     unsigned int maxfrag = (direction == OSSL_RECORD_DIRECTION_WRITE)
                            ? ssl_get_max_send_fragment(s)
                            : SSL3_RT_MAX_PLAIN_LENGTH;
@@ -1303,34 +1303,9 @@ int ssl_set_new_record_layer(SSL_CONNECTION *s, int version,
     }
     *opts = OSSL_PARAM_construct_end();
 
-    /* Parameters that *must* be supported by a record layer if passed */
-    if (direction == OSSL_RECORD_DIRECTION_READ) {
-        use_etm = SSL_READ_ETM(s) ? 1 : 0;
-        if ((s->mac_flags & SSL_MAC_FLAG_READ_MAC_STREAM) != 0)
-            stream_mac = 1;
-
-        if ((s->mac_flags & SSL_MAC_FLAG_READ_MAC_TLSTREE) != 0)
-            tlstree = 1;
-    } else {
-        use_etm = SSL_WRITE_ETM(s) ? 1 : 0;
-        if ((s->mac_flags & SSL_MAC_FLAG_WRITE_MAC_STREAM) != 0)
-            stream_mac = 1;
-
-        if ((s->mac_flags & SSL_MAC_FLAG_WRITE_MAC_TLSTREE) != 0)
-            tlstree = 1;
-    }
-
     if (use_etm)
         *set++ = OSSL_PARAM_construct_int(OSSL_LIBSSL_RECORD_LAYER_PARAM_USE_ETM,
                                           &use_etm);
-
-    if (stream_mac)
-        *set++ = OSSL_PARAM_construct_int(OSSL_LIBSSL_RECORD_LAYER_PARAM_STREAM_MAC,
-                                          &stream_mac);
-
-    if (tlstree)
-        *set++ = OSSL_PARAM_construct_int(OSSL_LIBSSL_RECORD_LAYER_PARAM_TLSTREE,
-                                          &tlstree);
 
     /*
      * We only need to do this for the read side. The write side should already

@@ -23,7 +23,7 @@
 #  include <openssl/md5.h> /* uses MD5_DIGEST_LENGTH */
 # endif
 # ifndef OPENSSL_NO_SM3
-#  include "internal/sm3.h" /* uses SM3_DIGEST_LENGTH */
+#  include <openssl/sm3.h> /* uses SM3_DIGEST_LENGTH */
 # endif
 #endif
 #include <openssl/sha.h> /* uses SHA???_DIGEST_LENGTH */

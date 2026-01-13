@@ -4206,6 +4206,7 @@ EVP_PKEY *ssl_generate_pkey(SSL_CONNECTION *s, EVP_PKEY *pm)
 EVP_PKEY *ssl_generate_pkey_group(SSL_CONNECTION *s, uint16_t id)
 {
     SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(s);
+    SSL *ssl = SSL_CONNECTION_GET_SSL(s);
     const TLS_GROUP_INFO *ginf = tls1_group_id_lookup(sctx, id);
     EVP_PKEY_CTX *pctx = NULL;
     EVP_PKEY *pkey = NULL;
@@ -4215,7 +4216,7 @@ EVP_PKEY *ssl_generate_pkey_group(SSL_CONNECTION *s, uint16_t id)
         goto err;
     }
 
-    if (!SSL_is_server(s) && id == TLSEXT_curve_SM2)
+    if (!SSL_is_server(ssl) && id == TLSEXT_curve_SM2)
         pctx = EVP_PKEY_CTX_new_from_name(sctx->libctx, "EC",
                                           sctx->propq);
     else

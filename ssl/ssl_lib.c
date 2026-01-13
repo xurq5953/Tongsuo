@@ -4665,7 +4665,7 @@ SSL_cert_cb_fn BABASSL_get_cert_cb(SSL *s)
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
-        return;
+        return NULL;
 
     return ssl_cert_get_cert_cb(sc->cert);
 }
@@ -4675,7 +4675,7 @@ void *BABASSL_get_cert_cb_arg(SSL *s)
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
-        return;
+        return NULL;
 
     return ssl_cert_get_cert_cb_arg(sc->cert);
 }
@@ -5410,7 +5410,12 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
     if (ret == NULL)
         goto err;
 
-    ret->references = 1;
+    
+    if (!CRYPTO_NEW_REF(&ret->references, 1)) {
+        OPENSSL_free(ret);
+        return NULL;
+    }
+
     ret->lock = CRYPTO_THREAD_lock_new();
     if (ret->lock == NULL) {
         ERR_raise(ERR_LIB_SSL, ERR_R_MALLOC_FAILURE);
@@ -5450,11 +5455,12 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
     ret->session_timeout = ctx->session_timeout;
     ret->max_cert_list = ctx->max_cert_list;
     ret->verify_mode = ctx->verify_mode;
+    ret->sigalg_list_len = ctx->sigalg_list_len;
 
     if (ctx->cert)
         ret->cert = ssl_cert_dup(ctx->cert);
     else
-        ret->cert = ssl_cert_new();
+        ret->cert = ssl_cert_new(SSL_PKEY_NUM + ctx->sigalg_list_len);
 
     if(ret->cert == NULL)
         goto err;
@@ -5489,12 +5495,21 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
     /* initialize cipher/digest methods table */
     if (!ssl_load_ciphers(ret))
         goto err2;
-    /* initialise sig algs */
-    if (!ssl_setup_sig_algs(ret))
-        goto err2;
 
     if (!ssl_load_groups(ret))
         goto err2;
+
+    /* load provider sigalgs */
+    if (!ssl_load_sigalgs(ret)) {
+        ERR_raise(ERR_LIB_SSL, ERR_R_SSL_LIB);
+        goto err2;
+    }
+
+    /* initialise sig algs */
+    if (!ssl_setup_sigalgs(ret)) {
+        ERR_raise(ERR_LIB_SSL, ERR_R_SSL_LIB);
+        goto err2;
+    }
 
     /* dup the cipher_list and cipher_list_by_id stacks */
     if (ctx->cipher_list) {
@@ -5751,10 +5766,11 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
 #endif
 
 #ifndef OPENSSL_NO_QUIC
-    ret->quic_method = ctx->quic_method;
+    /* ret->quic_method = ctx->quic_method; */
 #endif
 
 #ifndef OPENSSL_NO_CERT_COMPRESSION
+    /*
     if (ctx->cert_comp_algs) {
         ret->cert_comp_algs = sk_CERT_COMP_deep_copy(ctx->cert_comp_algs,
                                                      CERT_COMP_copy,
@@ -5762,6 +5778,7 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
         if (ret->cert_comp_algs == NULL)
             goto err;
     }
+    */
 #endif
 
     return (ret);
@@ -8252,7 +8269,7 @@ int SSL_CTX_set0_tmp_dh_pkey(SSL_CTX *ctx, EVP_PKEY *dhpkey)
 int BABASSL_SESSION_get_ref(SSL_SESSION *sess)
 {
     if(sess != NULL)
-        return sess->references;
+        return sess->references.val;
     else
         return 0;
 }
@@ -8349,26 +8366,33 @@ void BABASSL_get0_alpn_proposed(const SSL *ssl, const unsigned char **data,
     if (ssl == NULL || data == NULL || len == NULL)
         return;
 
-    *data = ssl->s3.alpn_proposed;
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+
+    if(sc == NULL)
+        return;
+
+    *data = sc->s3.alpn_proposed;
 
     if (*data == NULL)
         *len = 0;
     else
-        *len = ssl->s3.alpn_proposed_len;
+        *len = sc->s3.alpn_proposed_len;
 }
 
 /* TODO: condition opt */
 int BABASSL_get_master_key(SSL *s, unsigned char **master_key,
                            int *master_key_len)
 {
-    if (s == NULL || s->session == NULL || s->statem.in_handshake == 1)
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+
+    if (sc == NULL || sc->session == NULL || sc->statem.in_handshake == 1)
         return 0;
 
     if (master_key != NULL)
-        *master_key = s->session->master_key;
+        *master_key = sc->session->master_key;
 
     if (master_key_len != NULL)
-        *master_key_len = s->session->master_key_length;
+        *master_key_len = sc->session->master_key_length;
 
     return 1;
 }
@@ -8380,7 +8404,13 @@ void BABASSL_CTX_certs_clear(SSL_CTX *ctx)
 
 int BABASSL_check_tlsext_status(SSL *s)
 {
-    if (s->ext.status_type != -1 && s->ctx && s->ctx->ext.status_cb)
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(sc);
+
+    if(sc == NULL)
+        return 0;
+
+    if (sc->ext.status_type != -1 && sctx && sctx->ext.status_cb)
         return 1;
     else
         return 0;
@@ -8403,7 +8433,7 @@ int SSL_get_alert_level(SSL *ssl, int *level, int *desc)
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
-        return NULL;
+        return 0;
 
     if (level != NULL)
         *level = sc->s3.alert_level;
@@ -8421,7 +8451,7 @@ int SSL_get_alert_level(SSL *ssl, int *level, int *desc)
 #ifndef OPENSSL_NO_SKIP_SCSV
 void SSL_set_skip_scsv(SSL *s, int skip_scsv)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return ;
@@ -8438,7 +8468,7 @@ int SSL_set_cipher_list2(SSL *s, STACK_OF(SSL_CIPHER) *cipher_list)
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
-        return NULL;
+        return 0;
 
     if (cipher_list != NULL) {
         sk = sk_SSL_CIPHER_dup(cipher_list);
@@ -8461,7 +8491,7 @@ int SSL_set_cipher_list_by_id(SSL *s, STACK_OF(SSL_CIPHER) *cipher_list_by_id)
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
-        return NULL;
+        return 0;
 
     if (cipher_list_by_id != NULL) {
         sk = sk_SSL_CIPHER_dup(cipher_list_by_id);
@@ -8552,6 +8582,7 @@ int SSL_CTX_set_cipher_list_by_id(SSL_CTX *ctx,
 
     return 1;
 }
+#endif
 
 #ifndef OPENSSL_NO_VERIFY_SNI
 void SSL_CTX_set_verify_cert_with_sni(SSL_CTX *ctx, int value)
