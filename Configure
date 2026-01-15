@@ -571,6 +571,7 @@ my @disablables = (
     "status",
     "evp-cipher-api-compat",
     "crypto-mdebug-count",
+    "paillier",
     );
 foreach my $proto ((@tls, @dtls))
         {
@@ -643,8 +644,9 @@ our %disabled = ( # "what"         => "comment"
                   "optimize-chacha-choose"     => "default",
                   "status"              => "default",
                   "evp-cipher-api-compat"      => "default",
-                  "smtc"                 => "default",
-                  "smtc-debug"           => "default",
+                  "paillier"            => "default",
+                  "smtc"                => "default",
+                  "smtc-debug"          => "default",
                   "aria"                => "default", # ARIA has been removed
                   "bf"                  => "default", # Blowfish has been removed
                   "blake2"              => "default", # Blake2 has been removed
