@@ -1269,6 +1269,13 @@ IF[{- !$disabled{tests} -}]
     DEPEND[ecpmeth_test]=../libcrypto ../libssl libtestutil.a
   ENDIF
 
+  IF[{- !$disabled{'bn-method'} -}]
+    PROGRAMS{noinst}=bnmeth_test
+    SOURCE[bnmeth_test]=bnmeth_test.c helpers/ssltestlib.c
+    INCLUDE[bnmeth_test]=.. ../include ../apps/include
+    DEPEND[bnmeth_test]=../libcrypto ../libssl libtestutil.a
+  ENDIF
+
   IF[{- !$disabled{'smtc'} -}]
     PROGRAMS{noinst}=smtc_rand_self_test
     SOURCE[smtc_rand_self_test]=smtc_rand_self_test.c

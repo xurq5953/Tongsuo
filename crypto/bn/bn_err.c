@@ -19,6 +19,7 @@ static const ERR_STRING_DATA BN_str_reasons[] = {
     {ERR_PACK(ERR_LIB_BN, 0, BN_R_BAD_RECIPROCAL), "bad reciprocal"},
     {ERR_PACK(ERR_LIB_BN, 0, BN_R_BIGNUM_TOO_LONG), "bignum too long"},
     {ERR_PACK(ERR_LIB_BN, 0, BN_R_BITS_TOO_SMALL), "bits too small"},
+    {ERR_PACK(ERR_LIB_BN, 0, BN_R_BN_METHOD_NOT_FOUND), "bn method not found"},
     {ERR_PACK(ERR_LIB_BN, 0, BN_R_CALLED_WITH_EVEN_MODULUS),
     "called with even modulus"},
     {ERR_PACK(ERR_LIB_BN, 0, BN_R_DIV_BY_ZERO), "div by zero"},

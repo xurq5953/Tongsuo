@@ -572,6 +572,7 @@ my @disablables = (
     "evp-cipher-api-compat",
     "crypto-mdebug-count",
     "paillier",
+    "bn-method",
     );
 foreach my $proto ((@tls, @dtls))
         {
@@ -645,6 +646,7 @@ our %disabled = ( # "what"         => "comment"
                   "status"              => "default",
                   "evp-cipher-api-compat"      => "default",
                   "paillier"            => "default",
+                  "bn-method"           => "default",
                   "smtc"                => "default",
                   "smtc-debug"          => "default",
                   "aria"                => "default", # ARIA has been removed
@@ -1284,6 +1286,12 @@ if (!defined($disabled{'ec_elgamal'})) {
 
 if (!defined($disabled{'sm2_threshold'})) {
     die "sm2_threshold only supports api with 1.1.1\n"
+        if ($config{api} && $config{api} != $apitable->{"1.1.1"});
+    $config{api}=$apitable->{"1.1.1"};
+}
+
+if (!defined($disabled{'bn-method'})) {
+    die "bn-method only supports api with 1.1.1\n"
         if ($config{api} && $config{api} != $apitable->{"1.1.1"});
     $config{api}=$apitable->{"1.1.1"};
 }
