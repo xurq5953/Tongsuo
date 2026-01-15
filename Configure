@@ -573,6 +573,7 @@ my @disablables = (
     "evp-cipher-api-compat",
     "crypto-mdebug-count",
     "paillier",
+    "bulletproofs",
     "bn-method",
     );
 foreach my $proto ((@tls, @dtls))
@@ -648,6 +649,7 @@ our %disabled = ( # "what"         => "comment"
                   "status"              => "default",
                   "evp-cipher-api-compat"      => "default",
                   "paillier"            => "default",
+                  "bulletproofs"        => "default",
                   "bn-method"           => "default",
                   "smtc"                => "default",
                   "smtc-debug"          => "default",
