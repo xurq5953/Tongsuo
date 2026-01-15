@@ -20,6 +20,7 @@
 #define SECONDS          3
 #define PKEY_SECONDS    10
 #define EC_ELGAMAL_SECONDS      10
+#define PAILLIER_SECONDS        10
 
 #define RSA_SECONDS     PKEY_SECONDS
 #define DSA_SECONDS     PKEY_SECONDS
@@ -88,6 +89,9 @@ VirtualLock(
 #ifndef OPENSSL_NO_ZUC
 # include <crypto/zuc.h>
 #endif
+#ifndef OPENSSL_NO_PAILLIER
+# include <openssl/paillier.h>
+#endif
 #include <openssl/x509.h>
 #include <openssl/dsa.h>
 #include "./testdsa.h"
@@ -133,6 +137,7 @@ typedef struct openssl_speed_sec_st {
     int kem;
     int sig;
     int ec_elgamal;
+    int paillier;
     int keygen;
 } openssl_speed_sec_t;
 
@@ -145,6 +150,12 @@ static int usertime = 1;
 static int EC_ELGAMAL_loop(void *args);
 static void ec_elgamal_print_message(const char *str, const char *str2,
                                      long num, int tm);
+#endif
+
+#ifndef OPENSSL_NO_PAILLIER
+static int PAILLIER_loop(void *args);
+static void paillier_print_message(const char *str, const char *str2,
+                                   long num, int tm);
 #endif
 
 static double Time_F(int s);
@@ -632,6 +643,24 @@ static double ec_elgamal_results[EC_ELGAMAL_NUM][EC_ELGAMAL_PLAINTEXTS_NUM][6];
 
 #endif /* OPENSSL_NO_EC_ELGAMAL */
 
+#ifndef OPENSSL_NO_PAILLIER
+enum {
+    R_PAILLIER_G_OPTIMIZE,
+};
+
+static OPT_PAIR paillier_choices[] = {
+    {"ecelgamalp160", R_PAILLIER_G_OPTIMIZE},
+};
+
+static int paillier_plaintexts[] = {10, 100000, 100000000, -10, -100000, -100000000};
+
+# define PAILLIER_NUM                    OSSL_NELEM(paillier_choices)
+# define PAILLIER_PLAINTEXTS_NUM         OSSL_NELEM(paillier_plaintexts)
+
+static double paillier_results[PAILLIER_NUM][PAILLIER_PLAINTEXTS_NUM][6];
+
+#endif /* OPENSSL_NO_PAILLIER */
+
 #define MAX_KEM_NUM 111
 static size_t kems_algs_len = 0;
 static char *kems_algname[MAX_KEM_NUM] = { NULL };
@@ -725,7 +754,14 @@ typedef struct loopargs_st {
     EC_ELGAMAL_CIPHERTEXT *ciphertext_b[EC_ELGAMAL_NUM];
     EC_ELGAMAL_CIPHERTEXT *ciphertext_r[EC_ELGAMAL_NUM];
     EC_ELGAMAL_DECRYPT_TABLE *decrypt_table[EC_ELGAMAL_NUM][2];
-# endif
+#endif
+#ifndef OPENSSL_NO_PAILLIER
+    PAILLIER_KEY *paillier_key[PAILLIER_NUM];
+    PAILLIER_CTX *paillier_ctx[PAILLIER_NUM];
+    PAILLIER_CIPHERTEXT *paillier_ciphertext_a[PAILLIER_NUM];
+    PAILLIER_CIPHERTEXT *paillier_ciphertext_b[PAILLIER_NUM];
+    PAILLIER_CIPHERTEXT *paillier_ciphertext_r[PAILLIER_NUM];
+#endif
     unsigned char *secret_a;
     unsigned char *secret_b;
     size_t outlen[EC_NUM];
@@ -2038,6 +2074,85 @@ static int SDF_GenerateKey_loop(void *args)
     return count;
 }
 
+#ifndef OPENSSL_NO_PAILLIER
+static int paillier_encrypt = 0;
+static int paillier_decrypt = 0;
+static int paillier_add = 0;
+static int paillier_sub = 0;
+static int paillier_mul = 0;
+
+static int32_t paillier_plaintext_a = 9;
+static int32_t paillier_plaintext_b = 0;
+
+static long paillier_c[PAILLIER_NUM][5];
+
+static int PAILLIER_loop(void *args)
+{
+    loopargs_t *tempargs = *(loopargs_t **) args;
+    PAILLIER_CTX **ectx = tempargs->paillier_ctx;
+    PAILLIER_CIPHERTEXT **ciphertext_a = tempargs->paillier_ciphertext_a;
+    PAILLIER_CIPHERTEXT **ciphertext_b = tempargs->paillier_ciphertext_b;
+    PAILLIER_CIPHERTEXT **ciphertext_r = tempargs->paillier_ciphertext_r;
+    int count = 0, dcount = paillier_c[testnum][1];
+    int32_t r;
+
+    if (paillier_encrypt) {
+        for (; COND(paillier_c[testnum][0]); count++) {
+            if (!PAILLIER_encrypt(ectx[testnum], ciphertext_b[testnum],
+                                    paillier_plaintext_b)) {
+                BIO_printf(bio_err, "PAILLIER encrypt failure\n");
+                ERR_print_errors(bio_err);
+                count = -1;
+                break;
+            }
+        }
+    } else if (paillier_decrypt) {
+        for (; COND(dcount); count++) {
+            if (!PAILLIER_decrypt(ectx[testnum], &r, ciphertext_b[testnum])) {
+                BIO_printf(bio_err, "PAILLIER decrypt(+) failure\n");
+                ERR_print_errors(bio_err);
+                count = -1;
+                break;
+            }
+        }
+    } else if (paillier_add) {
+        for (; COND(paillier_c[testnum][2]); count++) {
+            if (!PAILLIER_add(ectx[testnum], ciphertext_r[testnum],
+                              ciphertext_a[testnum], ciphertext_b[testnum])) {
+                BIO_printf(bio_err, "PAILLIER add failure\n");
+                ERR_print_errors(bio_err);
+                count = -1;
+                break;
+            }
+        }
+    } else if (paillier_sub) {
+        for (; COND(paillier_c[testnum][3]); count++) {
+            if (!PAILLIER_sub(ectx[testnum], ciphertext_r[testnum],
+                              ciphertext_a[testnum], ciphertext_b[testnum])) {
+                BIO_printf(bio_err, "PAILLIER sub failure\n");
+                ERR_print_errors(bio_err);
+                count = -1;
+                break;
+            }
+        }
+    } else if (paillier_mul) {
+        for (; COND(paillier_c[testnum][4]); count++) {
+            if (!PAILLIER_mul(ectx[testnum], ciphertext_r[testnum],
+                              ciphertext_b[testnum], paillier_plaintext_a)) {
+                BIO_printf(bio_err, "PAILLIER mul failure\n");
+                ERR_print_errors(bio_err);
+                count = -1;
+                break;
+            }
+        }
+    }
+
+    (void)dcount;
+
+    return count;
+}
+#endif
+
 static int run_benchmark(int async_jobs,
                          int (*loop_function) (void *), loopargs_t *loopargs)
 {
@@ -2399,7 +2514,9 @@ int speed_main(int argc, char **argv)
     openssl_speed_sec_t seconds = { SECONDS, RSA_SECONDS, DSA_SECONDS,
                                     ECDSA_SECONDS, ECDH_SECONDS,
                                     EdDSA_SECONDS, SM2_SECONDS,
-                                    FFDH_SECONDS, KEM_SECONDS,
+                                    FFDH_SECONDS, 
+                                    PAILLIER_SECONDS,
+                                    KEM_SECONDS,
                                     SIG_SECONDS, KEYGEN_SECONDS };
 
     static const unsigned char key32[32] = {
@@ -2539,6 +2656,14 @@ int speed_main(int argc, char **argv)
     };
     int ec_elgamal_doit[EC_ELGAMAL_NUM] = { 0 };
 #endif
+
+#ifndef OPENSSL_NO_PAILLIER
+    static const char *test_paillier_names[] = {
+        "g_optimize",
+    };
+    int paillier_doit[PAILLIER_NUM] = { 0 };
+#endif
+
     uint8_t ecdsa_doit[ECDSA_NUM] = { 0 };
     uint8_t ecdh_doit[EC_NUM] = { 0 };
 #ifndef OPENSSL_NO_ECX
@@ -2982,6 +3107,17 @@ int speed_main(int argc, char **argv)
             continue;
         }
 #endif
+#ifndef OPENSSL_NO_PAILLIER
+        if (strcmp(algo, "paillier") == 0) {
+            for (i = 0; i < OSSL_NELEM(paillier_doit); i++)
+                paillier_doit[i] = 1;
+            continue;
+        }
+        if (opt_found(algo, paillier_choices, &i)) {
+            paillier_doit[i] = 2;
+            continue;
+        }
+#endif
         if (kem_locate(algo, &idx)) {
             kems_doit[idx]++;
             do_kems = 1;
@@ -3344,6 +3480,9 @@ int speed_main(int argc, char **argv)
     ec_elgamal_c[R_EC_ELGAMAL_SM2][4] = count / 20000;
 # endif  /* OPENSSL_NO_SM2 */
 #endif   /* OPENSSL_NO_EC_ELGAMAL */
+#ifndef OPENSSL_NO_PAILLIER
+    paillier_c[R_PAILLIER_G_OPTIMIZE][0] = count / 18000;
+#endif   /* OPENSSL_NO_PAILLIER */
 
     if (doit[D_MD5]) {
         for (testnum = 0; testnum < size_num; testnum++) {
@@ -5621,7 +5760,7 @@ int speed_main(int argc, char **argv)
                 ec_elgamal_encrypt = 0;
 
                 BIO_printf(bio_err,
-                           mr ? "+R12:%ld:%s:%d:%.2f\n" :
+                           mr ? "+R13:%ld:%s:%d:%.2f\n" :
                            "%ld %s EC-ElGamal encrypt(%d) in %.2fs \n",
                            count, test_ec_elgamal_curves[testnum].name,
                            ec_elgamal_plaintext_b, d);
@@ -5638,7 +5777,7 @@ int speed_main(int argc, char **argv)
                 ec_elgamal_decrypt = 0;
 
                 BIO_printf(bio_err,
-                           mr ? "+R13:%ld:%s:%d:%.2f\n" :
+                           mr ? "+R14:%ld:%s:%d:%.2f\n" :
                            "%ld %s EC-ElGamal decrypt(%d) in %.2fs \n",
                            count, test_ec_elgamal_curves[testnum].name,
                            ec_elgamal_plaintext_b, d);
@@ -5655,7 +5794,7 @@ int speed_main(int argc, char **argv)
                 ec_elgamal_add = 0;
 
                 BIO_printf(bio_err,
-                           mr ? "+R14:%ld:%s:%d:%d:%.2f\n" :
+                           mr ? "+R15:%ld:%s:%d:%d:%.2f\n" :
                            "%ld %s EC-ElGamal add(%d,%d) in %.2fs \n",
                            count, test_ec_elgamal_curves[testnum].name,
                            ec_elgamal_plaintext_a, ec_elgamal_plaintext_b, d);
@@ -5672,7 +5811,7 @@ int speed_main(int argc, char **argv)
                 ec_elgamal_sub = 0;
 
                 BIO_printf(bio_err,
-                           mr ? "+R15:%ld:%s:%d:%d:%.2f\n" :
+                           mr ? "+R16:%ld:%s:%d:%d:%.2f\n" :
                            "%ld %s EC-ElGamal sub(%d,%d) in %.2fs \n",
                            count, test_ec_elgamal_curves[testnum].name,
                            ec_elgamal_plaintext_a, ec_elgamal_plaintext_b, d);
@@ -5689,7 +5828,7 @@ int speed_main(int argc, char **argv)
                 ec_elgamal_mul = 0;
 
                 BIO_printf(bio_err,
-                           mr ? "+R16:%ld:%s:%d:%d:%.2f\n" :
+                           mr ? "+R17:%ld:%s:%d:%d:%.2f\n" :
                            "%ld %s EC-ElGamal mul(%d,%d) in %.2fs \n",
                            count, test_ec_elgamal_curves[testnum].name,
                            ec_elgamal_plaintext_a, ec_elgamal_plaintext_b, d);
@@ -5698,6 +5837,169 @@ int speed_main(int argc, char **argv)
         }
     }
 #endif                         /* OPENSSL_NO_EC_ELGAMAL */
+
+#ifndef OPENSSL_NO_PAILLIER
+    for (testnum = 0; testnum < PAILLIER_NUM; testnum++) {
+        int st = 1;
+        int32_t r = 0;
+        PAILLIER_CTX *ectx = NULL;
+
+        if (!paillier_doit[testnum])
+            continue;
+
+        paillier_plaintext_b = paillier_plaintexts[0];
+
+        for (i = 0; i < loopargs_len; i++) {
+            loopargs[i].paillier_key[testnum] = PAILLIER_KEY_new();
+            if (loopargs[i].paillier_key[testnum] == NULL
+                || !PAILLIER_KEY_generate_key(loopargs[i].paillier_key[testnum],
+                                              255)
+                || !(ectx = PAILLIER_CTX_new(loopargs[i].paillier_key[testnum],
+                                             PAILLIER_MAX_THRESHOLD))) {
+                st = 0;
+                break;
+            }
+
+            loopargs[i].paillier_ctx[testnum] = ectx;
+
+            loopargs[i].paillier_ciphertext_a[testnum] = PAILLIER_CIPHERTEXT_new(ectx);
+            loopargs[i].paillier_ciphertext_b[testnum] = PAILLIER_CIPHERTEXT_new(ectx);
+            loopargs[i].paillier_ciphertext_r[testnum] = PAILLIER_CIPHERTEXT_new(ectx);
+
+            if (!PAILLIER_encrypt(ectx,
+                                  loopargs[i].paillier_ciphertext_a[testnum],
+                                  paillier_plaintext_a)
+                || !PAILLIER_encrypt(ectx,
+                                     loopargs[i].paillier_ciphertext_b[testnum],
+                                     paillier_plaintext_b)
+                || !PAILLIER_add(ectx,
+                                 loopargs[i].paillier_ciphertext_r[testnum],
+                                 loopargs[i].paillier_ciphertext_a[testnum],
+                                 loopargs[i].paillier_ciphertext_b[testnum])
+                || !PAILLIER_decrypt(ectx, &r,
+                                     loopargs[i].paillier_ciphertext_r[testnum])
+                || r != (paillier_plaintext_a + paillier_plaintext_b)
+                || !PAILLIER_sub(ectx,
+                                 loopargs[i].paillier_ciphertext_r[testnum],
+                                 loopargs[i].paillier_ciphertext_a[testnum],
+                                 loopargs[i].paillier_ciphertext_b[testnum])
+                || !PAILLIER_decrypt(ectx, &r,
+                                     loopargs[i].paillier_ciphertext_r[testnum])
+                || r != (paillier_plaintext_a - paillier_plaintext_b)
+                || !PAILLIER_mul(ectx,
+                                 loopargs[i].paillier_ciphertext_r[testnum],
+                                 loopargs[i].paillier_ciphertext_b[testnum],
+                                 paillier_plaintext_a)
+                || !PAILLIER_decrypt(ectx, &r,
+                                     loopargs[i].paillier_ciphertext_r[testnum])
+                || r != (paillier_plaintext_a * paillier_plaintext_b)) {
+                st = 0;
+                break;
+            }
+        }
+
+        if (st == 0) {
+            BIO_printf(bio_err, "paillier failure.\n");
+            ERR_print_errors(bio_err);
+            op_count = 1;
+        } else {
+            unsigned long j = 0;
+
+            for (j = 0; j < sizeof(paillier_plaintexts) / sizeof(int); j++) {
+                paillier_print_message("encrypt",
+                                        test_paillier_names[testnum],
+                                        paillier_c[testnum][0],
+                                        seconds.paillier);
+                paillier_decrypt = 0;
+                paillier_add = 0;
+                paillier_sub = 0;
+                paillier_mul = 0;
+                paillier_plaintext_b = paillier_plaintexts[j];
+
+                paillier_encrypt = 1;
+                Time_F(START);
+                count = run_benchmark(async_jobs, PAILLIER_loop, loopargs);
+                d = Time_F(STOP);
+                paillier_encrypt = 0;
+
+                BIO_printf(bio_err,
+                           mr ? "+R18:%ld:%s:%d:%.2f\n" :
+                           "%ld %s paillier encrypt(%d) in %.2fs \n",
+                           count, test_paillier_names[testnum],
+                           paillier_plaintext_b, d);
+                paillier_results[testnum][j][1] = (double)count / d;
+
+                paillier_print_message("decrypt",
+                                        test_paillier_names[testnum],
+                                        paillier_c[testnum][1],
+                                        seconds.paillier);
+                paillier_decrypt = 1;
+                Time_F(START);
+                count = run_benchmark(async_jobs, PAILLIER_loop, loopargs);
+                d = Time_F(STOP);
+                paillier_decrypt = 0;
+
+                BIO_printf(bio_err,
+                           mr ? "+R19:%ld:%s:%d:%.2f\n" :
+                           "%ld %s paillier decrypt(%d) in %.2fs \n",
+                           count, test_paillier_names[testnum],
+                           paillier_plaintext_b, d);
+                paillier_results[testnum][j][2] = (double)count / d;
+
+                paillier_print_message("add",
+                                        test_paillier_names[testnum],
+                                        paillier_c[testnum][2],
+                                        seconds.paillier);
+                paillier_add = 1;
+                Time_F(START);
+                count = run_benchmark(async_jobs, PAILLIER_loop, loopargs);
+                d = Time_F(STOP);
+                paillier_add = 0;
+
+                BIO_printf(bio_err,
+                           mr ? "+R20:%ld:%s:%d:%d:%.2f\n" :
+                           "%ld %s paillier add(%d,%d) in %.2fs \n",
+                           count, test_paillier_names[testnum],
+                           paillier_plaintext_a, paillier_plaintext_b, d);
+                paillier_results[testnum][j][3] = (double)count / d;
+
+                paillier_print_message("sub",
+                                        test_paillier_names[testnum],
+                                        paillier_c[testnum][3],
+                                        seconds.paillier);
+                paillier_sub = 1;
+                Time_F(START);
+                count = run_benchmark(async_jobs, PAILLIER_loop, loopargs);
+                d = Time_F(STOP);
+                paillier_sub = 0;
+
+                BIO_printf(bio_err,
+                           mr ? "+R21:%ld:%s:%d:%d:%.2f\n" :
+                           "%ld %s paillier sub(%d,%d) in %.2fs \n",
+                           count, test_paillier_names[testnum],
+                           paillier_plaintext_a, paillier_plaintext_b, d);
+                paillier_results[testnum][j][4] = (double)count / d;
+
+                paillier_print_message("mul",
+                                        test_paillier_names[testnum],
+                                        paillier_c[testnum][4],
+                                        seconds.paillier);
+                paillier_mul = 1;
+                Time_F(START);
+                count = run_benchmark(async_jobs, PAILLIER_loop, loopargs);
+                d = Time_F(STOP);
+                paillier_mul = 0;
+
+                BIO_printf(bio_err,
+                           mr ? "+R22:%ld:%s:%d:%d:%.2f\n" :
+                           "%ld %s paillier mul(%d,%d) in %.2fs \n",
+                           count, test_paillier_names[testnum],
+                           paillier_plaintext_a, paillier_plaintext_b, d);
+                paillier_results[testnum][j][5] = (double)count / d;
+            }
+        }
+    }
+#endif                         /* OPENSSL_NO_PAILLIER */
 
     for (testnum = 0; testnum < KEYGEN_NUM; testnum++) {
         if (!keygen_doit[testnum])
@@ -6045,6 +6347,36 @@ int speed_main(int argc, char **argv)
     }
 #endif
 
+#ifndef OPENSSL_NO_PAILLIER
+    testnum = 1;
+    for (i = 0; i < OSSL_NELEM(paillier_doit); i++) {
+        if (!paillier_doit[i])
+            continue;
+        if (testnum && !mr) {
+            printf("\n%-20s %4s %12s   %12s   %12s %12s %12s %12s\n",
+                    "paillier type", "a", "b", "encrypt(b)/s",
+                    "decrypt(b)/s", "add(a,b)/s", "sub(a,b)/s", "mul(a,b)/s");
+            testnum = 0;
+        }
+
+        for (k = 0; k < sizeof(paillier_plaintexts) / sizeof(int); k++) {
+            if (mr)
+                printf("+F11:%u:%ld:%s:%d:%d:%f:%f:%f:%f:%f\n", i, k,
+                       test_paillier_names[i], paillier_plaintext_a,
+                       paillier_plaintexts[k], paillier_results[i][k][1],
+                       paillier_results[i][k][2], paillier_results[i][k][3],
+                       paillier_results[i][k][4], paillier_results[i][k][5]);
+            else
+                printf("%-20s %4d %12d   %12.1f   %12.1f %12.1f"
+                       "%12.1f %12.1f\n", test_paillier_names[i],
+                       paillier_plaintext_a, paillier_plaintexts[k],
+                       paillier_results[i][k][1], paillier_results[i][k][2],
+                       paillier_results[i][k][3], paillier_results[i][k][4],
+                       paillier_results[i][k][5]);
+        }
+    }
+#endif
+
     testnum = 1;
     for (k = 0; k < KEYGEN_NUM; k++) {
         if (!keygen_doit[k])
@@ -6169,7 +6501,24 @@ int speed_main(int argc, char **argv)
 
             if (loopargs[i].ec_elgamal_ctx[k] != NULL)
                 EC_ELGAMAL_CTX_free(loopargs[i].ec_elgamal_ctx[k]);
+#endif
+#ifndef OPENSSL_NO_PAILLIER
+        for (k = 0; k < PAILLIER_NUM; k++) {
+            if (loopargs[i].paillier_ciphertext_a[k] != NULL)
+                PAILLIER_CIPHERTEXT_free(loopargs[i].paillier_ciphertext_a[k]);
 
+            if (loopargs[i].paillier_ciphertext_b[k] != NULL)
+                PAILLIER_CIPHERTEXT_free(loopargs[i].paillier_ciphertext_b[k]);
+
+            if (loopargs[i].paillier_ciphertext_r[k] != NULL)
+                PAILLIER_CIPHERTEXT_free(loopargs[i].paillier_ciphertext_r[k]);
+
+            if (loopargs[i].paillier_key[k] != NULL)
+                PAILLIER_KEY_free(loopargs[i].paillier_key[k]);
+
+            if (loopargs[i].paillier_ctx[k] != NULL)
+                PAILLIER_CTX_free(loopargs[i].paillier_ctx[k]);
+        }
 #endif
         for (k = 0; k < kems_algs_len; k++) {
             EVP_PKEY_CTX_free(loopargs[i].kem_gen_ctx[k]);
@@ -6283,6 +6632,28 @@ static void ec_elgamal_print_message(const char *str, const char *str2,
     BIO_printf(bio_err,
                mr ? "+DTP:%s:%s:%d\n"
                : "Doing ec_elgamal %s with curve %s for %ld times: ",
+               str, str2, num);
+    (void)BIO_flush(bio_err);
+# endif
+}
+#endif
+
+#ifndef OPENSSL_NO_PAILLIER
+static void paillier_print_message(const char *str, const char *str2,
+                                   long num, int tm)
+{
+# ifdef SIGALRM
+    BIO_printf(bio_err,
+               mr ? "+DTP:%s:%s:%d\n"
+               : "Doing paillier %s with type %s for %ds: ",
+               str, str2, tm);
+    (void)BIO_flush(bio_err);
+    run = 1;
+    alarm(tm);
+# else
+    BIO_printf(bio_err,
+               mr ? "+DTP:%s:%s:%d\n"
+               : "Doing paillier %s with type %s for %ld times: ",
                str, str2, num);
     (void)BIO_flush(bio_err);
 # endif
@@ -6553,6 +6924,33 @@ static int do_multi(int multi, int size_num)
                 d = atof(sstrsep(&p, sep));
                 ec_elgamal_results[k][j][5] += d;
 # endif /* OPENSSL_NO_EC_ELGAMAL */
+# ifndef OPENSSL_NO_PAILLIER
+            } else if (CHECK_AND_SKIP_PREFIX(p, "+F11:")) {
+                int k, j;
+                double d;
+
+                p = buf + 4;
+                k = atoi(sstrsep(&p, sep));
+                j = atoi(sstrsep(&p, sep));
+                sstrsep(&p, sep);
+                sstrsep(&p, sep);
+                sstrsep(&p, sep);
+
+                d = atof(sstrsep(&p, sep));
+                paillier_results[k][j][1] += d;
+
+                d = atof(sstrsep(&p, sep));
+                paillier_results[k][j][2] += d;
+
+                d = atof(sstrsep(&p, sep));
+                paillier_results[k][j][3] += d;
+
+                d = atof(sstrsep(&p, sep));
+                paillier_results[k][j][4] += d;
+
+                d = atof(sstrsep(&p, sep));
+                paillier_results[k][j][5] += d;
+# endif /* OPENSSL_NO_PAILLIER */
             } else if (!HAS_PREFIX(buf, "+H:")) {
                 BIO_printf(bio_err, "Unknown type '%s' from child %d\n", buf,
                            n);
