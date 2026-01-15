@@ -715,7 +715,7 @@ static OPT_PAIR bulletproofs_choices[] = {
 # endif
 };
 
-static int bulletproofs_bits[] = {16, 32, 64};
+static int bulletproofs_bits[] = {16, 32, 63};
 static int bulletproofs_agg_max[] = {1, 16, 32};
 
 # define BULLETPROOFS_NUM                   OSSL_NELEM(bulletproofs_choices)
@@ -6210,7 +6210,7 @@ int speed_main(int argc, char **argv)
 
 #ifndef OPENSSL_NO_BULLETPROOFS
     for (i = 1; i < sizeof(bp_secrets)/sizeof(bp_secrets[0]); i++) {
-        bp_secrets[i] = (1U << i) - 1;
+        bp_secrets[i] = (1ULL << i) - 1;
     }
 
     if (!(v = BN_new()))
@@ -6224,7 +6224,7 @@ int speed_main(int argc, char **argv)
             continue;           /* Ignore Curve */
 
         for (m = 0; m < BULLETPROOFS_BITS_NUM; m++) {
-            bp_secrets[0] = (1U << bulletproofs_bits[m]) - 1;
+            bp_secrets[0] = (1ULL << bulletproofs_bits[m]) - 1;
 
             for (n = 0; n < BULLETPROOFS_AGG_MAX_NUM; n++) {
                 bp_pp[testnum][m][n] = BP_PUB_PARAM_new_by_curve_id(test_bulletproofs_curves[testnum].nid,
@@ -6264,7 +6264,7 @@ int speed_main(int argc, char **argv)
                     }
 
                     bp_ctx[testnum][m][n][j] = BP_RANGE_CTX_new(bp_pp[testnum][m][n], bp_witness[testnum][m][n][j], bp_transcript[testnum][m][n]);
-                    if (bp_ctx[testnum][m][n] == NULL)
+                    if (bp_ctx[testnum][m][n][j] == NULL)
                         goto end;
 
                     if (!BP_RANGE_PROOF_prove(bp_ctx[testnum][m][n][j], bp_proof[testnum][m][n])) {

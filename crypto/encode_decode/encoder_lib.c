@@ -569,7 +569,7 @@ static int encoder_process(struct encoder_process_data_st *data)
         /* Preparations */
 
         switch (ok) {
-        case 0:
+        default:
             break;
         case -1:
             /*
