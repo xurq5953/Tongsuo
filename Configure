@@ -574,6 +574,7 @@ my @disablables = (
     "crypto-mdebug-count",
     "paillier",
     "bulletproofs",
+    "nizk",
     "bn-method",
     );
 foreach my $proto ((@tls, @dtls))
@@ -650,6 +651,7 @@ our %disabled = ( # "what"         => "comment"
                   "evp-cipher-api-compat"      => "default",
                   "paillier"            => "default",
                   "bulletproofs"        => "default",
+                  "nizk"                => "default",
                   "bn-method"           => "default",
                   "smtc"                => "default",
                   "smtc-debug"          => "default",
@@ -1297,6 +1299,12 @@ if (!defined($disabled{'sm2_threshold'})) {
 
 if (!defined($disabled{'bulletproofs'})) {
     die "bulletproofs only supports api with 1.1.1\n"
+        if ($config{api} && $config{api} != $apitable->{"1.1.1"});
+    $config{api}=$apitable->{"1.1.1"};
+}
+
+if (!defined($disabled{'nizk'})) {
+    die "nizk only supports api with 1.1.1\n"
         if ($config{api} && $config{api} != $apitable->{"1.1.1"});
     $config{api}=$apitable->{"1.1.1"};
 }
