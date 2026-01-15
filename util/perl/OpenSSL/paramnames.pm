@@ -450,6 +450,9 @@ my %params = (
 # SLH_DSA Key generation parameters
     'PKEY_PARAM_SLH_DSA_SEED' =>              "seed",
 
+# SM2 Specific Parameter
+    'PKEY_PARAM_SM2_ZA' =>  "sm2-za",
+
 # Key Exchange parameters
     'EXCHANGE_PARAM_PAD' =>                   "pad",# uint
     'EXCHANGE_PARAM_EC_ECDH_COFACTOR_MODE' => "ecdh-cofactor-mode",# int
@@ -463,6 +466,15 @@ my %params = (
     'EXCHANGE_PARAM_FIPS_KEY_CHECK' =>        '*PKEY_PARAM_FIPS_KEY_CHECK',
     'EXCHANGE_PARAM_FIPS_ECDH_COFACTOR_CHECK' => '*PROV_PARAM_ECDH_COFACTOR_CHECK',
     'EXCHANGE_PARAM_FIPS_APPROVED_INDICATOR' => '*ALG_PARAM_FIPS_APPROVED_INDICATOR',
+# SM2DH Exchange Parameters
+    'EXCHANGE_PARAM_INITIATOR'      => "sm2-initiator",
+    'EXCHANGE_PARAM_SELF_ID'        => "self-id",
+    'EXCHANGE_PARAM_PEER_ID'        => "peer-id",
+    'EXCHANGE_PARAM_SELF_ENC_KEY'   => "self-enc-key",
+    'EXCHANGE_PARAM_PEER_ENC_KEY'   => "peer-enc-key",
+    'EXCHANGE_PARAM_DIGEST'         => '*PKEY_PARAM_DIGEST',
+    'EXCHANGE_PARAM_DIGEST_PROPS'   => "digest-props",
+    'EXCHANGE_PARAM_OUTLEN'         => "outlen",
 
 # Signature parameters
     'SIGNATURE_PARAM_ALGORITHM_ID' =>         '*PKEY_PARAM_ALGORITHM_ID',
