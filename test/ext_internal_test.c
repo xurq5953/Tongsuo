@@ -58,6 +58,11 @@ static EXT_LIST ext_list[] = {
 #else
     EXT_EXCEPTION(signed_certificate_timestamp),
 #endif
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    EXT_ENTRY(delegated_credential),
+#else
+    EXT_EXCEPTION(delegated_credential),
+#endif
     EXT_ENTRY(extended_master_secret),
     EXT_ENTRY(signature_algorithms_cert),
     EXT_ENTRY(post_handshake_auth),
