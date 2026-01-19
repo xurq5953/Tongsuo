@@ -391,17 +391,6 @@ static const EXTENSION_DEFINITION ext_defs[] = {
         tls_construct_stoc_cookie, tls_construct_ctos_cookie, NULL
     },
     {
-        /*
-         * Special unsolicited ServerHello extension only used when
-         * SSL_OP_CRYPTOPRO_TLSEXT_BUG is set. We allow it in a ClientHello but
-         * ignore it.
-         */
-        TLSEXT_TYPE_cryptopro_bug,
-        SSL_EXT_CLIENT_HELLO | SSL_EXT_TLS1_2_SERVER_HELLO
-        | SSL_EXT_TLS1_2_AND_BELOW_ONLY,
-        NULL, NULL, NULL, tls_construct_stoc_cryptopro_bug, NULL, NULL
-    },
-    {
         TLSEXT_TYPE_compress_certificate,
         SSL_EXT_CLIENT_HELLO | SSL_EXT_TLS1_3_CERTIFICATE_REQUEST
         | SSL_EXT_TLS_IMPLEMENTATION_ONLY | SSL_EXT_TLS1_3_ONLY,
