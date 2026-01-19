@@ -21,6 +21,7 @@
 
 static OSSL_FUNC_cipher_newctx_fn zuc_128_eea3_newctx;
 static OSSL_FUNC_cipher_freectx_fn zuc_128_eea3_freectx;
+static OSSL_FUNC_cipher_dupctx_fn zuc_128_eea3_dupctx;
 static OSSL_FUNC_cipher_get_params_fn zuc_128_eea3_get_params;
 static OSSL_FUNC_cipher_get_ctx_params_fn zuc_128_eea3_get_ctx_params;
 static OSSL_FUNC_cipher_set_ctx_params_fn zuc_128_eea3_set_ctx_params;
@@ -60,6 +61,17 @@ static void zuc_128_eea3_freectx(void *vctx)
         ossl_cipher_generic_reset_ctx((PROV_CIPHER_CTX *)vctx);
         OPENSSL_clear_free(ctx, sizeof(*ctx));
     }
+}
+
+static void *zuc_128_eea3_dupctx(void *vctx)
+{
+    PROV_ZUC_EEA3_CTX *ctx = (PROV_ZUC_EEA3_CTX *)vctx;
+    PROV_ZUC_EEA3_CTX *dupctx = NULL;
+
+    if(ctx != NULL)
+        dupctx = OPENSSL_memdup(ctx, sizeof(*dupctx));
+
+    return dupctx;
 }
 
 static int zuc_128_eea3_get_params(OSSL_PARAM params[])
@@ -201,6 +213,7 @@ int ossl_zuc_128_eea3_dinit(void *vctx, const unsigned char *key, size_t keylen,
 const OSSL_DISPATCH ossl_zuc_128_eea3_functions[] = {
     { OSSL_FUNC_CIPHER_NEWCTX, (void (*)(void))zuc_128_eea3_newctx },
     { OSSL_FUNC_CIPHER_FREECTX, (void (*)(void))zuc_128_eea3_freectx },
+    { OSSL_FUNC_CIPHER_DUPCTX, (void (*)(void))zuc_128_eea3_dupctx },
     { OSSL_FUNC_CIPHER_ENCRYPT_INIT, (void (*)(void))ossl_zuc_128_eea3_einit },
     { OSSL_FUNC_CIPHER_DECRYPT_INIT, (void (*)(void))ossl_zuc_128_eea3_dinit },
     { OSSL_FUNC_CIPHER_UPDATE, (void (*)(void))zuc_128_eea3_update },
