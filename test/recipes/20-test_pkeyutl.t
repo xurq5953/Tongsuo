@@ -41,7 +41,7 @@ SKIP: {
                       "Verify an SM2 signature against a piece of data");
     ok_nofips(run(app(([ 'openssl', 'pkeyutl', '-encrypt',
                       '-in', srctop_file('test', 'data2.bin'),
-                      '-inkey', srctop_file('test', 'certs', 'sm2-pub.key'),
+                      '-inkey', srctop_file('test', 'certs', 'sm2pub.key'),
                       '-pubin', '-out', 'sm2.enc']))),
                       "Encrypt a piece of data using SM2");
     ok_nofips(run(app(([ 'openssl', 'pkeyutl', '-decrypt',
