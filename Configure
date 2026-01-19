@@ -431,7 +431,6 @@ my @disablables = (
     "afalgeng",
     "atf_slibce",
     "apps",
-    "argon2",
     "asan",
     "asm",
     "async",
@@ -660,6 +659,7 @@ our %disabled = ( # "what"         => "comment"
                   "smtc"                => "default",
                   "smtc-debug"          => "default",
                   "aria"                => "default", # ARIA has been removed
+                  "argon2"              => "default", # Argon2 has been removed
                   "bf"                  => "default", # Blowfish has been removed
                   "blake2"              => "default", # Blake2 has been removed
                   "camellia"            => "default", # Camellia has been removed

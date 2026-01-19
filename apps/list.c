@@ -1455,9 +1455,6 @@ static void list_engines(void)
 static void list_disabled(void)
 {
     BIO_puts(bio_out, "Disabled algorithms:\n");
-#ifdef OPENSSL_NO_ARGON2
-    BIO_puts(bio_out, "ARGON2\n");
-#endif
 #ifdef OPENSSL_NO_CMAC
     BIO_puts(bio_out, "CMAC\n");
 #endif

@@ -322,11 +322,6 @@ static const OSSL_ALGORITHM deflt_kdfs[] = {
     !defined(OPENSSL_NO_WBSM4_WSISE)
     { PROV_NAMES_WBSM4KDF, "provider=default", ossl_kdf_wbsm4_functions },
 #endif
-#ifndef OPENSSL_NO_ARGON2
-    { PROV_NAMES_ARGON2I, "provider=default", ossl_kdf_argon2i_functions },
-    { PROV_NAMES_ARGON2D, "provider=default", ossl_kdf_argon2d_functions },
-    { PROV_NAMES_ARGON2ID, "provider=default", ossl_kdf_argon2id_functions },
-#endif
     { NULL, NULL, NULL }
 };
 

@@ -15,7 +15,6 @@ $SSHKDF_GOAL=../../libdefault.a ../../libfips.a
 $X942KDF_GOAL=../../libdefault.a ../../libfips.a
 $WBSM4KDF_GOAL=../../libdefault.a
 $HMAC_DRBG_KDF_GOAL=../../libdefault.a
-$ARGON2_GOAL=../../libdefault.a
 
 SOURCE[$TLS1_PRF_GOAL]=tls1_prf.c
 
@@ -46,4 +45,3 @@ DEPEND[x942kdf.o]=../../common/include/prov/der_wrap.h
 SOURCE[$WBSM4KDF_GOAL]=wbsm4kdf.c
 
 SOURCE[$HMAC_DRBG_KDF_GOAL]=hmacdrbg_kdf.c
-SOURCE[$ARGON2_GOAL]=argon2.c

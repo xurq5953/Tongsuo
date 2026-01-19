@@ -228,11 +228,6 @@ extern const OSSL_DISPATCH ossl_kdf_hmac_drbg_functions[];
     !defined(OPENSSL_NO_WBSM4_WSISE)
 extern const OSSL_DISPATCH ossl_kdf_wbsm4_functions[];
 #endif
-#ifndef OPENSSL_NO_ARGON2
-extern const OSSL_DISPATCH ossl_kdf_argon2i_functions[];
-extern const OSSL_DISPATCH ossl_kdf_argon2d_functions[];
-extern const OSSL_DISPATCH ossl_kdf_argon2id_functions[];
-#endif
 
 /* RNGs */
 extern const OSSL_DISPATCH ossl_test_rng_functions[];
