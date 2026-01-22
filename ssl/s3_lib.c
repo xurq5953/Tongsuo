@@ -148,6 +148,41 @@ static SSL_CIPHER tls13_ciphers[] = {
         384,
     },
 #endif
+#if (!defined OPENSSL_NO_SM2) && (!defined OPENSSL_NO_SM3) \
+    && (!defined OPENSSL_NO_SM4)
+ /* Cipher 0x00C6 and 0x00C7, Reference to RFC 8998 */
+       {
+        1,
+        TLS1_3_RFC_SM4_GCM_SM3,
+        TLS1_3_RFC_SM4_GCM_SM3,
+        TLS1_3_CK_SM4_GCM_SM3,
+        SSL_kANY,
+        SSL_aANY,
+        SSL_SM4GCM,
+        SSL_AEAD,
+        TLS1_3_VERSION,TLS1_3_VERSION,
+        0, 0,
+        SSL_HIGH,
+        SSL_HANDSHAKE_MAC_SM3 | TLS1_PRF_SM3,
+        128,
+        128,
+    }, {
+        1,
+        TLS1_3_RFC_SM4_CCM_SM3,
+        TLS1_3_RFC_SM4_CCM_SM3,
+        TLS1_3_CK_SM4_CCM_SM3,
+        SSL_kANY,
+        SSL_aANY,
+        SSL_SM4CCM,
+        SSL_AEAD,
+        TLS1_3_VERSION,TLS1_3_VERSION,
+        0, 0,
+        SSL_HIGH,
+        SSL_HANDSHAKE_MAC_SM3 | TLS1_PRF_SM3,
+        128,
+        128,
+    }
+#endif
 };
 
 /*
@@ -2500,42 +2535,6 @@ static SSL_CIPHER ssl3_ciphers[] = {
     },
 # endif /* OPENSSL_NO_SM4 */
 #endif  /* OPENSSL_NO_NTLS */
-
-#if (!defined OPENSSL_NO_SM2) && (!defined OPENSSL_NO_SM3) \
-    && (!defined OPENSSL_NO_SM4)
- /* Cipher 0x00C6 and 0x00C7, Reference to RFC 8998 */
-       {
-        1,
-        TLS1_3_RFC_SM4_GCM_SM3,
-        TLS1_3_RFC_SM4_GCM_SM3,
-        TLS1_3_CK_SM4_GCM_SM3,
-        SSL_kANY,
-        SSL_aANY,
-        SSL_SM4GCM,
-        SSL_AEAD,
-        TLS1_3_VERSION,TLS1_3_VERSION,
-        0, 0,
-        SSL_HIGH,
-        SSL_HANDSHAKE_MAC_SM3 | TLS1_PRF_SM3,
-        128,
-        128,
-    }, {
-        1,
-        TLS1_3_RFC_SM4_CCM_SM3,
-        TLS1_3_RFC_SM4_CCM_SM3,
-        TLS1_3_CK_SM4_CCM_SM3,
-        SSL_kANY,
-        SSL_aANY,
-        SSL_SM4CCM,
-        SSL_AEAD,
-        TLS1_3_VERSION,TLS1_3_VERSION,
-        0, 0,
-        SSL_HIGH,
-        SSL_HANDSHAKE_MAC_SM3 | TLS1_PRF_SM3,
-        128,
-        128,
-    }
-#endif
 
 };
 
