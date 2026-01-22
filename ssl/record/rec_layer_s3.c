@@ -1303,6 +1303,13 @@ int ssl_set_new_record_layer(SSL_CONNECTION *s, int version,
     }
     *opts = OSSL_PARAM_construct_end();
 
+    /* Parameters that *must* be supported by a record layer if passed */
+    if (direction == OSSL_RECORD_DIRECTION_READ) {
+        use_etm = SSL_READ_ETM(s) ? 1 : 0;
+    } else {
+        use_etm = SSL_WRITE_ETM(s) ? 1 : 0;
+    }
+
     if (use_etm)
         *set++ = OSSL_PARAM_construct_int(OSSL_LIBSSL_RECORD_LAYER_PARAM_USE_ETM,
                                           &use_etm);
