@@ -76,20 +76,20 @@ SKIP: {
                        "-sigopt", "distid:1234567812345678",
                        "-vfyopt", "distid:1234567812345678",
                        "-md", "sm3",
-                       "-cert", src_file("sm2-root.crt"),
+                       "-cert", src_file("sm2-root-cert.pem"),
                        "-keyfile", src_file("sm2-root.key")]))),
        0,
        "Signing SM2 certificate request");
 
     is(yes(cmdstr(app(["openssl", "ca", "-config",
                        $cnf,
-                       "-in", srctop_file("test", "certs", "sm2-noza-csr.pem"),
+                       "-in", src_file("sm2-noza-csr.pem"),
                        "-out", "sm2-noza-test.crt",
                        "-sigopt", "sm2-za:no",
                        "-vfyopt", "sm2-za:no",
                        "-md", "sm3",
-                       "-cert", srctop_file("test", "certs", "sm2-noza-root-cert.pem"),
-                       "-keyfile", srctop_file("test", "certs", "sm2-root.key")]))),
+                       "-cert", src_file("sm2-noza-root-cert.pem"),
+                       "-keyfile", src_file("sm2-root.key")]))),
        0,
        "Signing SM2 certificate request without Za");
 }
@@ -109,13 +109,13 @@ SKIP: {
 
     is(yes(cmdstr(app(["openssl", "ca", "-config",
                        $cnf,
-                       "-in", srctop_file("test", "certs", "sm2-csr.pem"),
+                       "-in", src_file("sm2-csr.pem"),
                        "-out", "sm2-test-cpt.crt",
                        "-sigopt", "sm2_id:1234567812345678",
                        "-sm2-id", "1234567812345678",
                        "-md", "sm3",
-                       "-cert", srctop_file("test", "certs", "sm2-root-cert.pem"),
-                       "-keyfile", srctop_file("test", "certs", "sm2-root.key")]))),
+                       "-cert", src_file("sm2-root-cert.pem"),
+                       "-keyfile", src_file("sm2-root.key")]))),
        0,
        "Signing SM2 certificate request (compat)");
 }
