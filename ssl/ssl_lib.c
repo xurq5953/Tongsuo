@@ -682,6 +682,8 @@ int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth)
 {
     STACK_OF(SSL_CIPHER) *sk;
 
+    int use_sm = 1;
+
     if (IS_QUIC_CTX(ctx)) {
         ERR_raise(ERR_LIB_SSL, SSL_R_WRONG_SSL_VERSION);
         return 0;
@@ -689,7 +691,12 @@ int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth)
 
     ctx->method = meth;
 
-    if (!SSL_CTX_set_ciphersuites(ctx, OSSL_default_ciphersuites())) {
+#ifndef OPENSSL_NO_QUIC
+    if (meth == OSSL_QUIC_client_method()) {
+        use_sm = 0;
+    }
+#endif
+    if (!SSL_CTX_set_ciphersuites(ctx, OSSL_default_ciphersuites(use_sm))) {
         ERR_raise(ERR_LIB_SSL, SSL_R_SSL_LIBRARY_HAS_NO_CIPHERS);
         return 0;
     }
@@ -4077,6 +4084,7 @@ SSL_CTX *SSL_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq,
 #ifndef OPENSSL_NO_COMP_ALG
     int i;
 #endif
+    int use_sm = 1;
 
     if (meth == NULL) {
         ERR_raise(ERR_LIB_SSL, SSL_R_NULL_SSL_METHOD_PASSED);
@@ -4186,7 +4194,18 @@ SSL_CTX *SSL_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq,
         goto err;
     }
 
-    if (!SSL_CTX_set_ciphersuites(ret, OSSL_default_ciphersuites())) {
+    /* 
+        We currently ignore RFC 8998 in QUIC as RFC 9001
+        does not specify how to use SM4 in QUIC-TLS.
+        RFC 9001 only describes the ways of using AES and ChaCha20.
+        Ref. RFC 9001 Section 4.2.3. "Record Number Encryption".
+    */
+#ifndef OPENSSL_NO_QUIC
+    if (meth == OSSL_QUIC_client_method()) {
+        use_sm = 0;
+    }
+#endif
+    if (!SSL_CTX_set_ciphersuites(ret, OSSL_default_ciphersuites(use_sm))) {
         ERR_raise(ERR_LIB_SSL, ERR_R_SSL_LIB);
         goto err;
     }

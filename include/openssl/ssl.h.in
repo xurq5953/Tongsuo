@@ -2970,7 +2970,11 @@ void SSL_set_allow_early_data_cb(SSL *s,
 
 /* store the default cipher strings inside the library */
 const char *OSSL_default_cipher_list(void);
-const char *OSSL_default_ciphersuites(void);
+/* 
+   Parameter use_sm specifis whether RFC 8998 is included 
+   in the list of default ciphersuites. 
+*/
+const char *OSSL_default_ciphersuites(int use_sm);
 
 # define SSL_client_hello_get1_extensions BABASSL_client_hello_get1_extensions
 int BABASSL_client_hello_get1_extensions(SSL *s, int **out, size_t *outlen);

@@ -2189,17 +2189,22 @@ const char *OSSL_default_cipher_list(void)
  * TLS_DEFAULT_CIPHERSUITES deprecated in 3.0.0
  * Update both macro and function simultaneously
  */
-const char *OSSL_default_ciphersuites(void)
-{
-    return "TLS_AES_256_GCM_SHA384:"
-           "TLS_CHACHA20_POLY1305_SHA256:"
-           "TLS_AES_128_GCM_SHA256"
+const char *OSSL_default_ciphersuites(int use_sm)
+{   
+    if(use_sm)
+        return "TLS_AES_256_GCM_SHA384:"
+            "TLS_CHACHA20_POLY1305_SHA256:"
+            "TLS_AES_128_GCM_SHA256"
 #if (!defined OPENSSL_NO_SM2) && (!defined OPENSSL_NO_SM3) \
-     && (!defined OPENSSL_NO_SM4)
-           ":TLS_SM4_GCM_SM3"
-           ":TLS_SM4_CCM_SM3"
+    && (!defined OPENSSL_NO_SM4)
+            ":TLS_SM4_GCM_SM3"
+            ":TLS_SM4_CCM_SM3"
 #endif
-           ;
+            ;
+    else
+        return "TLS_AES_256_GCM_SHA384:"
+            "TLS_CHACHA20_POLY1305_SHA256:"
+            "TLS_AES_128_GCM_SHA256";
 }
 
 unsigned long BABASSL_CIPHER_get_mkey(const SSL_CIPHER *c)
