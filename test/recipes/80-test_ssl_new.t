@@ -29,6 +29,7 @@ use lib srctop_dir('Configurations');
 use lib bldtop_dir('.');
 
 my $no_fips = disabled('fips') || ($ENV{NO_FIPS} // 0);
+my $no_smtc = disabled('smtc') || disabled('smtc-debug');
 
 $ENV{TEST_CERTS_DIR} = srctop_dir("test", "certs");
 $ENV{TEST_RUNS_DIR} = catdir(result_dir(), "..", "test_ssl_new");
