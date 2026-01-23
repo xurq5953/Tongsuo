@@ -23,10 +23,11 @@ Header:
           uncompressed (0)
           ansiX962_compressed_prime (1)
           ansiX962_compressed_char2 (2)
-        extension_type=supported_groups(10), length=18
+        extension_type=supported_groups(10), length=20
           X25519MLKEM768 (4588)
           ecdh_x25519 (29)
           secp256r1 (P-256) (23)
+          curveSM2 (41)
           ecdh_x448 (30)
           secp384r1 (P-384) (24)
           secp521r1 (P-521) (25)
