@@ -491,6 +491,7 @@ client = 15-test client enable sm_tls13_strict, the key_share extension must inc
 Certificate = ${ENV::TEST_CERTS_DIR}/sm2-leaf.crt
 CipherString = DEFAULT
 Ciphersuites = TLS_SM4_GCM_SM3
+Curves = curveSM2
 Enable_sm_tls13_strict = off
 MaxProtocol = TLSv1.3
 MinProtocol = TLSv1.3

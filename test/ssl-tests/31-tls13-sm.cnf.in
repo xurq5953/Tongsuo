@@ -333,6 +333,7 @@ our @tests = (
             "MinProtocol" => "TLSv1.3",
             "MaxProtocol" => "TLSv1.3",
             "Ciphersuites" => "TLS_SM4_GCM_SM3",
+            "Curves" => "curveSM2",
             "Certificate" => test_pem("sm2-leaf.crt"),
             "PrivateKey" => test_pem("sm2-leaf.key"),
             "Enable_sm_tls13_strict" => "off",

@@ -197,12 +197,12 @@ static const struct tls13groupselection_test_st tls13groupselection_tests[] =
         { "*X25519:DEFAULT:-prime256v1:-X448", /* test 18 */
           "DEFAULT:-X25519:-?X25519MLKEM768",
           CLIENT_PREFERENCE,
-          "secp384r1", HRR
+          "curveSM2", HRR
         },
         { "*X25519:DEFAULT:-prime256v1:-X448", /* test 19 */
           "DEFAULT:-X25519:-?X25519MLKEM768",
           SERVER_PREFERENCE,
-          "secp384r1", HRR
+          "curveSM2", HRR
         },
         /*
          * (J) Deduplication check

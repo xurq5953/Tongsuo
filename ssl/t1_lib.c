@@ -216,7 +216,7 @@ static const unsigned char ecformats_default[] = {
 /* Group list string of the built-in pseudo group DEFAULT */
 #define DEFAULT_GROUP_NAME "DEFAULT"
 #define TLS_DEFAULT_GROUP_LIST \
-    "?*X25519MLKEM768 / ?*X25519:?secp256r1 / ?X448:?secp384r1:?secp521r1 / ?ffdhe2048:?ffdhe3072"
+    "?*X25519MLKEM768 / ?*X25519:?secp256r1:?curveSM2 / ?X448:?secp384r1:?secp521r1 / ?ffdhe2048:?ffdhe3072"
 
 static const uint16_t suiteb_curves[] = {
     OSSL_TLS_GROUP_ID_secp256r1,
@@ -1097,12 +1097,12 @@ uint16_t tls1_shared_group(SSL_CONNECTION *s, int nmatch)
 int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
                     uint16_t **ksext, size_t *ksextlen,
                     size_t **tplext, size_t *tplextlen,
-                    int *groups, size_t ngroups)
+                    int *group_ids, size_t ngroups)
 {
     uint16_t *glist = NULL, *kslist = NULL;
     size_t *tpllist = NULL;
     size_t i;
-    uint8_t bitmap[64] = { 0 };
+    uint8_t bitmap[1024] = { 0 };
 
     if (ngroups == 0) {
         ERR_raise(ERR_LIB_SSL, SSL_R_BAD_LENGTH);
@@ -1115,8 +1115,7 @@ int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
     if ((tpllist = OPENSSL_malloc(1 * sizeof(*tpllist))) == NULL)
         goto err;
     for (i = 0; i < ngroups; i++) {
-        uint16_t id;
-        id = tls1_nid2group_id(groups[i]);
+        uint16_t id = group_ids[i];
         if (ngroups == 1) {
             glist[i] = id;
             break;

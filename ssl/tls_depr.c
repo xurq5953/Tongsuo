@@ -177,7 +177,7 @@ int ssl_set_tmp_ecdh_groups(uint16_t **pext, size_t *pextlen,
 {
 # ifndef OPENSSL_NO_EC
     const EC_GROUP *group = EC_KEY_get0_group((const EC_KEY *)key);
-    int nid;
+    int nid, group_id;
 
     if (group == NULL) {
         ERR_raise(ERR_LIB_SSL, SSL_R_MISSING_PARAMETERS);
@@ -186,10 +186,11 @@ int ssl_set_tmp_ecdh_groups(uint16_t **pext, size_t *pextlen,
     nid = EC_GROUP_get_curve_name(group);
     if (nid == NID_undef)
         return 0;
+    group_id = tls1_nid2group_id(nid);
     return tls1_set_groups(pext, pextlen,
                            ksext, ksextlen,
                            tplext, tplextlen,
-                           &nid, 1);
+                           &group_id, 1);
 # else
     return 0;
 # endif

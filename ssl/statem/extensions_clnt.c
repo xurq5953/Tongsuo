@@ -275,13 +275,13 @@ EXT_RETURN tls_construct_ctos_supported_groups(SSL_CONNECTION *s, WPACKET *pkt,
                 return EXT_RETURN_FAIL;
             }
 
-            for (i = 0; i < num_groups; i++)
-                groups[i] = tls1_group_id2nid(pgroups[i], 1);
-
-            for (i = sm2_idx; i > 0; i--)
-                groups[i] = groups[i - 1];
-
-            groups[0] = NID_sm2;
+            for(i = (num_groups - 1); i > 0; i--) {
+                if(i > sm2_idx)
+                    groups[i] = pgroups[i];
+                else
+                    groups[i] = pgroups[i - 1];
+            }   
+            groups[0] = tls1_nid2group_id(NID_sm2);
 
             if (!tls1_set_groups(&s->ext.supportedgroups,
                                  &s->ext.supportedgroups_len,

@@ -1900,7 +1900,7 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
         if (s->enable_sm_tls13_strict == 1
             && (cipher->id == TLS1_3_CK_SM4_GCM_SM3
                 || cipher->id == TLS1_3_CK_SM4_CCM_SM3)) {
-            int sm2_group = NID_sm2;
+            int sm2_group = tls1_nid2group_id(NID_sm2);
 
             if (!tls1_set_groups(&s->ext.supportedgroups,
                                  &s->ext.supportedgroups_len,

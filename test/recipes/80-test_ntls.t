@@ -46,7 +46,7 @@ plan tests => 5;
 # expectations dynamically based on the OpenSSL compile-time config.
 my %conf_dependent_tests = (
   "31-ntls.cnf" => disabled("ntls"),
-  "32-ntls-force-ntls.cnf" => disabled("ntls"),
+  "33-ntls-force-ntls.cnf" => disabled("ntls"),
   "39-ntls-sni-ticket.cnf" => disabled("ntls"),
   "40-ntls_client_auth.cnf" => disabled("ntls"),
   "41-ntls-alpn.cnf" => disabled("ntls"),
@@ -58,7 +58,7 @@ my %conf_dependent_tests = (
 my %skip = (
   "31-ntls.cnf" => disabled("ntls") || disabled("sm2") || disabled("sm3")
                     || disabled("sm4"),
-  "32-ntls-force-ntls.cnf" => disabled("ntls") || disabled("sm2")
+  "33-ntls-force-ntls.cnf" => disabled("ntls") || disabled("sm2")
                                 || disabled("sm3") || disabled("sm4")
                                 || !disabled("smtc"),
   "39-ntls-sni-ticket.cnf" => disabled("ntls") || disabled("sm2")

@@ -2951,7 +2951,7 @@ __owur uint16_t tls1_shared_group(SSL_CONNECTION *s, int nmatch);
 __owur int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
                            uint16_t **ksext, size_t *ksextlen,
                            size_t **tplext, size_t *tplextlen,
-                           int *curves, size_t ncurves);
+                           int *group_ids, size_t group_num);
 __owur int tls1_set_groups_list(SSL_CTX *ctx,
                                 uint16_t **grpext, size_t *grpextlen,
                                 uint16_t **ksext, size_t *ksextlen,

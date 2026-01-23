@@ -29,23 +29,26 @@ use lib srctop_dir('Configurations');
 use lib bldtop_dir('.');
 
 my $no_fips = disabled('fips') || ($ENV{NO_FIPS} // 0);
-my $no_smtc = disabled('smtc') || disabled('smtc-debug');
 
 $ENV{TEST_CERTS_DIR} = srctop_dir("test", "certs");
 $ENV{TEST_RUNS_DIR} = catdir(result_dir(), "..", "test_ssl_new");
 
 my @conf_srcs = ();
+# Ignore NTLS test
+# TODO: use an indenpendent directory for ntls test cnf
 if (defined $ENV{SSL_TESTS}) {
     my @conf_list = split(' ', $ENV{SSL_TESTS});
     foreach my $conf_file (@conf_list) {
+        next if $conf_file eq '33-ntls-force-ntls.cnf.in';
         push (@conf_srcs, glob(srctop_file("test", "ssl-tests", $conf_file)));
     }
     plan tests => scalar @conf_srcs;
 } else {
-    @conf_srcs = glob(srctop_file("test", "ssl-tests", "*.cnf.in"));
+    @conf_srcs = grep { $_ ne srctop_file("test", "ssl-tests", "33-ntls-force-ntls.cnf.in") } 
+        glob(srctop_file("test", "ssl-tests", "*.cnf.in"));
     # We hard-code the number of tests to double-check that the globbing above
     # finds all files as expected.
-    plan tests => 37;
+    plan tests => 33;
 }
 my @conf_files = map { basename($_, ".in") } @conf_srcs;
 
@@ -96,13 +99,8 @@ my %conf_dependent_tests = (
   "27-ticket-appdata.cnf" => !$is_default_tls,
   "28-seclevel.cnf" => disabled("tls1_2") || $no_ecx,
   "30-extended-master-secret.cnf" => disabled("tls1_2"),
-  "31-ntls.cnf" => disabled("ntls"),
   "32-compressed-certificate.cnf" => disabled("comp") || disabled("tls1_3"),
-  "33-ntls-force-ntls.cnf" => disabled("ntls"),
   "38-delegated-credential.cnf" => disabled("delegated-credential"),
-  "39-ntls-sni-ticket.cnf" => disabled("ntls"),
-  "40-ntls_client_auth.cnf" => disabled("ntls"),
-  "41-ntls-alpn.cnf" => disabled("ntls"),
 );
 
 if (!disabled("delegated-credential")) {
@@ -143,7 +141,7 @@ my %skip = (
   "25-cipher.cnf" => disabled("ec") || disabled("tls1_2"),
   "26-tls13_client_auth.cnf" => disabled("tls1_3") || ($no_ec && $no_dh),
   "29-dtls-sctp-label-bug.cnf" => disabled("sctp") || disabled("sock"),
-  "30-tls13-sm.cnf" => disabled("sm2") || disabled("sm3") || disabled("sm4")
+  "31-tls13-sm.cnf" => disabled("sm2") || disabled("sm3") || disabled("sm4")
                         || disabled("tls1_3") || !$no_fips,
   "32-compressed-certificate.cnf" => disabled("comp") || disabled("tls1_3"),
   "38-delegated-credential.cnf" => disabled("delegated-credential"),
@@ -151,8 +149,7 @@ my %skip = (
 
 foreach my $conf (@conf_files) {
     subtest "Test configuration $conf" => sub {
-        plan tests => 6 + ($no_fips ? 0 : 3)
-                      + ($conf !~ /^[0-9]+-ntls/ || $no_smtc ? 0 : 3);
+        plan tests => 6 + ($no_fips ? 0 : 3);
         test_conf($conf,
                   $conf_dependent_tests{$conf} ? 0 : 1,
                   defined($skip{$conf}) ? $skip{$conf} : $no_tls,
@@ -203,10 +200,6 @@ sub test_conf {
       if ($provider eq "fips") {
           ok(run(test(["ssl_test", $output_file, $provider,
                        srctop_file("test", "fips-and-base.cnf")])), $msg);
-      } elsif ($provider eq "smtc") {
-          ok(run(test(["ssl_test", $output_file, $provider,
-                       srctop_file("test", "smtc-and-base.cnf")])),
-             "running ssl_test $conf");
       } else {
           ok(run(test(["ssl_test", $output_file, $provider])), $msg);
       }
