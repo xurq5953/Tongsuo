@@ -400,7 +400,9 @@ end:
 #ifndef OPENSSL_NO_TLS1_2
 static int client_hello_callback(SSL *s, int *al, void *arg) {
     int *exts;
+    /* Follows sslapitest */
     const int expected_extensions[] = {
+        65281,
 # ifndef OPENSSL_NO_EC
         11, 10,
 # endif
@@ -530,6 +532,7 @@ static int babassl_client_hello_callback(SSL *s, int *al, void *arg)
     size_t  len, i;
     /* We only configure two ciphers, but the SCSV is added automatically. */
     const int expected_extensions[] = {
+                                       65281,
 #   ifndef OPENSSL_NO_EC
                                        11, 10,
 #   endif
@@ -598,12 +601,18 @@ static int test_babassl_set_ssl_ctx(void)
     SSL_CTX_set_options(cctx, SSL_OP_NO_TLSv1_2);
     SSL_CTX_set_options(cctx, SSL_OP_NO_TLSv1);
     SSL_CTX_set_options(cctx, SSL_OP_NO_SSLv3);
+    /* 
+        This setting is necessary since OpenSSL 3.5 forbids 
+        TLS 1.1 in the default securtiy level = 2.
+    */
+    SSL_CTX_set_security_level(cctx, 0);
 
     if (!TEST_true(create_ssl_objects(sctx, cctx, &serverssl, &clientssl,
                                       NULL, NULL))
             || !TEST_false(create_ssl_connection(serverssl, clientssl,
                                                  SSL_ERROR_NONE)))
         goto end;
+    SSL_CTX_set_security_level(cctx, 2);
 
     SSL_free(serverssl);
     SSL_free(clientssl);
@@ -1558,7 +1567,6 @@ int setup_tests(void)
         OPENSSL_free(cert);
         return 0;
     }
-
     ADD_TEST(test_babassl_debug);
     ADD_TEST(test_babassl_get_master_key);
     ADD_TEST(test_babassl_cipher_get);

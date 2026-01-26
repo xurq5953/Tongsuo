@@ -5463,7 +5463,7 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
     ret->enable_force_ntls = ctx->enable_force_ntls;
 #endif
 #ifndef OPENSSL_NO_SM2
-    ret->enable_sm_tls13_strict = ctx->enable_sm_tls13_strict ;
+    ret->enable_sm_tls13_strict = ctx->enable_sm_tls13_strict;
 #endif
     ret->method = ctx->method;
     ret->min_proto_version = ctx->min_proto_version;
@@ -5474,15 +5474,7 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
     ret->session_timeout = ctx->session_timeout;
     ret->max_cert_list = ctx->max_cert_list;
     ret->verify_mode = ctx->verify_mode;
-    ret->sigalg_list_len = ctx->sigalg_list_len;
 
-    if (ctx->cert)
-        ret->cert = ssl_cert_dup(ctx->cert);
-    else
-        ret->cert = ssl_cert_new(SSL_PKEY_NUM + ctx->sigalg_list_len);
-
-    if(ret->cert == NULL)
-        goto err;
 
     ret->sessions = lh_SSL_SESSION_new(ssl_session_hash, ssl_session_cmp);
     if (ret->sessions == NULL)
@@ -5529,6 +5521,16 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
         ERR_raise(ERR_LIB_SSL, ERR_R_SSL_LIB);
         goto err2;
     }
+
+    ret->sigalg_list_len = ctx->sigalg_list_len;
+
+    if (ctx->cert)
+        ret->cert = ssl_cert_dup(ctx->cert);
+    else
+        ret->cert = ssl_cert_new(SSL_PKEY_NUM + ctx->sigalg_list_len);
+
+    if(ret->cert == NULL)
+        goto err;
 
     /* dup the cipher_list and cipher_list_by_id stacks */
     if (ctx->cipher_list) {
@@ -5779,10 +5781,6 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
 
     ret->async_cb = ctx->async_cb;
     ret->async_cb_arg = ctx->async_cb_arg;
-
-#ifndef OPENSSL_NO_SM2
-    ret->enable_sm_tls13_strict = ctx->enable_sm_tls13_strict;
-#endif
 
 #ifndef OPENSSL_NO_QUIC
     /* ret->quic_method = ctx->quic_method; */
@@ -6092,19 +6090,16 @@ SSL_CTX *BABASSL_set_SESSION_CTX(SSL *ssl, SSL_CTX *ctx)
 {
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
 
-    if (sc == NULL)
-        return NULL;
-
-    if (ssl->ctx == ctx)
-        return ssl->ctx;
+    if (sc->session_ctx == ctx)
+        return sc->session_ctx;
     if (ctx == NULL)
         ctx = sc->session_ctx;
 
     SSL_CTX_up_ref(ctx);
-    SSL_CTX_free(ssl->ctx);     /* decrement reference count */
-    ssl->ctx = ctx;
+    SSL_CTX_free(sc->session_ctx);     /* decrement reference count */
+    sc->session_ctx = ctx;
 
-    return ssl->ctx;
+    return sc->session_ctx;
 }
 
 int SSL_CTX_set_default_verify_paths(SSL_CTX *ctx)
