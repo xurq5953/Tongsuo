@@ -283,7 +283,7 @@ EXT_RETURN tls_construct_ctos_supported_groups(SSL_CONNECTION *s, WPACKET *pkt,
             }   
             groups[0] = tls1_nid2group_id(NID_sm2);
 
-            if (!tls1_set_groups(&s->ext.supportedgroups,
+            if (!tls1_set_groups_with_id(&s->ext.supportedgroups,
                                  &s->ext.supportedgroups_len,
                                  &s->ext.keyshares,
                                  &s->ext.keyshares_len,

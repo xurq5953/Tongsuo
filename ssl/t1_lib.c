@@ -1094,10 +1094,10 @@ uint16_t tls1_shared_group(SSL_CONNECTION *s, int nmatch)
     return 0;
 }
 
-int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
-                    uint16_t **ksext, size_t *ksextlen,
-                    size_t **tplext, size_t *tplextlen,
-                    int *group_ids, size_t ngroups)
+int tls1_set_groups_internal(uint16_t **grpext, size_t *grpextlen,
+                             uint16_t **ksext, size_t *ksextlen,
+                             size_t **tplext, size_t *tplextlen,
+                             int *groups, size_t ngroups, int use_nid)
 {
     uint16_t *glist = NULL, *kslist = NULL;
     size_t *tpllist = NULL;
@@ -1115,7 +1115,11 @@ int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
     if ((tpllist = OPENSSL_malloc(1 * sizeof(*tpllist))) == NULL)
         goto err;
     for (i = 0; i < ngroups; i++) {
-        uint16_t id = group_ids[i];
+        uint16_t id;
+        if(use_nid)
+            id = tls1_nid2group_id(groups[i]);
+        else
+            id = groups[i];
         if (ngroups == 1) {
             glist[i] = id;
             break;
@@ -1146,6 +1150,24 @@ err:
     OPENSSL_free(kslist);
     OPENSSL_free(tpllist);
     return 0;
+}
+
+int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
+                    uint16_t **ksext, size_t *ksextlen,
+                    size_t **tplext, size_t *tplextlen,
+                    int *groups, size_t ngroups)
+{
+    return tls1_set_groups_internal(grpext, grpextlen, ksext, ksextlen,
+                                    tplext, tplextlen, groups, ngroups, 1);
+}
+
+int tls1_set_groups_with_id(uint16_t **grpext, size_t *grpextlen,
+                    uint16_t **ksext, size_t *ksextlen,
+                    size_t **tplext, size_t *tplextlen,
+                    int *groups, size_t ngroups)
+{
+    return tls1_set_groups_internal(grpext, grpextlen, ksext, ksextlen,
+                                    tplext, tplextlen, groups, ngroups, 0);
 }
 
 /*

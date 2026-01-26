@@ -5173,8 +5173,10 @@ static int test_key_exchange(int idx)
             goto end;
     }
 
-    if (!TEST_true(create_ssl_connection(serverssl, clientssl, SSL_ERROR_NONE)))
+    if (!TEST_true(create_ssl_connection(serverssl, clientssl, SSL_ERROR_NONE))){
+        printf("idx: %d\n", idx);
         goto end;
+    }
 
     /*
      * If the handshake succeeds the negotiated kexch alg should be the first

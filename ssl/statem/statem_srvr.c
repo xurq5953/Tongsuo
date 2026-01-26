@@ -1902,7 +1902,7 @@ static int tls_early_post_process_client_hello(SSL_CONNECTION *s)
                 || cipher->id == TLS1_3_CK_SM4_CCM_SM3)) {
             int sm2_group = tls1_nid2group_id(NID_sm2);
 
-            if (!tls1_set_groups(&s->ext.supportedgroups,
+            if (!tls1_set_groups_with_id(&s->ext.supportedgroups,
                                  &s->ext.supportedgroups_len,
                                  &s->ext.keyshares,
                                  &s->ext.keyshares_len,
