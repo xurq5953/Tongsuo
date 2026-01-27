@@ -5017,9 +5017,9 @@ int ossl_ssl_get_error(const SSL *s, int i, int check_err)
         if (SSL_want_read(s)) {
             bio = SSL_get_rbio(s);
 #ifndef OPENSSL_NO_NTLS
-        if (s->enable_ntls == 1 && s->enable_force_ntls == 0
-            && SSL_IS_FIRST_HANDSHAKE(s)
-            && s->preread_len < sizeof(s->preread_buf) && !BIO_eof(bio))
+        if (sc->enable_ntls == 1 && sc->enable_force_ntls == 0
+            && SSL_IS_FIRST_HANDSHAKE(sc)
+            && sc->preread_len < sizeof(sc->preread_buf) && !BIO_eof(bio))
             return SSL_ERROR_WANT_READ;
 #endif
             if (BIO_should_read(bio))
@@ -8131,7 +8131,7 @@ void SSL_enable_force_ntls(SSL *s)
     if (sc == NULL)
         return;
 
-    s->enable_force_ntls = 1;
+    sc->enable_force_ntls = 1;
 }
 
 void SSL_disable_force_ntls(SSL *s)
@@ -8141,7 +8141,7 @@ void SSL_disable_force_ntls(SSL *s)
     if (sc == NULL)
         return;
 
-    s->enable_force_ntls = 0;
+    sc->enable_force_ntls = 0;
 }
 #endif
 

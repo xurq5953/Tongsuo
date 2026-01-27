@@ -9,6 +9,7 @@
 
 
 #include <string.h>
+#include "internal/ssl_unwrap.h"
 #include "internal/nelem.h"
 #include "internal/cryptlib.h"
 #include "ntls_ssl_local.h"

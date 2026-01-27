@@ -3839,7 +3839,7 @@ int ssl3_get_req_cert_type(SSL_CONNECTION *s, WPACKET *pkt)
     if (!(alg_a & SSL_aDSS)
 #ifndef OPENSSL_NO_NTLS
         /* TLCP not define DSS sign */
-        && !SSL_IS_NTLS(s)
+        && !SSL_CONNECTION_IS_NTLS(s)
 #endif
         && !WPACKET_put_bytes_u8(pkt, SSL3_CT_DSS_SIGN))
         return 0;
@@ -3850,7 +3850,7 @@ int ssl3_get_req_cert_type(SSL_CONNECTION *s, WPACKET *pkt)
      */
     if ((s->version >= TLS1_VERSION
 #if (!defined OPENSSL_NO_NTLS) && (!defined OPENSSL_NO_SM2)
-        || SSL_IS_NTLS(s)
+        || SSL_CONNECTION_IS_NTLS(s)
 #endif
         )
             && !(alg_a & SSL_aECDSA)

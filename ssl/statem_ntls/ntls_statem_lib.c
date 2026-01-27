@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <openssl/core_names.h>
+#include "internal/ssl_unwrap.h"
 #include "ntls_ssl_local.h"
 #include "ntls_statem_local.h"
 #include "internal/cryptlib.h"
@@ -319,7 +320,7 @@ MSG_PROCESS_RETURN tls_process_cert_verify_ntls(SSL_CONNECTION *s, PACKET *pkt)
         goto err;
     }
 
-    if (ssl_cert_lookup_by_pkey(pkey, NULL) == NULL) {
+    if (ssl_cert_lookup_by_pkey(pkey, NULL, sctx) == NULL) {
         SSLfatal_ntls(s, SSL_AD_ILLEGAL_PARAMETER,
                       SSL_R_SIGNATURE_FOR_NON_SIGNING_CERTIFICATE);
         goto err;
@@ -866,7 +867,8 @@ WORK_STATE tls_finish_handshake_ntls(SSL_CONNECTION *s, ossl_unused WORK_STATE w
 int tls_get_message_header_ntls(SSL_CONNECTION *s, int *mt)
 {
     /* s->init_num < SSL3_HM_HEADER_LENGTH */
-    int skip_message, i, recvd_type;
+    int skip_message, i;
+    uint8_t recvd_type;
     unsigned char *p;
     size_t l, readbytes;
     SSL *ssl = SSL_CONNECTION_GET_SSL(s);

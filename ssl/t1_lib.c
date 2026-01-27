@@ -106,7 +106,7 @@ SSL3_ENC_METHOD const NTLS_enc_data = {
     TLS_MD_SERVER_FINISH_CONST, TLS_MD_SERVER_FINISH_CONST_SIZE,
     ntls_alert_code,
     tls1_export_keying_material,
-    SSL_ENC_FLAG_EXPLICIT_IV,
+    0,
     ssl3_set_handshake_header,
     tls_close_construct_packet,
     ssl3_handshake_write
@@ -1024,7 +1024,7 @@ uint16_t tls1_shared_group(SSL_CONNECTION *s, int nmatch)
     SSL_CTX *ctx = SSL_CONNECTION_GET_CTX(s);
 
 #ifndef OPENSSL_NO_NTLS
-    if (SSL_IS_NTLS(s))
+    if (SSL_CONNECTION_IS_NTLS(s))
         return TLSEXT_curve_SM2;
 #endif
 
@@ -1930,7 +1930,8 @@ static int tls1_check_cert_param(SSL_CONNECTION *s, X509 *x, int check_ee_md)
  * Checks that the kECDHE cipher suite we're considering using
  * is compatible with the client extensions.
  *
- * Returns 0 when the cipher can't be used or 1 when it can.
+ * Returns 0 when the cipher can't be used or 
+ * 1 when it can.
  */
 int tls1_check_ec_tmp_key(SSL_CONNECTION *s, unsigned long cid)
 {
@@ -1951,15 +1952,19 @@ int tls1_check_ec_tmp_key(SSL_CONNECTION *s, unsigned long cid)
 
 #ifndef OPENSSL_NO_NTLS
 static const SIGALG_LOOKUP ntls_sm2_sigalg = {
+    TLSEXT_SIGALG_sm2sig_sm3_name,
     "sm2sig_sm3", TLSEXT_SIGALG_sm2sig_sm3,
     NID_sm3, SSL_MD_SM3_IDX, NID_sm2, SSL_PKEY_SM2_SIGN,
-    NID_SM2_with_SM3, NID_sm2
+    NID_SM2_with_SM3, NID_sm2, 1, 0,
+    NTLS1_1_VERSION, NTLS1_1_VERSION, 0, 0
 };
 
 static const SIGALG_LOOKUP ntls_rsa_sigalg = {
+    TLSEXT_SIGALG_rsa_pkcs1_sha256_name,
     "rsa_pkcs1_sha256", TLSEXT_SIGALG_rsa_pkcs1_sha256,
     NID_sha256, SSL_MD_SHA256_IDX, EVP_PKEY_RSA, SSL_PKEY_RSA_SIGN,
-    NID_sha256WithRSAEncryption, NID_undef
+    NID_sha256WithRSAEncryption, NID_undef, 1, 0,
+    NTLS1_1_VERSION, NTLS1_1_VERSION, 0, 0
 };
 #endif
 
@@ -2506,7 +2511,7 @@ int tls1_set_peer_legacy_sigalg(SSL_CONNECTION *s, const EVP_PKEY *pkey)
     const SIGALG_LOOKUP *lu;
 
 #ifndef OPENSSL_NO_NTLS
-    if (SSL_IS_NTLS(s)) {
+    if (SSL_CONNECTION_IS_NTLS(s)) {
         if (EVP_PKEY_is_a(pkey, "SM2"))
             s->s3.tmp.peer_sigalg = &ntls_sm2_sigalg;
         else if (EVP_PKEY_is_a(pkey, "RSA"))
@@ -2938,7 +2943,7 @@ int ssl_cipher_disabled(const SSL_CONNECTION *s, const SSL_CIPHER *c,
         /*
          * NTLS cipher can only use in NTLS
          */
-        if (min_tls == NTLS_VERSION)
+        if (minversion == NTLS_VERSION)
             if (s->s3.tmp.max_ver != NTLS_VERSION)
                 return 1;
 #endif
@@ -3049,7 +3054,7 @@ SSL_TICKET_STATUS tls_get_ticket_from_client(SSL_CONNECTION *s,
 #endif
         s->version <= SSL3_VERSION
 #ifndef OPENSSL_NO_NTLS
-        && !SSL_IS_NTLS(s)
+        && !SSL_CONNECTION_IS_NTLS(s)
         )
 #endif
         || !tls_use_ticket(s))

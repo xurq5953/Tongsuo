@@ -7,6 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
+#include "internal/ssl_unwrap.h"
 #include "internal/cryptlib.h"
 #include <openssl/rand.h>
 #include "ntls_ssl_local.h"
@@ -649,6 +650,7 @@ static SUB_STATE_RETURN read_state_machine_ntls(SSL_CONNECTION *s)
                 st->read_state = READ_STATE_HEADER;
                 break;
 
+            case WORK_FINISHED_SWAP:
             case WORK_FINISHED_STOP:
                 return SUB_STATE_FINISHED;
             }
@@ -788,6 +790,9 @@ static SUB_STATE_RETURN write_state_machine_ntls(SSL_CONNECTION *s)
                 st->write_state = WRITE_STATE_SEND;
                 break;
 
+            case WORK_FINISHED_SWAP:
+                return SUB_STATE_FINISHED;
+
             case WORK_FINISHED_STOP:
                 return SUB_STATE_END_HANDSHAKE;
             }
@@ -844,6 +849,9 @@ static SUB_STATE_RETURN write_state_machine_ntls(SSL_CONNECTION *s)
             case WORK_FINISHED_CONTINUE:
                 st->write_state = WRITE_STATE_TRANSITION;
                 break;
+
+            case WORK_FINISHED_SWAP:
+                return SUB_STATE_FINISHED;
 
             case WORK_FINISHED_STOP:
                 return SUB_STATE_END_HANDSHAKE;

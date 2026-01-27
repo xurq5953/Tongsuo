@@ -295,7 +295,7 @@ int tls1_setup_key_block(SSL_CONNECTION *s)
     }
 
 #if defined(SMTC_MODULE) && !defined(OPENSSL_NO_NTLS)
-    if (SSL_IS_NTLS(s) && (s->options & SSL_OP_NO_TICKET)
+    if (SSL_CONNECTION_IS_NTLS(s) && (s->options & SSL_OP_NO_TICKET)
         && (s->ctx->session_cache_mode == SSL_SESS_CACHE_OFF)) {
         OPENSSL_cleanse(s->session->master_key, s->session->master_key_length);
     }

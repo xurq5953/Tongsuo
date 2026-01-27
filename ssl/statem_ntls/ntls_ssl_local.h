@@ -67,6 +67,6 @@ void custom_exts_free_ntls(custom_ext_methods *exts);
 void ssl_comp_free_compression_methods_int(void);
 
 /* ssl_mcnf.c */
-void ssl_ctx_system_config(SSL_CTX *ctx);
+int ssl_ctx_system_config(SSL_CTX *ctx);
 
 #endif

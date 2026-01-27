@@ -234,7 +234,6 @@ static void setup_trace(const char *str)
 #endif /* OPENSSL_NO_TRACE */
 
 static char *help_argv[] = { "help", NULL };
-static char *version_argv[] = { "version", NULL };
 
 int main(int argc, char *argv[])
 {

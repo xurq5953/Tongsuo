@@ -827,7 +827,7 @@ static const OPT_PAIR services[] = {
 #ifndef OPENSSL_NO_NTLS
 # define IS_PROT_FLAG(o) \
  (o == OPT_SSL3 || o == OPT_TLS1 || o == OPT_TLS1_1 || o == OPT_TLS1_2 \
-  || o == OPT_TLS1_3 || o == OPT_DTLS || o == OPT_DTLS1 || o == OPT_DTLS1_2 || o == OPT_NTLS
+  || o == OPT_TLS1_3 || o == OPT_DTLS || o == OPT_DTLS1 || o == OPT_DTLS1_2 || o == OPT_NTLS \
   || o == OPT_QUIC)
 #else
 # define IS_PROT_FLAG(o) \

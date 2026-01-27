@@ -8,6 +8,7 @@
  */
 
 #include <openssl/ocsp.h>
+#include "internal/ssl_unwrap.h"
 #include "ntls_ssl_local.h"
 #include "ntls_statem_local.h"
 #include "internal/cryptlib.h"

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <assert.h>
+#include "internal/ssl_unwrap.h"
 #include "ntls_ssl_local.h"
 #include "ntls_statem_local.h"
 #include <openssl/buffer.h>
@@ -421,17 +422,6 @@ WORK_STATE ossl_statem_client_pre_work_ntls(SSL_CONNECTION *s, WORK_STATE wst)
     case TLS_ST_CW_CHANGE:
         break;
 
-    case TLS_ST_PENDING_EARLY_DATA_END:
-        /*
-         * If we've been called by SSL_do_handshake()/SSL_write(), or we did not
-         * attempt to write early data before calling SSL_read() then we press
-         * on with the handshake. Otherwise we pause here.
-         */
-        if (s->early_data_state == SSL_EARLY_DATA_FINISHED_WRITING
-                || s->early_data_state == SSL_EARLY_DATA_NONE)
-            return WORK_FINISHED_CONTINUE;
-        /* Fall through */
-
     case TLS_ST_EARLY_DATA:
         return tls_finish_handshake_ntls(s, wst, 0, 1);
 
@@ -450,7 +440,6 @@ WORK_STATE ossl_statem_client_pre_work_ntls(SSL_CONNECTION *s, WORK_STATE wst)
 WORK_STATE ossl_statem_client_post_work_ntls(SSL_CONNECTION *s, WORK_STATE wst)
 {
     OSSL_STATEM *st = &s->statem;
-    SSL *ssl = SSL_CONNECTION_GET_SSL(s);
 
     s->init_num = 0;
 
@@ -480,16 +469,7 @@ WORK_STATE ossl_statem_client_post_work_ntls(SSL_CONNECTION *s, WORK_STATE wst)
         }
 
         break;
-
-    case TLS_ST_CW_END_OF_EARLY_DATA:
-        /*
-         * We set the enc_write_ctx back to NULL because we may end up writing
-         * in cleartext again if we get a HelloRetryRequest from the server.
-         */
-        EVP_CIPHER_CTX_free(s->enc_write_ctx);
-        s->enc_write_ctx = NULL;
-        break;
-
+    
     case TLS_ST_CW_KEY_EXCH:
         if (tls_client_key_exchange_post_work_ntls(s) == 0) {
             /* SSLfatal_ntls() already called */
@@ -498,41 +478,21 @@ WORK_STATE ossl_statem_client_post_work_ntls(SSL_CONNECTION *s, WORK_STATE wst)
         break;
 
     case TLS_ST_CW_CHANGE:
-        if (s->hello_retry_request == SSL_HRR_PENDING)
-            break;
-        if (s->early_data_state == SSL_EARLY_DATA_CONNECTING
-                    && s->max_early_data > 0) {
-            /*
-             * We haven't selected TLSv1.3 yet so we don't call the change
-             * cipher state function associated with the SSL_METHOD. Instead
-             * we call tls13_change_cipher_state() directly.
-             */
-            if (!tls13_change_cipher_state(s,
-                        SSL3_CC_EARLY | SSL3_CHANGE_CIPHER_CLIENT_WRITE))
-                return WORK_ERROR;
-            break;
-        }
-        s->session->cipher = s->s3.tmp.new_cipher;
-#ifdef OPENSSL_NO_COMP
-        s->session->compress_meth = 0;
+        if (s->hello_retry_request == SSL_HRR_PENDING) {
+            st->hand_state = TLS_ST_CW_CLNT_HELLO;
+        } else if (s->early_data_state == SSL_EARLY_DATA_CONNECTING) {
+            st->hand_state = TLS_ST_EARLY_DATA;
+        } else {
+#if defined(OPENSSL_NO_NEXTPROTONEG)
+            st->hand_state = TLS_ST_CW_FINISHED;
 #else
-        if (s->s3.tmp.new_compression == NULL)
-            s->session->compress_meth = 0;
-        else
-            s->session->compress_meth = s->s3.tmp.new_compression->id;
+            if (!SSL_CONNECTION_IS_DTLS(s) && s->s3.npn_seen)
+                st->hand_state = TLS_ST_CW_NEXT_PROTO;
+            else
+                st->hand_state = TLS_ST_CW_FINISHED;
 #endif
-        if (!ssl->method->ssl3_enc->setup_key_block(s)) {
-            /* SSLfatal_ntls() already called */
-            return WORK_ERROR;
         }
-
-        if (!ssl->method->ssl3_enc->change_cipher_state(s,
-                                          SSL3_CHANGE_CIPHER_CLIENT_WRITE)) {
-            /* SSLfatal_ntls() already called */
-            return WORK_ERROR;
-        }
-
-        break;
+        return WRITE_TRAN_CONTINUE;
 
     case TLS_ST_CW_FINISHED:
         if (statem_flush_ntls(s) != 1)
@@ -579,16 +539,6 @@ int ossl_statem_client_construct_message_ntls(SSL_CONNECTION *s, WPACKET *pkt,
     case TLS_ST_CW_CLNT_HELLO:
         *confunc = tls_construct_client_hello_ntls;
         *mt = SSL3_MT_CLIENT_HELLO;
-        break;
-
-    case TLS_ST_CW_END_OF_EARLY_DATA:
-        *confunc = tls_construct_end_of_early_data_ntls;
-        *mt = SSL3_MT_END_OF_EARLY_DATA;
-        break;
-
-    case TLS_ST_PENDING_EARLY_DATA_END:
-        *confunc = NULL;
-        *mt = SSL3_MT_DUMMY;
         break;
 
     case TLS_ST_CW_CERT:
@@ -1174,13 +1124,6 @@ static MSG_PROCESS_RETURN tls_process_as_hello_retry_request(SSL_CONNECTION *s,
 {
     RAW_EXTENSION *extensions = NULL;
 
-    /*
-     * If we were sending early_data then the enc_write_ctx is now invalid and
-     * should not be used.
-     */
-    EVP_CIPHER_CTX_free(s->enc_write_ctx);
-    s->enc_write_ctx = NULL;
-
     if (!tls_collect_extensions_ntls(s, extpkt, SSL_EXT_TLS1_3_HELLO_RETRY_REQUEST,
                                 &extensions, NULL, 1)
             || !tls_parse_all_extensions_ntls(s, SSL_EXT_TLS1_3_HELLO_RETRY_REQUEST,
@@ -1395,7 +1338,8 @@ WORK_STATE tls_post_process_server_certificate_ntls(SSL_CONNECTION *s, WORK_STAT
             return WORK_ERROR;
         }
 
-        if ((clu = ssl_cert_lookup_by_pkey(pkey, &certidx)) == NULL) {
+        if ((clu = ssl_cert_lookup_by_pkey(pkey, &certidx,
+                                           SSL_CONNECTION_GET_CTX(s))) == NULL) {
             SSLfatal_ntls(s, SSL_AD_ILLEGAL_PARAMETER,
                           SSL_R_UNKNOWN_CERTIFICATE_TYPE);
             return WORK_ERROR;
@@ -2203,7 +2147,8 @@ int ssl3_check_cert_and_algorithm_ntls(SSL_CONNECTION *s)
         return 1;
 
     /* This is the passed certificate */
-    clu = ssl_cert_lookup_by_pkey(X509_get0_pubkey(s->session->peer), &idx);
+    clu = ssl_cert_lookup_by_pkey(X509_get0_pubkey(s->session->peer), &idx,
+                                  SSL_CONNECTION_GET_CTX(s));
 
     /* Check certificate is recognised and suitable for cipher */
     if (clu == NULL || (alg_a & clu->amask) == 0) {

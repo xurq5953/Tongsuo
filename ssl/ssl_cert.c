@@ -1299,10 +1299,15 @@ static int ssl_security_default_callback(const SSL *s, const SSL_CTX *ctx,
             /* NTLS v1.1 not allowed at level 3 */
             if (nid == NTLS_VERSION && level >= 3)
                 return 0;
+            /* NTLS v1.1 has a version number of 0x0101 < 0x0300 */
+            if (nid != NTLS_VERSION) {
 #endif
-            /* SSLv3, TLS v1.0 and TLS v1.1 only allowed at level 0 */
-            if (nid <= TLS1_1_VERSION && level > 0)
-                return 0;
+                /* SSLv3, TLS v1.0 and TLS v1.1 only allowed at level 0 */
+                if (nid <= TLS1_1_VERSION && level > 0)
+                    return 0;
+#ifndef OPENSSL_NO_NTLS
+            }
+#endif
         } else {
             /* DTLS v1.0 only allowed at level 0 */
             if (DTLS_VERSION_LT(nid, DTLS1_2_VERSION) && level > 0)
