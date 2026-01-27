@@ -64,6 +64,8 @@ static int test_trace_categories(void)
             SET_EXPECTED_CAT_NAME(PROVIDER);
         case OSSL_TRACE_CATEGORY_QUERY:
             SET_EXPECTED_CAT_NAME(QUERY);
+        case OSSL_TRACE_CATEGORY_SMTC:
+            SET_EXPECTED_CAT_NAME(SMTC);
         default:
             if (cat_num == -1 || cat_num >= OSSL_TRACE_CATEGORY_NUM)
                 expected_cat_name = NULL;

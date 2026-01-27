@@ -356,9 +356,8 @@ enum {
     D_MD5, D_SHA1,
     D_SHA256, D_SHA512, D_HMAC,
     D_CBC_DES, D_EDE3_DES, D_RC4,
-    D_CBC_RC5, D_CBC_CAST,
+    D_CBC_RC5,
     D_CBC_128_AES, D_CBC_192_AES, D_CBC_256_AES,
-    D_CBC_128_CML, D_CBC_192_CML, D_CBC_256_CML,
     D_EVP, D_GHASH, D_RAND, D_EVP_CMAC, D_KMAC128, D_KMAC256,
     D_SM3, D_CBC_SM4, D_ECB_SM4,
     D_CBC_WBSM4_XIAOLAI, D_ECB_WBSM4_XIAOLAI,
@@ -801,6 +800,7 @@ typedef struct loopargs_st {
     EVP_MD_CTX *eddsa_ctx2[EdDSA_NUM];
 #endif /* OPENSSL_NO_ECX */
 #ifndef OPENSSL_NO_SM2
+    // Need to assign a sm2 buffer here for sm2 ciphertext
     EVP_MD_CTX *sm2_ctx[SM2_NUM];
     EVP_MD_CTX *sm2_vfy_ctx[SM2_NUM];
     EVP_PKEY *sm2_pkey[SM2_NUM];
@@ -3386,6 +3386,7 @@ int speed_main(int argc, char **argv)
     buflen = lengths[size_num - 1];
     if (buflen < 36)    /* size of random vector in RSA benchmark */
         buflen = 36;
+    buflen += 97;
     if (INT_MAX - (MAX_MISALIGNMENT + 1) < buflen) {
         BIO_printf(bio_err, "Error: buffer size too large\n");
         goto end;
@@ -4904,12 +4905,15 @@ int speed_main(int argc, char **argv)
     }
 #endif /* OPENSSL_NO_ECX */
 
+
 #ifndef OPENSSL_NO_SM2
     if (doit[D_SM2_DECRYPT]) {
         int st = 1;
         doit[D_SM2_ENCRYPT] = 1;
-        lengths = sm2_lengths_list;
-        size_num = OSSL_NELEM(sm2_lengths_list);
+        if (lengths == lengths_list) {
+            lengths = sm2_lengths_list;
+            size_num = OSSL_NELEM(sm2_lengths_list);
+        }
 
         for (i = 0; st && i < loopargs_len; i++) {
             EVP_PKEY *pkey = NULL, *pubkey = NULL;
@@ -4998,13 +5002,16 @@ int speed_main(int argc, char **argv)
             EVP_PKEY_CTX_free(loopargs[i].sm2_dec_pctx);
             loopargs[i].sm2_dec_pctx = NULL;
         }
+        lengths = lengths_list;
     }
 #ifndef OPENSSL_NO_SM2_THRESHOLD
     if (doit[D_SM2_THRESHOLD_DECRYPT]) {
         int st = 1;
         doit[D_SM2_ENCRYPT] = 1;
-        lengths = sm2_lengths_list;
-        size_num = OSSL_NELEM(sm2_lengths_list);
+        if (lengths == lengths_list) {
+            lengths = sm2_lengths_list;
+            size_num = OSSL_NELEM(sm2_lengths_list);
+        }
 
         for (i = 0; st && i < loopargs_len; i++) {
             EVP_PKEY *key1 = NULL, *key2 = NULL, *pubkey = NULL;
@@ -5063,6 +5070,7 @@ int speed_main(int argc, char **argv)
             EVP_PKEY_CTX_free(loopargs[i].sm2_enc_pctx);
             loopargs[i].sm2_enc_pctx = NULL;
         }
+        lengths = lengths_list;
     }
 
     /* SM2 threshold sign */
@@ -5275,6 +5283,7 @@ int speed_main(int argc, char **argv)
             }
         }
     }
+
 #endif                         /* OPENSSL_NO_SM2 */
 
 #ifndef OPENSSL_NO_DH
