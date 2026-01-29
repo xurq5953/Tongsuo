@@ -800,7 +800,6 @@ static int final_server_name(SSL_CONNECTION *s, unsigned int context, int sent)
     else if (s->session_ctx->ext.servername_cb != NULL)
         ret = s->session_ctx->ext.servername_cb(ssl, &altmp,
                                        s->session_ctx->ext.servername_arg);
-
     /*
      * For servers, propagate the SNI hostname from the temporary
      * storage in the SSL to the persistent SSL_SESSION, now that we

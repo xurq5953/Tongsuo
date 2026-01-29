@@ -395,11 +395,20 @@ void ossl_rlayer_fatal(OSSL_RECORD_LAYER *rl, int al, int reason,
      ERR_set_debug(OPENSSL_FILE, OPENSSL_LINE, OPENSSL_FUNC),      \
      ossl_rlayer_fatal)
 
+#ifndef OPENSSL_NO_NTLS
+#define RLAYER_USE_EXPLICIT_IV(rl) ((rl)->version == TLS1_1_VERSION \
+                                    || (rl)->version == TLS1_2_VERSION \
+                                    || (rl)->version == DTLS1_BAD_VER \
+                                    || (rl)->version == DTLS1_VERSION \
+                                    || (rl)->version == DTLS1_2_VERSION \
+                                    || (rl)->version == NTLS1_1_VERSION)
+#else
 #define RLAYER_USE_EXPLICIT_IV(rl) ((rl)->version == TLS1_1_VERSION \
                                     || (rl)->version == TLS1_2_VERSION \
                                     || (rl)->version == DTLS1_BAD_VER \
                                     || (rl)->version == DTLS1_VERSION \
                                     || (rl)->version == DTLS1_2_VERSION)
+#endif
 
 void ossl_tls_rl_record_set_seq_num(TLS_RL_RECORD *r,
                                     const unsigned char *seq_num);

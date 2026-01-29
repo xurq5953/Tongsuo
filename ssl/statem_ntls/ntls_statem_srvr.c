@@ -1154,6 +1154,11 @@ static int tls_early_post_process_client_hello_ntls(SSL_CONNECTION *s)
         }
     }
 
+    if (!s->hit && !tls1_set_server_sigalgs(s)) {
+        /* SSLfatal() already called */
+        goto err;
+    }
+
     if (!s->hit
             && s->version >= TLS1_VERSION
             && s->ext.session_secret_cb) {

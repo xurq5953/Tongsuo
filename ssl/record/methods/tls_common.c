@@ -103,6 +103,9 @@ char ssl3_cbc_record_digest_supported(const EVP_MD_CTX *ctx)
     case NID_sha256:
     case NID_sha384:
     case NID_sha512:
+#ifndef OPENSSL_NO_SM3
+    case NID_sm3:
+#endif
         return 1;
     default:
         return 0;
@@ -1425,6 +1428,12 @@ tls_new_record_layer(OSSL_LIB_CTX *libctx, const char *propq, int vers,
     case SSL3_VERSION:
         (*retrl)->funcs = &ssl_3_0_funcs;
         break;
+#ifndef OPENSSL_NO_NTLS
+    case NTLS_VERSION:
+        /* NTLS TODO: add ntls funcs*/
+        (*retrl)->funcs = &tls_1_funcs;
+        break;
+#endif
     default:
         /* Should not happen */
         ERR_raise(ERR_LIB_SSL, ERR_R_INTERNAL_ERROR);

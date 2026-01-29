@@ -440,6 +440,7 @@ WORK_STATE ossl_statem_client_pre_work_ntls(SSL_CONNECTION *s, WORK_STATE wst)
 WORK_STATE ossl_statem_client_post_work_ntls(SSL_CONNECTION *s, WORK_STATE wst)
 {
     OSSL_STATEM *st = &s->statem;
+    SSL *ssl = SSL_CONNECTION_GET_SSL(s);
 
     s->init_num = 0;
 
@@ -478,21 +479,21 @@ WORK_STATE ossl_statem_client_post_work_ntls(SSL_CONNECTION *s, WORK_STATE wst)
         break;
 
     case TLS_ST_CW_CHANGE:
-        if (s->hello_retry_request == SSL_HRR_PENDING) {
-            st->hand_state = TLS_ST_CW_CLNT_HELLO;
-        } else if (s->early_data_state == SSL_EARLY_DATA_CONNECTING) {
-            st->hand_state = TLS_ST_EARLY_DATA;
-        } else {
-#if defined(OPENSSL_NO_NEXTPROTONEG)
-            st->hand_state = TLS_ST_CW_FINISHED;
-#else
-            if (!SSL_CONNECTION_IS_DTLS(s) && s->s3.npn_seen)
-                st->hand_state = TLS_ST_CW_NEXT_PROTO;
-            else
-                st->hand_state = TLS_ST_CW_FINISHED;
-#endif
+        s->session->cipher = s->s3.tmp.new_cipher;
+        s->session->compress_meth = 0;
+
+        if (!ssl->method->ssl3_enc->setup_key_block(s)) {
+            /* SSLfatal() already called */
+            return WORK_ERROR;
         }
-        return WRITE_TRAN_CONTINUE;
+
+        if (!ssl->method->ssl3_enc->change_cipher_state(s,
+                                          SSL3_CHANGE_CIPHER_CLIENT_WRITE)) {
+            /* SSLfatal() already called */
+            return WORK_ERROR;
+        }
+
+        break;
 
     case TLS_ST_CW_FINISHED:
         if (statem_flush_ntls(s) != 1)
@@ -1539,12 +1540,16 @@ MSG_PROCESS_RETURN tls_process_key_exchange_ntls(SSL_CONNECTION *s, PACKET *pkt)
 
 MSG_PROCESS_RETURN tls_process_certificate_request_ntls(SSL_CONNECTION *s, PACKET *pkt)
 {
-    size_t i;
-
     /* Clear certificate validity flags */
-    for (i = 0; i < SSL_PKEY_NUM; i++)
-        s->s3.tmp.valid_flags[i] = 0;
-
+    if (s->s3.tmp.valid_flags)
+        memset(s->s3.tmp.valid_flags, 0, s->ssl_pkey_num * sizeof(uint32_t));
+    else
+        s->s3.tmp.valid_flags = OPENSSL_zalloc(s->ssl_pkey_num * sizeof(uint32_t));
+    if (s->s3.tmp.valid_flags == NULL) {
+        SSLfatal_ntls(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+        return MSG_PROCESS_ERROR;
+    }
+    
     {
         PACKET ctypes;
 
@@ -1596,7 +1601,7 @@ MSG_PROCESS_RETURN tls_process_certificate_request_ntls(SSL_CONNECTION *s, PACKE
 
     /* we should setup a certificate to return.... */
     s->s3.tmp.cert_req = 1;
-
+    
     return MSG_PROCESS_CONTINUE_PROCESSING;
 }
 

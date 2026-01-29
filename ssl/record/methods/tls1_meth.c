@@ -479,20 +479,11 @@ static int tls1_mac(OSSL_RECORD_LAYER *rl, TLS_RL_RECORD *rec, unsigned char *md
         return 0;
     md_size = t;
 
-    if (rl->stream_mac) {
-        mac_ctx = hash;
-    } else {
-        hmac = EVP_MD_CTX_new();
-        if (hmac == NULL || !EVP_MD_CTX_copy(hmac, hash)) {
-            goto end;
-        }
-        mac_ctx = hmac;
-    }
-
-    if (!rl->isdtls
-            && rl->tlstree
-            && EVP_MD_CTX_ctrl(mac_ctx, EVP_MD_CTRL_TLSTREE, 0, seq) <= 0)
+    hmac = EVP_MD_CTX_new();
+    if (hmac == NULL || !EVP_MD_CTX_copy(hmac, hash)) {
         goto end;
+    }
+    mac_ctx = hmac;
 
     if (rl->isdtls) {
         unsigned char dtlsseq[8], *p = dtlsseq;

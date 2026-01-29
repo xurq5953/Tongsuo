@@ -529,7 +529,6 @@ MSG_PROCESS_RETURN tls_process_change_cipher_spec_ntls(SSL_CONNECTION *s, PACKET
 {
     size_t remain;
 
-    printf("tls_process_change_cipher_spec_ntls a\n");
     remain = PACKET_remaining(pkt);
     /*
      * 'Change Cipher Spec' is just a single byte, which should already have
@@ -546,15 +545,11 @@ MSG_PROCESS_RETURN tls_process_change_cipher_spec_ntls(SSL_CONNECTION *s, PACKET
         return MSG_PROCESS_ERROR;
     }
 
-    printf("tls_process_change_cipher_spec_ntls b\n");
-
     s->s3.change_cipher_spec = 1;
     if (!ssl3_do_change_cipher_spec(s)) {
         SSLfatal_ntls(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
         return MSG_PROCESS_ERROR;
     }
-
-    printf("tls_process_change_cipher_spec_ntls c\n");
 
     return MSG_PROCESS_CONTINUE_READING;
 }
