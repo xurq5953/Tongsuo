@@ -33,6 +33,16 @@
 # define TIME_INTERVAL                           (60*60)   /* 1 hour */
 
 /*
+ * The number of bytes that constitutes an atomic lump of entropy with respect
+ * to the FIPS 140-2 section 4.9.2 Conditional Tests.  The size is somewhat
+ * arbitrary, the smaller the value, the less entropy is consumed on first
+ * read but the higher the probability of the test failing by accident.
+ *
+ * The value is in bytes.
+ */
+#define CRNGT_BUFSIZ    16
+
+/*
  * Maximum input size for the DRBG (entropy, nonce, personalization string)
  *
  * NIST SP800 90Ar1 allows a maximum of (1 << 35) bits i.e., (1 << 32) bytes.

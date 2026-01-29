@@ -409,7 +409,7 @@ end:
     if (!ok) {
         OSSL_TRACE(SMTC, "Authentication failed\n");
         OSSL_syslog(LOG_ERR, "[SMTC] Admin login failed!\n");
-        ossl_sleep(3000);
+        OSSL_sleep(3000);
     } else {
         OSSL_syslog(LOG_INFO, "[SMTC] Admin login success\n");
     }
@@ -679,7 +679,6 @@ end:
         OSSL_syslog(LOG_ERR, "[SMTC] Self-test failed\n");
         smtc_set_state(SMTC_STATE_ERROR);
     }
-        
     CRYPTO_THREAD_unlock(self_test_lock);
 
     return ok;

@@ -3182,7 +3182,7 @@ SSL_TICKET_STATUS tls_decrypt_ticket(SSL_CONNECTION *s,
             renew_ticket = 1;
     } else {
 #if !defined(OPENSSL_NO_NTLS) && defined(SMTC_MODULE)
-        if (SSL_is_ntls(s)) {
+        if (SSL_CONNECTION_IS_NTLS(s)) {
             EVP_CIPHER *sm4cbc = NULL;
 
             /* Check key name matches */
@@ -3192,9 +3192,8 @@ SSL_TICKET_STATUS tls_decrypt_ticket(SSL_CONNECTION *s,
                 goto end;
             }
 
-
-            sm4cbc = EVP_CIPHER_fetch(s->ctx->libctx, "SM4-CBC",
-                                    s->ctx->propq);
+            sm4cbc = EVP_CIPHER_fetch(SSL_CONNECTION_GET_CTX(s)->libctx, "SM4-CBC",
+                                    SSL_CONNECTION_GET_CTX(s)->propq);
             if (sm4cbc == NULL
                 || ssl_hmac_init(hctx, tctx->ext.secure->tick_hmac_key,
                                 sizeof(tctx->ext.secure->tick_hmac_key),

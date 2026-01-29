@@ -276,7 +276,7 @@ EXT_RETURN tls_construct_ctos_supported_groups(SSL_CONNECTION *s, WPACKET *pkt,
             }
 
             for(i = (num_groups - 1); i > 0; i--) {
-                if(i > sm2_idx)
+                if(i > (size_t)sm2_idx)
                     groups[i] = pgroups[i];
                 else
                     groups[i] = pgroups[i - 1];

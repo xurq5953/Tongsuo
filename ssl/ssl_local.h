@@ -2952,6 +2952,10 @@ __owur int tls1_set_groups(uint16_t **grpext, size_t *grpextlen,
                            uint16_t **ksext, size_t *ksextlen,
                            size_t **tplext, size_t *tplextlen,
                            int *group_ids, size_t group_num);
+__owur int tls1_set_groups_internal(uint16_t **grpext, size_t *grpextlen,
+                             uint16_t **ksext, size_t *ksextlen,
+                             size_t **tplext, size_t *tplextlen,
+                             int *groups, size_t ngroups, int use_nid);
 __owur int tls1_set_groups_with_id(uint16_t **grpext, size_t *grpextlen,
                            uint16_t **ksext, size_t *ksextlen,
                            size_t **tplext, size_t *tplextlen,
