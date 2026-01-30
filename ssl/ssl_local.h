@@ -2169,7 +2169,7 @@ typedef struct cert_st {
     size_t ssl_pkey_num;
 
 # ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-    DC_PKEY dc_pkeys[ssl_pkey_num];
+    DC_PKEY dc_pkeys[SSL_PKEY_NUM];
 # endif
     /* Custom certificate types sent in certificate request message. */
     uint8_t *ctype;
@@ -2554,7 +2554,7 @@ struct openssl_ssl_test_functions {
 const char *ssl_protocol_to_string(int version);
 
 #ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-static ossl_inline int ssl_has_dc(const SSL *s, int idx)
+static ossl_inline int ssl_has_dc(const SSL_CONNECTION *s, int idx)
 {
     if (idx < 0 || idx >= SSL_PKEY_NUM)
         return 0;
@@ -3124,7 +3124,7 @@ void custom_exts_free(custom_ext_methods *exts);
 int ssl_ctx_system_config(SSL_CTX *ctx);
 
 #  ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-int tls1_set_shared_dc_sigalgs(SSL *s);
+int tls1_set_shared_dc_sigalgs(SSL_CONNECTION *s);
 #  endif
 
 const EVP_CIPHER *ssl_evp_cipher_fetch(OSSL_LIB_CTX *libctx,

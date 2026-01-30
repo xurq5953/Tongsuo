@@ -145,7 +145,7 @@ int ossl_ec_check_security_strength(const EC_GROUP *group, int protect)
 int ossl_ec_check_key(OSSL_LIB_CTX *ctx, const EC_KEY *ec, int protect)
 {
 # if !defined(OPENSSL_NO_FIPS_SECURITYCHECKS)
-    if (ossl_securitycheck_enabled(ctx)) {
+    if (ossl_fips_config_securitycheck_enabled(ctx)) {
         int nid, strength;
         const char *curve_name;
         const EC_GROUP *group = EC_KEY_get0_group(ec);
@@ -284,7 +284,7 @@ int ossl_dh_check_key(const DH *dh)
 int ossl_digest_is_allowed(OSSL_LIB_CTX *ctx, const EVP_MD *md)
 {
 # if !defined(OPENSSL_NO_FIPS_SECURITYCHECKS)
-    if (ossl_securitycheck_enabled(ctx))
+    if (ossl_fips_config_securitycheck_enabled(ctx))
         return ossl_digest_get_approved_nid(md) != NID_undef;
 # endif /* OPENSSL_NO_FIPS_SECURITYCHECKS */
     return 1;

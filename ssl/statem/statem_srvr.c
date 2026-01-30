@@ -3772,7 +3772,7 @@ MSG_PROCESS_RETURN tls_process_client_certificate(SSL_CONNECTION *s,
         X509 *peer_cert = sk_X509_value(sk, 0);
 
         if (s->delegated_credential_tag & DC_HAS_BEEN_USED_FOR_VERIFY_PEER) {
-            if (!SSL_IS_TLS13(s)) {
+            if (!SSL_CONNECTION_IS_TLS13(s)) {
                 SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER,
                          SSL_R_UNKNOWN_CERTIFICATE_TYPE);
                 goto err;

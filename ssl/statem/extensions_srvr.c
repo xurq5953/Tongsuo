@@ -1272,7 +1272,7 @@ int tls_parse_ctos_supported_groups(SSL_CONNECTION *s, PACKET *pkt,
 }
 
 #ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-int tls_parse_ctos_delegated_credential(SSL *s, PACKET *pkt, unsigned int context,
+int tls_parse_ctos_delegated_credential(SSL_CONNECTION *s, PACKET *pkt, unsigned int context,
                                         X509 *x, size_t chainidx)
 {
     if (s->statem.hand_state == TLS_ST_SR_CLNT_HELLO)
@@ -1923,7 +1923,7 @@ EXT_RETURN tls_construct_stoc_etm(SSL_CONNECTION *s, WPACKET *pkt,
 }
 
 #ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-EXT_RETURN tls_construct_stoc_delegated_credential(SSL *s, WPACKET *pkt,
+EXT_RETURN tls_construct_stoc_delegated_credential(SSL_CONNECTION *s, WPACKET *pkt,
                                                    unsigned int context,
                                                    X509 *x, size_t chainidx)
 {

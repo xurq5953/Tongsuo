@@ -32,7 +32,7 @@
 static const SIGALG_LOOKUP *find_sig_alg(SSL_CONNECTION *s, X509 *x, EVP_PKEY *pkey);
 static int tls12_sigalg_allowed(const SSL_CONNECTION *s, int op, const SIGALG_LOOKUP *lu);
 #ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-static const SIGALG_LOOKUP *find_dc_sig_alg(SSL *s);
+static const SIGALG_LOOKUP *find_dc_sig_alg(SSL_CONNECTION *s);
 #endif
 
 SSL3_ENC_METHOD const TLSv1_enc_data = {
@@ -4746,13 +4746,23 @@ int tls_choose_sigalg_ntls(SSL_CONNECTION *s, int fatalerrs)
  */
 int tls_choose_sigalg(SSL_CONNECTION *s, int fatalerrs)
 {
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    const SIGALG_LOOKUP *dc_lu = NULL;
+#endif
     const SIGALG_LOOKUP *lu = NULL;
     int sig_idx = -1;
 
     s->s3.tmp.cert = NULL;
     s->s3.tmp.sigalg = NULL;
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    s->s3.tmp.dc = NULL;
+#endif
 
     if (SSL_CONNECTION_IS_TLS13(s)) {
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+        dc_lu = find_dc_sig_alg(s);
+        if (dc_lu == NULL) {
+#endif
         lu = find_sig_alg(s, NULL, NULL);
         if (lu == NULL) {
             if (!fatalerrs)
@@ -4761,6 +4771,9 @@ int tls_choose_sigalg(SSL_CONNECTION *s, int fatalerrs)
                      SSL_R_NO_SUITABLE_SIGNATURE_ALGORITHM);
             return 0;
         }
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+        }
+#endif
     } else {
         /* If ciphersuite doesn't require a cert nothing to do */
         if (!(s->s3.tmp.new_cipher->algorithm_auth & SSL_aCERT))
@@ -5056,7 +5069,7 @@ __owur int tls13_set_encoded_pub_key(EVP_PKEY *pkey,
 }
 
 #ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-static int check_dc_usable(SSL *s, const SIGALG_LOOKUP *sig,
+static int check_dc_usable(SSL_CONNECTION *s, const SIGALG_LOOKUP *sig,
                            DELEGATED_CREDENTIAL *dc, EVP_PKEY *pkey)
 {
     int default_mdnid;
@@ -5082,8 +5095,11 @@ static int check_dc_usable(SSL *s, const SIGALG_LOOKUP *sig,
     return 0;
 }
 
-static int has_usable_dc(SSL *s, const SIGALG_LOOKUP *sig, int idx)
+static int has_usable_dc(SSL_CONNECTION *s, const SIGALG_LOOKUP *sig, int idx)
 {
+    if(s == NULL || sig == NULL)
+        return 0;
+
     if (idx == -1)
         idx = sig->sig_idx;
 
@@ -5095,14 +5111,15 @@ static int has_usable_dc(SSL *s, const SIGALG_LOOKUP *sig, int idx)
 }
 
 /* refer to find_sig_alg() */
-static const SIGALG_LOOKUP *find_dc_sig_alg(SSL *s)
+static const SIGALG_LOOKUP *find_dc_sig_alg(SSL_CONNECTION *s)
 {
     const SIGALG_LOOKUP *lu = NULL;
     size_t i;
     int curve = -1;
     EVP_PKEY *tmppkey;
+    SSL_CTX *ctx = SSL_CONNECTION_GET_CTX(s);
 
-    if (!s->enable_sign_by_dc || !SSL_IS_TLS13(s))
+    if (!s->enable_sign_by_dc || !SSL_CONNECTION_IS_TLS13(s))
         return NULL;
 
     /* Look for a shared sigalgs matching possible certificates */
@@ -5116,7 +5133,7 @@ static const SIGALG_LOOKUP *find_dc_sig_alg(SSL *s)
             || lu->sig == EVP_PKEY_RSA)
             continue;
         /* Check that we have a cert, and signature_algorithms_cert */
-        if (!tls1_lookup_md(s->ctx, lu, NULL))
+        if (!tls1_lookup_md(ctx, lu, NULL))
             continue;
 
         if (!has_usable_dc(s, lu, -1))
@@ -5131,7 +5148,7 @@ static const SIGALG_LOOKUP *find_dc_sig_alg(SSL *s)
                 continue;
         } else if (lu->sig == EVP_PKEY_RSA_PSS) {
             /* validate that key is large enough for the signature algorithm */
-            if (!rsa_pss_check_min_key_size(s->ctx, tmppkey, lu))
+            if (!rsa_pss_check_min_key_size(ctx, tmppkey, lu))
                 continue;
         }
         break;
@@ -5144,7 +5161,7 @@ static const SIGALG_LOOKUP *find_dc_sig_alg(SSL *s)
 }
 
 /* refer to tls1_set_shared_sigalgs */
-int tls1_set_shared_dc_sigalgs(SSL *s)
+int tls1_set_shared_dc_sigalgs(SSL_CONNECTION *s)
 {
     const uint16_t *pref, *allow, *conf;
     size_t preflen, allowlen, conflen;

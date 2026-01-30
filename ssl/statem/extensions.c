@@ -1927,9 +1927,11 @@ static int init_client_cert_type(SSL_CONNECTION *sc, unsigned int context)
 }
 
 #ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-int tls_parse_dc_from_extension(SSL *s, PACKET *pkt, unsigned int context,
+int tls_parse_dc_from_extension(SSL_CONNECTION *s, PACKET *pkt, unsigned int context,
                                 X509 *x, size_t chainidx)
 {
+    SSL_CTX *ctx = SSL_CONNECTION_GET_CTX(s);
+
     if (!s->enable_verify_peer_by_dc)
         return 1;
     /*
@@ -1953,8 +1955,8 @@ int tls_parse_dc_from_extension(SSL *s, PACKET *pkt, unsigned int context,
 
     s->session->peer_dc = DC_new_from_raw_byte_ex(PACKET_data(pkt),
                                                   PACKET_remaining(pkt),
-                                                  s->ctx->libctx,
-                                                  s->ctx->propq);
+                                                  ctx->libctx,
+                                                  ctx->propq);
     if (s->session->peer_dc == NULL) {
         SSLfatal(s, SSL_AD_UNEXPECTED_MESSAGE, ERR_R_INTERNAL_ERROR);
         return 0;
@@ -1964,7 +1966,7 @@ int tls_parse_dc_from_extension(SSL *s, PACKET *pkt, unsigned int context,
     return 1;
 }
 
-int tls_process_dc_request(SSL *s, PACKET *pkt, unsigned int context,
+int tls_process_dc_request(SSL_CONNECTION *s, PACKET *pkt, unsigned int context,
                            X509 *x, size_t chainidx)
 {
     PACKET supported_sig_algs;
@@ -1996,7 +1998,7 @@ int tls_process_dc_request(SSL *s, PACKET *pkt, unsigned int context,
     return 1;
 }
 
-EXT_RETURN tls_construct_delegated_credential_raw(SSL *s, WPACKET *pkt, unsigned int context,
+EXT_RETURN tls_construct_delegated_credential_raw(SSL_CONNECTION *s, WPACKET *pkt, unsigned int context,
                                                   X509 *x, size_t chainidx)
 {
     if (!s->enable_sign_by_dc)
@@ -2036,7 +2038,7 @@ EXT_RETURN tls_construct_delegated_credential_raw(SSL *s, WPACKET *pkt, unsigned
     return EXT_RETURN_NOT_SENT;
 }
 
-EXT_RETURN tls_construct_delegated_credential_request(SSL *s, WPACKET *pkt,
+EXT_RETURN tls_construct_delegated_credential_request(SSL_CONNECTION *s, WPACKET *pkt,
                                                       unsigned int context,
                                                       X509 *x, size_t chainidx)
 {

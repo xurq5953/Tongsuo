@@ -1867,7 +1867,7 @@ int SSL_CTX_use_sign_certificate_file(SSL_CTX *ctx, const char *file, int type)
 #endif
 
 #ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-static int ssl_set_dc(CERT *c, DELEGATED_CREDENTIAL *dc, int is_server)
+static int ssl_set_dc(CERT *c, DELEGATED_CREDENTIAL *dc, int is_server, SSL_CTX *ctx)
 {
     EVP_PKEY *pkey;
     uint16_t sigalg;
@@ -1886,7 +1886,7 @@ static int ssl_set_dc(CERT *c, DELEGATED_CREDENTIAL *dc, int is_server)
         return 0;
     }
 
-    if (ssl_cert_lookup_by_pkey(pkey, &i) == NULL) {
+    if (ssl_cert_lookup_by_pkey(pkey, &i, ctx) == NULL) {
         ERR_raise(ERR_LIB_SSL, SSL_R_UNKNOWN_CERTIFICATE_TYPE);
         return 0;
     }
@@ -1948,11 +1948,11 @@ static int ssl_set_dc(CERT *c, DELEGATED_CREDENTIAL *dc, int is_server)
     return 1;
 }
 
-static int ssl_set_dc_pkey(CERT *c, EVP_PKEY *pkey)
+static int ssl_set_dc_pkey(CERT *c, EVP_PKEY *pkey, SSL_CTX *ctx)
 {
     size_t i;
 
-    if (ssl_cert_lookup_by_pkey(pkey, &i) == NULL) {
+    if (ssl_cert_lookup_by_pkey(pkey, &i, ctx) == NULL) {
         ERR_raise(ERR_LIB_SSL, SSL_R_UNKNOWN_CERTIFICATE_TYPE);
         return 0;
     }
@@ -1970,20 +1970,23 @@ static int ssl_set_dc_pkey(CERT *c, EVP_PKEY *pkey)
 
 int SSL_use_dc(SSL *ssl, DELEGATED_CREDENTIAL *dc)
 {
-    if (ssl == NULL || dc == NULL) {
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+
+    if (sc == NULL || dc == NULL) {
         ERR_raise(ERR_LIB_SSL, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
-    return ssl_set_dc(ssl->cert, dc, SSL_is_server(ssl));
+    return ssl_set_dc(sc->cert, dc, SSL_is_server(ssl), ssl->ctx);
 }
 
 int SSL_use_dc_file(SSL *ssl, const char *file, int type)
 {
     DELEGATED_CREDENTIAL *dc = NULL;
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
     int ret = 0;
 
-    if (ssl == NULL || file == NULL) {
+    if (sc == NULL || file == NULL) {
         ERR_raise(ERR_LIB_SSL, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
@@ -2003,7 +2006,7 @@ int SSL_use_dc_file(SSL *ssl, const char *file, int type)
         goto end;
     }
 
-    ret = ssl_set_dc(ssl->cert, dc, SSL_is_server(ssl));
+    ret = ssl_set_dc(sc->cert, dc, SSL_is_server(ssl), ssl->ctx);
 end:
     DC_free(dc);
     return ret;
@@ -2025,7 +2028,7 @@ int SSL_CTX_use_dc(SSL_CTX *ctx, DELEGATED_CREDENTIAL *dc)
 
     is_server = (ctx->method->ssl_accept == ssl_undefined_function) ? 0 : 1;
 
-    return ssl_set_dc(ctx->cert, dc, is_server);
+    return ssl_set_dc(ctx->cert, dc, is_server, ctx);
 }
 
 int SSL_CTX_use_dc_file(SSL_CTX *ctx, const char *file, int type)
@@ -2053,7 +2056,7 @@ int SSL_CTX_use_dc_file(SSL_CTX *ctx, const char *file, int type)
 
     is_server = (ctx->method->ssl_accept == ssl_undefined_function) ? 0 : 1;
 
-    ret = ssl_set_dc(ctx->cert, dc, is_server);
+    ret = ssl_set_dc(ctx->cert, dc, is_server, ctx);
 end:
     DC_free(dc);
     return ret;
@@ -2061,12 +2064,14 @@ end:
 
 int SSL_use_dc_PrivateKey(SSL *ssl, EVP_PKEY *pkey)
 {
-    if (ssl == NULL || pkey == NULL) {
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+
+    if (ssl == NULL || sc == NULL || pkey == NULL) {
         ERR_raise(ERR_LIB_SSL, ERR_R_PASSED_NULL_PARAMETER);
         return 0;
     }
 
-    return ssl_set_dc_pkey(ssl->cert, pkey);
+    return ssl_set_dc_pkey(sc->cert, pkey, ssl->ctx);
 }
 
 int SSL_use_dc_PrivateKey_file(SSL *ssl, const char *file, int type)
@@ -2074,6 +2079,7 @@ int SSL_use_dc_PrivateKey_file(SSL *ssl, const char *file, int type)
     BIO *in;
     int j, ret = 0;
     EVP_PKEY *pkey = NULL;
+    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     in = BIO_new(BIO_s_file());
     if (in == NULL) {
@@ -2088,8 +2094,8 @@ int SSL_use_dc_PrivateKey_file(SSL *ssl, const char *file, int type)
     if (type == SSL_FILETYPE_PEM) {
         j = ERR_R_PEM_LIB;
         pkey = PEM_read_bio_PrivateKey(in, NULL,
-                                       ssl->default_passwd_callback,
-                                       ssl->default_passwd_callback_userdata);
+                                       sc->default_passwd_callback,
+                                       sc->default_passwd_callback_userdata);
     } else if (type == SSL_FILETYPE_ASN1) {
         j = ERR_R_ASN1_LIB;
         pkey = d2i_PrivateKey_bio(in, NULL);
@@ -2102,7 +2108,7 @@ int SSL_use_dc_PrivateKey_file(SSL *ssl, const char *file, int type)
         goto end;
     }
 
-    ret = ssl_set_dc_pkey(ssl->cert, pkey);
+    ret = ssl_set_dc_pkey(sc->cert, pkey, ssl->ctx);
     EVP_PKEY_free(pkey);
 end:
     BIO_free(in);
@@ -2116,7 +2122,7 @@ int SSL_CTX_use_dc_PrivateKey(SSL_CTX *ctx, EVP_PKEY *pkey)
         return 0;
     }
 
-    return ssl_set_dc_pkey(ctx->cert, pkey);
+    return ssl_set_dc_pkey(ctx->cert, pkey, ctx);
 }
 
 int SSL_CTX_use_dc_PrivateKey_file(SSL_CTX *ctx, const char *file, int type)
@@ -2153,7 +2159,7 @@ int SSL_CTX_use_dc_PrivateKey_file(SSL_CTX *ctx, const char *file, int type)
         goto end;
     }
 
-    ret = ssl_set_dc_pkey(ctx->cert, pkey);
+    ret = ssl_set_dc_pkey(ctx->cert, pkey, ctx);
     EVP_PKEY_free(pkey);
 end:
     BIO_free(in);

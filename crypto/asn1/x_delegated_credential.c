@@ -25,10 +25,18 @@ DELEGATED_CREDENTIAL *DC_new_ex(OSSL_LIB_CTX *libctx, const char *propq)
         return NULL;
     }
 
-    dc->references = 1;
     dc->lock = CRYPTO_THREAD_lock_new();
-    if (dc->lock == NULL)
-        goto err;
+    if (dc->lock == NULL) {
+        ERR_raise(ERR_LIB_ASN1, ERR_R_CRYPTO_LIB);
+        OPENSSL_free(dc);
+        return NULL;
+    }
+
+    if (!CRYPTO_NEW_REF(&dc->references, 1)) {
+        ERR_raise(ERR_LIB_ASN1, ERR_R_CRYPTO_LIB);
+        OPENSSL_free(dc);
+        return NULL;
+    }
 
     dc->libctx = libctx;
     if (propq != NULL) {
@@ -52,8 +60,8 @@ void DC_free(DELEGATED_CREDENTIAL *dc)
     if (dc == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&dc->references, &i, dc->lock);
-    REF_PRINT_COUNT("DC", dc);
+    CRYPTO_DOWN_REF(&dc->references, &i);
+    REF_PRINT_COUNT("DC", i, dc);
     if (i > 0)
         return;
     REF_ASSERT_ISNT(i < 0);
@@ -72,10 +80,10 @@ int DC_up_ref(DELEGATED_CREDENTIAL *dc)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&dc->references, &i, dc->lock) <= 0)
+    if (CRYPTO_UP_REF(&dc->references, &i) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("DC", dc);
+    REF_PRINT_COUNT("DC", i, dc);
     REF_ASSERT_ISNT(i < 2);
     return ((i > 1) ? 1 : 0);
 }
