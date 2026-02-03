@@ -2169,7 +2169,7 @@ typedef struct cert_st {
     size_t ssl_pkey_num;
 
 # ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
-    DC_PKEY dc_pkeys[SSL_PKEY_NUM];
+    DC_PKEY *dc_pkeys;
 # endif
     /* Custom certificate types sent in certificate request message. */
     uint8_t *ctype;

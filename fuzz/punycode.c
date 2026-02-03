@@ -6,10 +6,9 @@
  * in the file LICENSE in the source distribution or at
  * https://www.openssl.org/source/license.html
  */
-
-#include "crypto/punycode.h"
 #include "internal/nelem.h"
 #include <openssl/crypto.h>
+#include "crypto/punycode.h"
 #include "fuzzer.h"
 
 #include <stdio.h>

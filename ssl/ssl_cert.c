@@ -80,6 +80,13 @@ CERT *ssl_cert_new(size_t ssl_pkey_num)
         OPENSSL_free(ret);
         return NULL;
     }
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    ret->dc_pkeys = OPENSSL_zalloc(ret->ssl_pkey_num * sizeof(CERT_PKEY));
+    if (ret->dc_pkeys == NULL) {
+        OPENSSL_free(ret);
+        return NULL;
+    }
+#endif
 
     ret->key = &(ret->pkeys[SSL_PKEY_RSA]);
     ret->sec_cb = ssl_security_default_callback;
@@ -111,6 +118,13 @@ CERT *ssl_cert_dup(CERT *cert)
         OPENSSL_free(ret);
         return NULL;
     }
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    ret->dc_pkeys = OPENSSL_zalloc(ret->ssl_pkey_num * sizeof(CERT_PKEY));
+    if (ret->dc_pkeys == NULL) {
+        OPENSSL_free(ret);
+        return NULL;
+    }
+#endif
 
     ret->key = &ret->pkeys[cert->key - cert->pkeys];
     if (!CRYPTO_NEW_REF(&ret->references, 1)) {
@@ -312,6 +326,9 @@ void ssl_cert_free(CERT *c)
     OPENSSL_free(c->psk_identity_hint);
 #endif
     OPENSSL_free(c->pkeys);
+#ifndef OPENSSL_NO_DELEGATED_CREDENTIAL
+    OPENSSL_free(c->dc_pkeys);
+#endif
     CRYPTO_FREE_REF(&c->references);
     OPENSSL_free(c);
 }

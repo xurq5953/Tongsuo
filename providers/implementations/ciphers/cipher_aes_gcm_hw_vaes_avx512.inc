@@ -18,9 +18,6 @@
      defined(_M_AMD64) || defined(_M_X64))
 # define VAES_GCM_ENABLED
 
-/* Returns non-zero when AVX512F + VAES + VPCLMULDQD combination is available */
-int ossl_vaes_vpclmulqdq_capable(void);
-
 # define OSSL_AES_GCM_UPDATE(direction)                                 \
     void ossl_aes_gcm_ ## direction ## _avx512(const void *ks,          \
                                                void *gcm128ctx,         \
@@ -31,15 +28,6 @@ int ossl_vaes_vpclmulqdq_capable(void);
 
 OSSL_AES_GCM_UPDATE(encrypt)
 OSSL_AES_GCM_UPDATE(decrypt)
-
-void ossl_aes_gcm_init_avx512(const void *ks, void *gcm128ctx);
-void ossl_aes_gcm_setiv_avx512(const void *ks, void *gcm128ctx,
-                               const unsigned char *iv, size_t ivlen);
-void ossl_aes_gcm_update_aad_avx512(void *gcm128ctx, const unsigned char *aad,
-                                    size_t aadlen);
-void ossl_aes_gcm_finalize_avx512(void *gcm128ctx, unsigned int pblocklen);
-
-void ossl_gcm_gmult_avx512(u64 Xi[2], const void *gcm128ctx);
 
 static int vaes_gcm_setkey(PROV_GCM_CTX *ctx, const unsigned char *key,
                            size_t keylen)

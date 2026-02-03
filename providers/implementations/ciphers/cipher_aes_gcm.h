@@ -43,3 +43,32 @@ typedef struct prov_aes_gcm_ctx_st {
 } PROV_AES_GCM_CTX;
 
 const PROV_GCM_HW *ossl_prov_aes_hw_gcm(size_t keybits);
+
+/*
+ * See crypto/modes/asm/aes-gcm-avx512.pl for further details.
+ */
+void ossl_aes_gcm_encrypt_avx512 (const void* aes_keys, 
+                                  void *gcm128ctx,
+                                  unsigned int *pblocklen,
+                                  const unsigned char *in,
+                                  size_t len,
+                                  unsigned char *out);
+
+void ossl_aes_gcm_decrypt_avx512 (const void* keys,
+                                  void *gcm128ctx,
+                                  unsigned int *pblocklen,
+                                  const unsigned char *in,
+                                  size_t len,
+                                  unsigned char *out);
+
+void ossl_aes_gcm_init_avx512(const void *ks, void *gcm128ctx);
+void ossl_aes_gcm_setiv_avx512(const void *ks, void *gcm128ctx,
+                               const unsigned char *iv, size_t ivlen);
+void ossl_aes_gcm_update_aad_avx512(void *gcm128ctx, const unsigned char *aad,
+                                    size_t aadlen);
+void ossl_aes_gcm_finalize_avx512(void *gcm128ctx, unsigned int pblocklen);
+
+void ossl_gcm_gmult_avx512(u64 Xi[2], const void *gcm128ctx);
+
+/* Returns non-zero when AVX512F + VAES + VPCLMULDQD combination is available */
+int ossl_vaes_vpclmulqdq_capable(void);

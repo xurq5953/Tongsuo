@@ -56,6 +56,82 @@ int ossl_rsaz_mod_exp_avx512_x2(BN_ULONG *res1,
                                 BN_ULONG k0_2,
                                 int factor_size);
 
+/*
+ * For details of the methods declared below please refer to
+ *    crypto/bn/asm/rsaz-avx512.pl
+ *
+ * Naming conventions:
+ *  amm = Almost Montgomery Multiplication
+ *  ams = Almost Montgomery Squaring
+ *  52xZZ - data represented as array of ZZ digits in 52-bit radix
+ *  _x1_/_x2_ - 1 or 2 independent inputs/outputs
+ *  _ifma256 - uses 256-bit wide IFMA ISA (AVX512_IFMA256)
+ *  _avxifma256 - uses 256-bit wide AVXIFMA ISA (AVX_IFMA256)
+ */
+
+void ossl_rsaz_amm52x20_x1_ifma256(BN_ULONG *res, const BN_ULONG *a,
+                                   const BN_ULONG *b, const BN_ULONG *m,
+                                   BN_ULONG k0);
+void ossl_rsaz_amm52x20_x2_ifma256(BN_ULONG *out, const BN_ULONG *a,
+                                   const BN_ULONG *b, const BN_ULONG *m,
+                                   const BN_ULONG k0[2]);
+void ossl_extract_multiplier_2x20_win5(BN_ULONG *red_Y,
+                                       const BN_ULONG *red_table,
+                                       int red_table_idx1, int red_table_idx2);
+
+void ossl_rsaz_amm52x30_x1_ifma256(BN_ULONG *res, const BN_ULONG *a,
+                                   const BN_ULONG *b, const BN_ULONG *m,
+                                   BN_ULONG k0);
+void ossl_rsaz_amm52x30_x2_ifma256(BN_ULONG *out, const BN_ULONG *a,
+                                   const BN_ULONG *b, const BN_ULONG *m,
+                                   const BN_ULONG k0[2]);
+void ossl_extract_multiplier_2x30_win5(BN_ULONG *red_Y,
+                                       const BN_ULONG *red_table,
+                                       int red_table_idx1, int red_table_idx2);
+
+void ossl_rsaz_amm52x40_x1_ifma256(BN_ULONG *res, const BN_ULONG *a,
+                                   const BN_ULONG *b, const BN_ULONG *m,
+                                   BN_ULONG k0);
+void ossl_rsaz_amm52x40_x2_ifma256(BN_ULONG *out, const BN_ULONG *a,
+                                   const BN_ULONG *b, const BN_ULONG *m,
+                                   const BN_ULONG k0[2]);
+void ossl_extract_multiplier_2x40_win5(BN_ULONG *red_Y,
+                                       const BN_ULONG *red_table,
+                                       int red_table_idx1, int red_table_idx2);
+
+void ossl_rsaz_amm52x20_x1_avxifma256(BN_ULONG *res, const BN_ULONG *a,
+                                      const BN_ULONG *b, const BN_ULONG *m,
+                                      BN_ULONG k0);
+void ossl_rsaz_amm52x20_x2_avxifma256(BN_ULONG *out, const BN_ULONG *a,
+                                      const BN_ULONG *b, const BN_ULONG *m,
+                                      const BN_ULONG k0[2]);
+void ossl_extract_multiplier_2x20_win5_avx(BN_ULONG *red_Y,
+                                           const BN_ULONG *red_table,
+                                           int red_table_idx1,
+                                           int red_table_idx2);
+
+void ossl_rsaz_amm52x30_x1_avxifma256(BN_ULONG *res, const BN_ULONG *a,
+                                      const BN_ULONG *b, const BN_ULONG *m,
+                                      BN_ULONG k0);
+void ossl_rsaz_amm52x30_x2_avxifma256(BN_ULONG *out, const BN_ULONG *a,
+                                      const BN_ULONG *b, const BN_ULONG *m,
+                                      const BN_ULONG k0[2]);
+void ossl_extract_multiplier_2x30_win5_avx(BN_ULONG *red_Y,
+                                           const BN_ULONG *red_table,
+                                           int red_table_idx1,
+                                           int red_table_idx2);
+
+void ossl_rsaz_amm52x40_x1_avxifma256(BN_ULONG *res, const BN_ULONG *a,
+                                      const BN_ULONG *b, const BN_ULONG *m,
+                                      BN_ULONG k0);
+void ossl_rsaz_amm52x40_x2_avxifma256(BN_ULONG *out, const BN_ULONG *a,
+                                      const BN_ULONG *b, const BN_ULONG *m,
+                                      const BN_ULONG k0[2]);
+void ossl_extract_multiplier_2x40_win5_avx(BN_ULONG *red_Y,
+                                           const BN_ULONG *red_table,
+                                           int red_table_idx1,
+                                           int red_table_idx2);
+
 static ossl_inline void bn_select_words(BN_ULONG *r, BN_ULONG mask,
                                         const BN_ULONG *a,
                                         const BN_ULONG *b, size_t num)

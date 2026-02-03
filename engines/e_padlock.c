@@ -147,15 +147,19 @@ static int padlock_init(ENGINE *e)
 }
 
 #  ifndef AES_ASM
-static int padlock_aes_set_encrypt_key(const unsigned char *userKey,
-                                       const int bits,
-                                       AES_KEY *key);
-static int padlock_aes_set_decrypt_key(const unsigned char *userKey,
-                                       const int bits,
-                                       AES_KEY *key);
 #   define AES_ASM
-#   define AES_set_encrypt_key padlock_aes_set_encrypt_key
-#   define AES_set_decrypt_key padlock_aes_set_decrypt_key
+#   ifndef AES_set_encrypt_key
+        static int padlock_aes_set_encrypt_key(const unsigned char *userKey,
+                                               const int bits,
+                                               AES_KEY *key);
+#       define AES_set_encrypt_key padlock_aes_set_encrypt_key
+#   endif
+#   ifndef AES_set_decrypt_key
+        static int padlock_aes_set_decrypt_key(const unsigned char *userKey,
+                                               const int bits,
+                                               AES_KEY *key);
+#       define AES_set_decrypt_key padlock_aes_set_decrypt_key
+#   endif
 #   include "../crypto/aes/aes_core.c"
 #  endif
 
