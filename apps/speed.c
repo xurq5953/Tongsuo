@@ -6886,6 +6886,7 @@ int speed_main(int argc, char **argv)
 
             if (loopargs[i].ec_elgamal_ctx[k] != NULL)
                 EC_ELGAMAL_CTX_free(loopargs[i].ec_elgamal_ctx[k]);
+        }
 #endif
 #ifndef OPENSSL_NO_PAILLIER
         for (k = 0; k < PAILLIER_NUM; k++) {
@@ -7326,9 +7327,6 @@ static int do_multi(int multi, int size_num)
                 }
 # ifndef OPENSSL_NO_EC_ELGAMAL
             } else if (CHECK_AND_SKIP_PREFIX(p, "+F11:")) {
-                int k;
-                double d;
-
                 p = buf + 4;
                 k = atoi(sstrsep(&p, sep));
                 sstrsep(&p, sep);
@@ -7339,8 +7337,7 @@ static int do_multi(int multi, int size_num)
                 d = atof(sstrsep(&p, sep));
                 ec_elgamal_results[k][1][0] += d;
             } else if (CHECK_AND_SKIP_PREFIX(p, "+F12:")) {
-                int k, j;
-                double d;
+                int j;
 
                 p = buf + 4;
                 k = atoi(sstrsep(&p, sep));
@@ -7366,8 +7363,7 @@ static int do_multi(int multi, int size_num)
 # endif /* OPENSSL_NO_EC_ELGAMAL */
 # ifndef OPENSSL_NO_PAILLIER
             } else if (CHECK_AND_SKIP_PREFIX(p, "+F11:")) {
-                int k, j;
-                double d;
+                int j;
 
                 p = buf + 4;
                 k = atoi(sstrsep(&p, sep));

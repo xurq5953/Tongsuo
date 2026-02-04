@@ -430,7 +430,7 @@ EC_ELGAMAL_DECRYPT_TABLE *EC_ELGAMAL_DECRYPT_TABLE_new_ex(EC_ELGAMAL_CTX *ctx,
     table->baby_step_bits = baby_step_bits;
     table->giant_step_bits = giant_step_bits;
 
-    table->references = 1;
+    CRYPTO_NEW_REF(&table->references, 1);
     table->lock = CRYPTO_THREAD_lock_new();
 
     BN_CTX_free(bn_ctx);
@@ -461,7 +461,7 @@ void EC_ELGAMAL_DECRYPT_TABLE_free(EC_ELGAMAL_DECRYPT_TABLE *table)
     if (table == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&table->references, &i, table->lock);
+    CRYPTO_DOWN_REF(&table->references, &i);
 
     if (i > 0)
         return;
@@ -487,5 +487,5 @@ void EC_ELGAMAL_CTX_set_decrypt_table(EC_ELGAMAL_CTX *ctx,
     int i;
 
     ctx->decrypt_table = table;
-    CRYPTO_UP_REF(&table->references, &i, table->lock);
+    CRYPTO_UP_REF(&table->references, &i);
 }

@@ -31,7 +31,7 @@ PAILLIER_KEY *PAILLIER_KEY_new(void)
         || (key->u = BN_new()) == NULL)
         goto err;
 
-    key->references = 1;
+    CRYPTO_NEW_REF(&key->references, 1);
     if ((key->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_PAILLIER, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -53,8 +53,8 @@ void PAILLIER_KEY_free(PAILLIER_KEY *key)
     if (key == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&key->references, &i, key->lock);
-    REF_PRINT_COUNT("PAILLIER_KEY", key);
+    CRYPTO_DOWN_REF(&key->references, &i);
+    REF_PRINT_COUNT("PAILLIER_KEY", i, key);
     if (i > 0)
         return;
     REF_ASSERT_ISNT(i < 0);
@@ -144,10 +144,10 @@ int PAILLIER_KEY_up_ref(PAILLIER_KEY *key)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&key->references, &i, key->lock) <= 0)
+    if (CRYPTO_UP_REF(&key->references, &i) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("PAILLIER_KEY", key);
+    REF_PRINT_COUNT("PAILLIER_KEY", i, key);
     REF_ASSERT_ISNT(i < 2);
     return ((i > 1) ? 1 : 0);
 }
