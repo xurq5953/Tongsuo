@@ -13336,9 +13336,17 @@ static int test_ssl_trace(void)
     } else {
 
 # ifdef OPENSSL_NO_ZLIB
+    #ifndef OPENSSL_NO_SM2
         reffile = test_mk_file_path(datadir, "ssltraceref.txt");
+    #else
+        reffile = test_mk_file_path(datadir, "ssltraceref-no-sm2.txt");
+    #endif
 # else
+    #ifndef OPENSSL_NO_SM2
         reffile = test_mk_file_path(datadir, "ssltraceref-zlib.txt");
+    #else
+        reffile = test_mk_file_path(datadir, "ssltraceref-no-sm2-zlib.txt");
+    #endif
 # endif
         if (!TEST_true(compare_with_reference_file(bio, reffile)))
             goto err;
