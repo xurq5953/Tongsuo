@@ -1749,14 +1749,18 @@ static int SM2_keygen_loop(void *args)
 {
     int count;
 
+    EVP_PKEY *sm2_pkey = NULL;
+
     for (count = 0; COND(keygen_results[testnum]); count++) {
-        if (EVP_PKEY_Q_keygen(app_get0_libctx(), app_get0_propq(), "SM2")
+        if ((sm2_pkey = EVP_PKEY_Q_keygen(app_get0_libctx(), app_get0_propq(), "SM2"))
                 == NULL) {
             BIO_printf(bio_err, "SM2 keygen failure\n");
             ERR_print_errors(bio_err);
             count = -1;
             break;
         }
+        EVP_PKEY_free(sm2_pkey);
+        sm2_pkey = NULL;
     }
 
     return count;

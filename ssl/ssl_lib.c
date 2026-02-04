@@ -5507,8 +5507,8 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
     if (!ssl_load_ciphers(ret))
         goto err2;
 
-    if (!ssl_load_groups(ret))
-        goto err2;
+    //if (!ssl_load_groups(ret))
+    //    goto err2;
 
     /* load provider sigalgs */
     if (!ssl_load_sigalgs(ret)) {
@@ -5716,6 +5716,24 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
             goto err;
 
         ret->ext.supportedgroups_len = ctx->ext.supportedgroups_len;
+    }
+    if (ctx->ext.keyshares) {
+        ret->ext.keyshares = OPENSSL_memdup(ctx->ext.keyshares,
+                                            ctx->ext.keyshares_len
+                                            * sizeof(*ctx->ext.keyshares));
+        if(!ret->ext.keyshares)
+            goto err;
+        
+        ret->ext.keyshares_len = ctx->ext.keyshares_len;
+    }
+    if(ctx->ext.tuples) {
+        ret->ext.tuples = OPENSSL_memdup(ctx->ext.tuples,
+                                         ctx->ext.tuples_len
+                                         * sizeof(*ctx->ext.tuples));
+        if(!ret->ext.tuples)
+            goto err;
+        
+        ret->ext.tuples_len = ctx->ext.tuples_len;
     }
 # endif
 
