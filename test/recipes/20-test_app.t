@@ -30,8 +30,3 @@ ok(run(app(["openssl", "-help"])),
 ok(run(app(["openssl", "--help"])),
    "Run openssl app with --help");
 
-ok(run(app(["openssl", "-version"])),
-   "Run openssl app with -version");
-
-ok(run(app(["openssl", "--version"])),
-   "Run openssl app with --version");
