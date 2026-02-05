@@ -1767,8 +1767,6 @@ static int SM2_keygen_loop(void *args)
 }
 
 # ifndef OPENSSL_NO_SM2_THRESHOLD
-static long sm2_threshold_c[2];
-
 static int SM2_THRESHOLD_decrypt_loop(void *args)
 {
     loopargs_t *tempargs = *(loopargs_t **)args;
@@ -1815,10 +1813,12 @@ static int SM2_THRESHOLD_decrypt_loop(void *args)
         pt = NULL;
     }
 
-    BN_free(w);
-    EC_POINT_free(T1);
-    EC_POINT_free(T2);
-    OPENSSL_free(pt);
+    if(count == -1) {
+        BN_free(w);
+        EC_POINT_free(T1);
+        EC_POINT_free(T2);
+        OPENSSL_free(pt);
+    }       
 
     return count;
 }
@@ -4914,10 +4914,12 @@ int speed_main(int argc, char **argv)
     if (doit[D_SM2_DECRYPT]) {
         int st = 1;
         doit[D_SM2_ENCRYPT] = 1;
+        printf("size_num: %d\n", size_num);
         if (lengths == lengths_list) {
             lengths = sm2_lengths_list;
             size_num = OSSL_NELEM(sm2_lengths_list);
         }
+        
 
         for (i = 0; st && i < loopargs_len; i++) {
             EVP_PKEY *pkey = NULL, *pubkey = NULL;
@@ -5006,7 +5008,11 @@ int speed_main(int argc, char **argv)
             EVP_PKEY_CTX_free(loopargs[i].sm2_dec_pctx);
             loopargs[i].sm2_dec_pctx = NULL;
         }
-        lengths = lengths_list;
+        if(lengths == sm2_lengths_list) {
+            lengths = lengths_list;
+            size_num = OSSL_NELEM(lengths_list);
+        }
+            
     }
 #ifndef OPENSSL_NO_SM2_THRESHOLD
     if (doit[D_SM2_THRESHOLD_DECRYPT]) {
@@ -5046,17 +5052,14 @@ int speed_main(int argc, char **argv)
 
         for (testnum = 0; st && testnum < size_num; testnum++) {
             algindex = D_SM2_ENCRYPT;
-            print_message(names[D_SM2_ENCRYPT], c[D_SM2_ENCRYPT][testnum],
-                          lengths[testnum], seconds.sym);
+            print_message(names[D_SM2_ENCRYPT], lengths[testnum], seconds.sym);
             Time_F(START);
             count = run_benchmark(async_jobs, SM2_encrypt_loop, loopargs);
             d = Time_F(STOP);
             print_result(D_SM2_ENCRYPT, testnum, count, d);
 
             algindex = D_SM2_THRESHOLD_DECRYPT;
-            print_message(names[D_SM2_THRESHOLD_DECRYPT],
-                          c[D_SM2_THRESHOLD_DECRYPT][testnum],
-                          lengths[testnum], seconds.sym);
+            print_message(names[D_SM2_THRESHOLD_DECRYPT], lengths[testnum], seconds.sym);
             Time_F(START);
             count =
                 run_benchmark(async_jobs, SM2_THRESHOLD_decrypt_loop, loopargs);
@@ -5074,7 +5077,10 @@ int speed_main(int argc, char **argv)
             EVP_PKEY_CTX_free(loopargs[i].sm2_enc_pctx);
             loopargs[i].sm2_enc_pctx = NULL;
         }
-        lengths = lengths_list;
+        if(lengths == sm2_lengths_list) {
+            lengths = lengths_list;
+            size_num = OSSL_NELEM(lengths_list);
+        }
     }
 
     /* SM2 threshold sign */
@@ -5105,7 +5111,6 @@ int speed_main(int argc, char **argv)
         }
 
         pkey_print_message("sign", "SM2_THRESHOLD",
-                            sm2_threshold_c[0],
                             sm2_curves[0].bits, seconds.sm2);
         Time_F(START);
         count = run_benchmark(async_jobs, SM2_THRESHOLD_sign_loop, loopargs);
@@ -5119,7 +5124,6 @@ int speed_main(int argc, char **argv)
 
         testnum = 0;
         pkey_print_message("verify", sm2_curves[0].name,
-                            sm2_c[0][1],
                             sm2_curves[0].bits, seconds.sm2);
         Time_F(START);
         count = run_benchmark(async_jobs, SM2_verify_loop, loopargs);
