@@ -119,7 +119,7 @@ BP_PUB_PARAM *BP_PUB_PARAM_new(const EC_GROUP *group, int gens_capacity,
             goto err;
     }
 
-    pp->references = 1;
+    CRYPTO_NEW_REF(&pp->references, 1);
     if ((pp->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -200,8 +200,8 @@ void BP_PUB_PARAM_free(BP_PUB_PARAM *pp)
     if (pp == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&pp->references, &ref, pp->lock);
-    REF_PRINT_COUNT("BP_PUB_PARAM", pp);
+    CRYPTO_DOWN_REF(&pp->references, &ref);
+    REF_PRINT_COUNT("BP_PUB_PARAM", ref, pp);
     if (ref > 0)
         return;
     REF_ASSERT_ISNT(ref < 0);
@@ -226,10 +226,10 @@ int BP_PUB_PARAM_up_ref(BP_PUB_PARAM *pp)
     if (pp == NULL)
         return 0;
 
-    if (CRYPTO_UP_REF(&pp->references, &ref, pp->lock) <= 0)
+    if (CRYPTO_UP_REF(&pp->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("BP_PUB_PARAM", pp);
+    REF_PRINT_COUNT("BP_PUB_PARAM", ref, pp);
     REF_ASSERT_ISNT(ref < 2);
     return ((ref > 1) ? 1 : 0);
 }
@@ -245,10 +245,10 @@ int BP_PUB_PARAM_down_ref(BP_PUB_PARAM *pp)
     if (pp == NULL)
         return 0;
 
-    if (CRYPTO_DOWN_REF(&pp->references, &ref, pp->lock) <= 0)
+    if (CRYPTO_DOWN_REF(&pp->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("BP_PUB_PARAM", pp);
+    REF_PRINT_COUNT("BP_PUB_PARAM", ref, pp);
     REF_ASSERT_ISNT(ref < 0);
     return ((ref > 0) ? 1 : 0);
 }
@@ -325,7 +325,7 @@ BP_WITNESS *BP_WITNESS_new(const BP_PUB_PARAM *pp)
         || !(witness->H = EC_POINT_dup(pp->H, pp->group)))
         goto err;
 
-    witness->references = 1;
+    CRYPTO_NEW_REF(&witness->references, 1);
     if ((witness->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -347,8 +347,8 @@ void BP_WITNESS_free(BP_WITNESS *witness)
     if (witness == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&witness->references, &ref, witness->lock);
-    REF_PRINT_COUNT("BP_WITNESS", witness);
+    CRYPTO_DOWN_REF(&witness->references, &ref);
+    REF_PRINT_COUNT("BP_WITNESS", ref, witness);
     if (ref > 0)
         return;
     REF_ASSERT_ISNT(ref < 0);
@@ -373,10 +373,10 @@ int BP_WITNESS_up_ref(BP_WITNESS *witness)
     if (witness == NULL)
         return 0;
 
-    if (CRYPTO_UP_REF(&witness->references, &ref, witness->lock) <= 0)
+    if (CRYPTO_UP_REF(&witness->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("BP_WITNESS", witness);
+    REF_PRINT_COUNT("BP_WITNESS", ref, witness);
     REF_ASSERT_ISNT(ref < 2);
     return ((ref > 1) ? 1 : 0);
 }
@@ -392,10 +392,10 @@ int BP_WITNESS_down_ref(BP_WITNESS *witness)
     if (witness == NULL)
         return 0;
 
-    if (CRYPTO_DOWN_REF(&witness->references, &ref, witness->lock) <= 0)
+    if (CRYPTO_DOWN_REF(&witness->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("BP_WITNESS", witness);
+    REF_PRINT_COUNT("BP_WITNESS", ref, witness);
     REF_ASSERT_ISNT(ref < 0);
     return ((ref > 0) ? 1 : 0);
 }

@@ -27,7 +27,7 @@ BP_R1CS_VARIABLE *BP_R1CS_VARIABLE_new(BP_R1CS_VARIABLE_TYPE type, uint64_t valu
         return NULL;
     }
 
-    var->references = 1;
+    CRYPTO_NEW_REF(&var->references, 1);
     if ((var->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -62,8 +62,8 @@ void BP_R1CS_VARIABLE_free(BP_R1CS_VARIABLE *var)
     if (var == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&var->references, &ref, var->lock);
-    REF_PRINT_COUNT("BP_R1CS_VARIABLE", var);
+    CRYPTO_DOWN_REF(&var->references, &ref);
+    REF_PRINT_COUNT("BP_R1CS_VARIABLE", ref, var);
     if (ref > 0)
         return;
     REF_ASSERT_ISNT(ref < 0);
@@ -91,7 +91,7 @@ BP_R1CS_LC_ITEM *BP_R1CS_LC_ITEM_new(BP_R1CS_VARIABLE *var, const BIGNUM *scalar
         }
         var = v;
     } else {
-        if (CRYPTO_UP_REF(&var->references, &ref, var->lock) <= 0)
+        if (CRYPTO_UP_REF(&var->references, &ref) <= 0)
             goto err;
     }
 
@@ -149,7 +149,7 @@ BP_R1CS_LINEAR_COMBINATION *BP_R1CS_LINEAR_COMBINATION_new(void)
     if ((lc->items = sk_BP_R1CS_LINEAR_COMBINATION_ITEM_new_null()) == NULL)
         goto err;
 
-    lc->references = 1;
+    CRYPTO_NEW_REF(&lc->references, 1);
     if ((lc->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -230,8 +230,8 @@ void BP_R1CS_LINEAR_COMBINATION_free(BP_R1CS_LINEAR_COMBINATION *lc)
     if (lc == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&lc->references, &ref, lc->lock);
-    REF_PRINT_COUNT("BP_R1CS_LINEAR_COMBINATION", lc);
+    CRYPTO_DOWN_REF(&lc->references, &ref);
+    REF_PRINT_COUNT("BP_R1CS_LINEAR_COMBINATION", ref, lc);
     if (ref > 0)
         return;
     REF_ASSERT_ISNT(ref < 0);
@@ -754,7 +754,7 @@ int BP_R1CS_LINEAR_COMBINATION_constrain(BP_R1CS_LINEAR_COMBINATION *lc,
         return 0;
     }
 
-    if (CRYPTO_UP_REF(&lc->references, &ref, lc->lock) <= 0)
+    if (CRYPTO_UP_REF(&lc->references, &ref) <= 0)
         return 0;
 
     if (sk_BP_R1CS_LINEAR_COMBINATION_push(ctx->constraints, lc) <= 0)
@@ -762,7 +762,7 @@ int BP_R1CS_LINEAR_COMBINATION_constrain(BP_R1CS_LINEAR_COMBINATION *lc,
 
     return 1;
 err:
-    CRYPTO_DOWN_REF(&lc->references, &ref, lc->lock);
+    CRYPTO_DOWN_REF(&lc->references, &ref);
     return 0;
 }
 

@@ -43,7 +43,7 @@ BP_RANGE_PROOF *bp_range_proof_alloc(const EC_GROUP *group)
         || !(proof->tx = BN_new()))
         goto err;
 
-    proof->references = 1;
+    CRYPTO_NEW_REF(&proof->references, 1);
     if ((proof->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -133,8 +133,8 @@ void BP_RANGE_PROOF_free(BP_RANGE_PROOF *proof)
     if (proof == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&proof->references, &ref, proof->lock);
-    REF_PRINT_COUNT("BP_RANGE_PROOF", proof);
+    CRYPTO_DOWN_REF(&proof->references, &ref);
+    REF_PRINT_COUNT("BP_RANGE_PROOF", ref, proof);
     if (ref > 0)
         return;
     REF_ASSERT_ISNT(ref < 0);
@@ -168,10 +168,10 @@ int BP_RANGE_PROOF_up_ref(BP_RANGE_PROOF *proof)
 {
     int ref;
 
-    if (CRYPTO_UP_REF(&proof->references, &ref, proof->lock) <= 0)
+    if (CRYPTO_UP_REF(&proof->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("BP_RANGE_PROOF", proof);
+    REF_PRINT_COUNT("BP_RANGE_PROOF", ref, proof);
     REF_ASSERT_ISNT(ref < 2);
     return ((ref > 1) ? 1 : 0);
 }
@@ -184,10 +184,10 @@ int BP_RANGE_PROOF_down_ref(BP_RANGE_PROOF *proof)
 {
     int ref;
 
-    if (CRYPTO_DOWN_REF(&proof->references, &ref, proof->lock) <= 0)
+    if (CRYPTO_DOWN_REF(&proof->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("BP_RANGE_PROOF", proof);
+    REF_PRINT_COUNT("BP_RANGE_PROOF", ref, proof);
     REF_ASSERT_ISNT(ref > 0);
     return ((ref > 0) ? 1 : 0);
 }

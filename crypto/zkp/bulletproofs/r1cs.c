@@ -120,7 +120,7 @@ BP_R1CS_PROOF *BP_R1CS_PROOF_new(BP_R1CS_CTX *ctx)
     BN_zero(proof->mu);
     BN_zero(proof->tx);
 
-    proof->references = 1;
+    CRYPTO_NEW_REF(&proof->references, 1);
 
     if ((proof->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
@@ -140,8 +140,8 @@ void BP_R1CS_PROOF_free(BP_R1CS_PROOF *proof)
     if (proof == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&proof->references, &ref, proof->lock);
-    REF_PRINT_COUNT("BP_R1CS_PROOF", proof);
+    CRYPTO_DOWN_REF(&proof->references, &ref);
+    REF_PRINT_COUNT("BP_R1CS_PROOF", ref, proof);
     if (ref > 0)
         return;
     REF_ASSERT_ISNT(ref < 0);

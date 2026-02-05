@@ -625,7 +625,7 @@ BP_WITNESS *BP_WITNESS_decode(const unsigned char *in, size_t size, int flag)
 
     witness->group = group;
 
-    witness->references = 1;
+    CRYPTO_NEW_REF(&witness->references, 1);
     if ((witness->lock = CRYPTO_THREAD_lock_new()) == NULL)
         goto err;
 
@@ -822,7 +822,7 @@ BP_RANGE_PROOF *BP_RANGE_PROOF_decode(const unsigned char *in, size_t size)
     if (proof == NULL)
         goto err;
 
-    proof->references = 1;
+    CRYPTO_NEW_REF(&proof->references, 1);
     if ((proof->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -1073,7 +1073,7 @@ BP_R1CS_PROOF *BP_R1CS_PROOF_decode(const unsigned char *in, size_t size)
     if (proof == NULL)
         goto err;
 
-    proof->references = 1;
+    CRYPTO_NEW_REF(&proof->references, 1);
     if ((proof->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
         goto err;

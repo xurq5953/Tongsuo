@@ -47,7 +47,7 @@ NIZK_PUB_PARAM *NIZK_PUB_PARAM_new(const EC_GROUP *group, const EC_POINT *G,
             goto err;
     }
 
-    pp->references = 1;
+    CRYPTO_NEW_REF(&pp->references, 1);
     if ((pp->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_BP, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -65,8 +65,8 @@ void NIZK_PUB_PARAM_free(NIZK_PUB_PARAM *pp)
     if (pp == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&pp->references, &ref, pp->lock);
-    REF_PRINT_COUNT("NIZK_PUB_PARAM", pp);
+    CRYPTO_DOWN_REF(&pp->references, &ref);
+    REF_PRINT_COUNT("NIZK_PUB_PARAM", ref, pp);
     if (ref > 0)
         return;
     REF_ASSERT_ISNT(ref < 0);
@@ -89,10 +89,10 @@ int NIZK_PUB_PARAM_up_ref(NIZK_PUB_PARAM *pp)
     if (pp == NULL)
         return 0;
 
-    if (CRYPTO_UP_REF(&pp->references, &ref, pp->lock) <= 0)
+    if (CRYPTO_UP_REF(&pp->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("NIZK_PUB_PARAM", pp);
+    REF_PRINT_COUNT("NIZK_PUB_PARAM", ref, pp);
     REF_ASSERT_ISNT(ref < 2);
     return ((ref > 1) ? 1 : 0);
 }
@@ -108,10 +108,10 @@ int NIZK_PUB_PARAM_down_ref(NIZK_PUB_PARAM *pp)
     if (pp == NULL)
         return 0;
 
-    if (CRYPTO_DOWN_REF(&pp->references, &ref, pp->lock) <= 0)
+    if (CRYPTO_DOWN_REF(&pp->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("NIZK_PUB_PARAM", pp);
+    REF_PRINT_COUNT("NIZK_PUB_PARAM", ref, pp);
     REF_ASSERT_ISNT(ref < 0);
     return ((ref > 0) ? 1 : 0);
 }
@@ -152,7 +152,7 @@ NIZK_WITNESS *NIZK_WITNESS_new(const NIZK_PUB_PARAM *pp, const BIGNUM *r,
     if (v != NULL && !BN_copy(witness->v, v))
         goto err;
 
-    witness->references = 1;
+    CRYPTO_NEW_REF(&witness->references, 1);
     if ((witness->lock = CRYPTO_THREAD_lock_new()) == NULL) {
         ERR_raise(ERR_LIB_ZKP_NIZK, ERR_R_MALLOC_FAILURE);
         goto err;
@@ -174,8 +174,8 @@ void NIZK_WITNESS_free(NIZK_WITNESS *witness)
     if (witness == NULL)
         return;
 
-    CRYPTO_DOWN_REF(&witness->references, &ref, witness->lock);
-    REF_PRINT_COUNT("NIZK_WITNESS", witness);
+    CRYPTO_DOWN_REF(&witness->references, &ref);
+    REF_PRINT_COUNT("NIZK_WITNESS", ref, witness);
     if (ref > 0)
         return;
     REF_ASSERT_ISNT(ref < 0);
@@ -198,10 +198,10 @@ int NIZK_WITNESS_up_ref(NIZK_WITNESS *witness)
     if (witness == NULL)
         return 0;
 
-    if (CRYPTO_UP_REF(&witness->references, &ref, witness->lock) <= 0)
+    if (CRYPTO_UP_REF(&witness->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("NIZK_WITNESS", witness);
+    REF_PRINT_COUNT("NIZK_WITNESS", ref, witness);
     REF_ASSERT_ISNT(ref < 2);
     return ((ref > 1) ? 1 : 0);
 }
@@ -217,10 +217,10 @@ int NIZK_WITNESS_down_ref(NIZK_WITNESS *witness)
     if (witness == NULL)
         return 0;
 
-    if (CRYPTO_DOWN_REF(&witness->references, &ref, witness->lock) <= 0)
+    if (CRYPTO_DOWN_REF(&witness->references, &ref) <= 0)
         return 0;
 
-    REF_PRINT_COUNT("NIZK_WITNESS", witness);
+    REF_PRINT_COUNT("NIZK_WITNESS", ref, witness);
     REF_ASSERT_ISNT(ref < 0);
     return ((ref > 0) ? 1 : 0);
 }

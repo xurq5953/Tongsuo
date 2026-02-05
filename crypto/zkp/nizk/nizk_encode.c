@@ -305,7 +305,7 @@ NIZK_WITNESS *NIZK_WITNESS_decode(const unsigned char *in, size_t size, int flag
         }
     }
 
-    witness->references = 1;
+    CRYPTO_NEW_REF(&witness->references, 1);
     if ((witness->lock = CRYPTO_THREAD_lock_new()) == NULL)
         goto err;
 
