@@ -800,7 +800,7 @@ typedef struct loopargs_st {
     EVP_MD_CTX *eddsa_ctx2[EdDSA_NUM];
 #endif /* OPENSSL_NO_ECX */
 #ifndef OPENSSL_NO_SM2
-    // Need to assign a sm2 buffer here for sm2 ciphertext
+    /* TODO: Need to assign a sm2 buffer here for sm2 ciphertext */ 
     EVP_MD_CTX *sm2_ctx[SM2_NUM];
     EVP_MD_CTX *sm2_vfy_ctx[SM2_NUM];
     EVP_PKEY *sm2_pkey[SM2_NUM];

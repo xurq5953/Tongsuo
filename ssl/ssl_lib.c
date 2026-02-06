@@ -31,6 +31,7 @@
 #include "internal/ktls.h"
 #include "internal/to_hex.h"
 #include "internal/ssl_unwrap.h"
+#include "internal/packet.h"
 #include "quic/quic_local.h"
 #include "crypto/x509.h"
 #include "crypto/x509/x509_local.h"
@@ -5507,9 +5508,6 @@ SSL_CTX *SSL_CTX_dup(SSL_CTX *ctx)
     if (!ssl_load_ciphers(ret))
         goto err2;
 
-    //if (!ssl_load_groups(ret))
-    //    goto err2;
-
     /* load provider sigalgs */
     if (!ssl_load_sigalgs(ret)) {
         ERR_raise(ERR_LIB_SSL, ERR_R_SSL_LIB);
@@ -7507,12 +7505,13 @@ int BABASSL_client_hello_get1_extensions(SSL *s, int **out, size_t *outlen)
 {
     int *exts, i = 0;
     size_t num = 0;
+    PACKET extensions;
     const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
 
-    PACKET extensions = sc->clienthello->extensions;
+    extensions = sc->clienthello->extensions;
 
     while (PACKET_remaining(&extensions) > 0) {
         unsigned int type;
@@ -8327,13 +8326,14 @@ static int ssl_cipher_get_cert_index(const SSL_CIPHER *c)
 
 X509 *BABASSL_get_use_certificate(const SSL *s)
 {
+    int idx;
+    CERT *c = NULL;
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
 
-    CERT *c = sc->cert;
-    int idx;
+    c = sc->cert;
 
     if (sc->s3.tmp.new_cipher == NULL)
         return NULL;
@@ -8395,12 +8395,9 @@ X509 *BABASSL_get_enc_certificate_ntls(const SSL *s)
 void BABASSL_get0_alpn_proposed(const SSL *ssl, const unsigned char **data,
                                 unsigned *len)
 {
-    if (ssl == NULL || data == NULL || len == NULL)
-        return;
-
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
-    if(sc == NULL)
+    if(sc == NULL || data == NULL || len == NULL)
         return;
 
     *data = sc->s3.alpn_proposed;
