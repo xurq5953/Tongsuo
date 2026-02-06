@@ -393,6 +393,7 @@ void EC_nistp256_pre_comp_free(NISTP256_PRE_COMP *);
 void ossl_ec_nistp384_pre_comp_free(NISTP384_PRE_COMP *);
 void EC_nistp521_pre_comp_free(NISTP521_PRE_COMP *);
 void EC_nistz256_pre_comp_free(NISTZ256_PRE_COMP *);
+void EC_sm2p256_pre_comp_free(SM2P256_PRE_COMP *);
 void EC_ec_pre_comp_free(EC_PRE_COMP *);
 
 /*
