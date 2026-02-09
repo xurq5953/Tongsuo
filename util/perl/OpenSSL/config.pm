@@ -166,12 +166,6 @@ my $guess_patterns = [
     [ 'CYGWIN.*',                   '${MACHINE}-pc-cygwin' ],
     [ 'vxworks.*',                  '${MACHINE}-whatever-vxworks' ],
 
-    # The MACHINE part of the array POSIX::uname() returns on VMS isn't
-    # worth the bits wasted on it.  It's better, then, to rely on perl's
-    # %Config, which has a trustworthy item 'archname', especially since
-    # VMS installation aren't multiarch (yet)
-    [ 'OpenVMS:.*',                 "$Config{archname}-whatever-OpenVMS" ],
-
     # Note: there's also NEO and NSR, but they are old and unsupported
     [ 'NONSTOP_KERNEL:.*:NSE-.*?',  'nse-tandem-nsk${RELEASE}' ],
     [ 'NONSTOP_KERNEL:.*:NSV-.*?',  'nsv-tandem-nsk${RELEASE}' ],

@@ -2,8 +2,7 @@ Build and Install
 =================
 
 This document describes installation on all supported operating
-systems: the Unix/Linux family (including macOS), OpenVMS,
-and Windows.
+systems: the Unix/Linux family (including macOS) and Windows.
 
 Table of Contents
 =================
@@ -65,7 +64,6 @@ issues and other details, please read one of these:
  * [Notes for Android platforms](NOTES-ANDROID.md)
  * [Notes for Windows platforms](NOTES-WINDOWS.md)
  * [Notes for the DOS platform with DJGPP](NOTES-DJGPP.md)
- * [Notes for the OpenVMS platform](NOTES-VMS.md)
  * [Notes for the HPE NonStop platform](NOTES-NONSTOP.md)
  * [Notes on POSIX](NOTES-POSIX.md)
  * [Notes on Perl](NOTES-PERL.md)
@@ -151,14 +149,6 @@ OpenSSL for production use.
     $ make
     $ make test
 
-### OpenVMS
-
-Use the following commands to build OpenSSL:
-
-    $ perl Configure
-    $ mms
-    $ mms test
-
 ### Windows
 
 If you are using Visual Studio, open a Developer Command Prompt and
@@ -222,16 +212,6 @@ More precisely, the files will be installed into the  subdirectories
 
 depending on the file type, as it is custom on Unix-like operating systems.
 
-### OpenVMS
-
-Use the following command to install OpenSSL.
-
-    $ mms install
-
-By default, OpenSSL will be installed to
-
-    SYS$COMMON:[OPENSSL]
-
 ### Windows
 
 If you are using Visual Studio, open the Developer Command Prompt _elevated_
@@ -264,10 +244,6 @@ The options `--prefix` and `--openssldir` are explained in further detail in
 On Unix:
 
     $ ./Configure --prefix=/opt/openssl --openssldir=/usr/local/ssl
-
-On OpenVMS:
-
-    $ perl Configure --prefix=PROGRAM:[INSTALLS] --openssldir=SYS$MANAGER:[OPENSSL]
 
 Note: if you do add options to the configuration command, please make sure
 you've read more than just this Quick Start, such as relevant `NOTES-*` files,
@@ -361,7 +337,6 @@ and key store.  Defaults are:
 
     Unix:           /usr/local/ssl
     Windows:        C:\Program Files\Common Files\SSL
-    OpenVMS:        SYS$COMMON:[OPENSSL-COMMON]
 
 For 32bit Windows applications on Windows 64bit (WOW64), always replace
 `C:\Program Files` by `C:\Program Files (x86)`.
@@ -374,7 +349,6 @@ The top of the installation directory tree.  Defaults are:
 
     Unix:           /usr/local
     Windows:        C:\Program Files\OpenSSL
-    OpenVMS:        SYS$COMMON:[OPENSSL]
 
 Compiler Warnings
 -----------------
@@ -439,10 +413,6 @@ If not provided the system library path will be used.
 without a path).  This flag must be provided if the
 [zlib-dynamic](#zlib-dynamic) option is not also used. If `zlib-dynamic` is used
 then this flag is optional and defaults to `ZLIB1` if not provided.
-
-**On VMS:** this is the filename of the zlib library (with or without a path).
-This flag is optional and if not provided then `GNV$LIBZSHR`, `GNV$LIBZSHR32`
-or `GNV$LIBZSHR64` is used by default depending on the pointer size chosen.
 
 ### with-zstd-include
 
@@ -1287,8 +1257,8 @@ configuration.  The following variables are supported:
     CPPFLAGS        Flags for the C/C++ preprocessor.
     CPPDEFINES      List of CPP macro definitions, separated
                     by a platform specific character (':' or
-                    space for Unix, ';' for Windows, ',' for
-                    VMS).  This can be used instead of using
+                    space for Unix, ';' for Windows).  This 
+                    can be used instead of using
                     -D (or what corresponds to that on your
                     compiler) in CPPFLAGS.
     CPPINCLUDES     List of CPP inclusion directories, separated
@@ -1305,8 +1275,7 @@ configuration.  The following variables are supported:
     LDLIBS          Extra libraries to use when linking.
                     Takes the form of a space separated list
                     of library specifications on Unix and
-                    Windows, and as a comma separated list of
-                    libraries on VMS.
+                    Windows.
     RANLIB          The library archive indexer.
     RC              The Windows resource compiler.
     RCFLAGS         Flags for the Windows resource compiler.
@@ -1367,7 +1336,7 @@ For more information, please do:
 
 or
 
-    $ perl configdata.pm --help                      # Windows and VMS
+    $ perl configdata.pm --help                      # Windows
 
 Installation Steps in Detail
 ============================
@@ -1384,10 +1353,6 @@ the same.
 #### Unix / Linux / macOS
 
     $ ./Configure [options...]
-
-#### OpenVMS
-
-    $ perl Configure [options...]
 
 #### Windows
 
@@ -1428,8 +1393,8 @@ for more information.
 The generic configurations `cc` or `gcc` should usually work on 32 bit
 Unix-like systems.
 
-`Configure` creates a build file (`Makefile` on Unix, `makefile` on Windows
-and `descrip.mms` on OpenVMS) from a suitable template in `Configurations/`,
+`Configure` creates a build file (`Makefile` on Unix and `makefile` on 
+Windows) from a suitable template in `Configurations/`,
 and defines various macros in `include/openssl/configuration.h` (generated
 from `include/openssl/configuration.h.in`.
 
@@ -1453,13 +1418,6 @@ directory and invoking the configuration commands from there.
     $ cd /var/tmp/openssl-build
     $ /PATH/TO/OPENSSL/SOURCE/Configure [options...]
 
-#### OpenVMS example
-
-    $ set default sys$login:
-    $ create/dir [.tmp.openssl-build]
-    $ set default [.tmp.openssl-build]
-    $ perl D:[PATH.TO.OPENSSL.SOURCE]Configure [options...]
-
 #### Windows example
 
     $ C:
@@ -1476,7 +1434,6 @@ Build OpenSSL
 Build OpenSSL by running:
 
     $ make                                           # Unix
-    $ mms                                            ! (or mmk) OpenVMS
     $ nmake                                          # Windows
 
 This will build the OpenSSL libraries (`libcrypto.a` and `libssl.a` on
@@ -1494,7 +1451,6 @@ After a successful build, and before installing, the libraries should
 be tested.  Run:
 
     $ make test                                      # Unix
-    $ mms test                                       ! OpenVMS
     $ nmake test                                     # Windows
 
 **Warning:** you MUST run the tests from an unprivileged account (or disable
@@ -1510,7 +1466,6 @@ Install OpenSSL
 If everything tests ok, install OpenSSL with
 
     $ make install                                   # Unix
-    $ mms install                                    ! OpenVMS
     $ nmake install                                  # Windows
 
 Note that in order to perform the install step above you need to have
@@ -1542,27 +1497,6 @@ its default):
     share/doc/openssl/html/man7
                    Contains the HTML rendition of the man-pages.
 
-### OpenVMS
-
-'arch' is replaced with the architecture name, `ALPHA` or `IA64`,
-'sover' is replaced with the shared library version (`0101` for 1.1), and
-'pz' is replaced with the pointer size OpenSSL was built with:
-
-    [.EXE.'arch']  Contains the openssl binary.
-    [.EXE]         Contains a few utility scripts.
-    [.include.openssl]
-                   Contains the header files needed if you want
-                   to build your own programs that use libcrypto
-                   or libssl.
-    [.LIB.'arch']  Contains the OpenSSL library files.
-    [.ENGINES'sover''pz'.'arch']
-                   Contains the OpenSSL dynamically loadable engines.
-    [.SYS$STARTUP] Contains startup, login and shutdown scripts.
-                   These define appropriate logical names and
-                   command symbols.
-    [.SYSTEST]     Contains the installation verification procedure.
-    [.HTML]        Contains the HTML rendition of the manual pages.
-
 ### Additional Directories
 
 Additionally, install will add the following directories under
@@ -1586,7 +1520,6 @@ but have the package installed somewhere else so that it can easily be
 packaged, can use
 
     $ make DESTDIR=/tmp/package-root install         # Unix
-    $ mms/macro="DESTDIR=TMP:[PACKAGE-ROOT]" install ! OpenVMS
 
 The specified destination directory will be prepended to all installation
 target paths.
@@ -1636,8 +1569,8 @@ over the build process.  Typically these should be defined prior to running
 
     BUILDFILE
                    Use a different build file name than the platform default
-                   ("Makefile" on Unix-like platforms, "makefile" on native Windows,
-                   "descrip.mms" on OpenVMS).  This requires that there is a
+                   ("Makefile" on Unix-like platforms, "makefile" on native 
+                   Windows).  This requires that there is a
                    corresponding build file template.
                    See [Configurations/README.md](Configurations/README.md)
                    for further information.
@@ -1873,7 +1806,6 @@ change, it might be helpful to clean the build tree before attempting another
 build.  Use this command:
 
     $ make clean                                     # Unix
-    $ mms clean                                      ! (or mmk) OpenVMS
     $ nmake clean                                    # Windows
 
 Assembler error messages can sometimes be sidestepped by using the `no-asm`
@@ -1966,13 +1898,6 @@ On Windows build with MSVC or using MingW, shared libraries are named
 and `libcrypto-1_1-ia64.dll` and `libssl-1_1-ia64.dll` for IA64 Windows.
 With MSVC, the import libraries are named `libcrypto.lib` and `libssl.lib`,
 while with MingW, they are named `libcrypto.dll.a` and `libssl.dll.a`.
-
-On VMS, shareable images (VMS speak for shared libraries) are named
-`ossl$libcrypto0101_shr.exe` and `ossl$libssl0101_shr.exe`.  However, when
-OpenSSL is specifically built for 32-bit pointers, the shareable images
-are named `ossl$libcrypto0101_shr32.exe` and `ossl$libssl0101_shr32.exe`
-instead, and when built for 64-bit pointers, they are named
-`ossl$libcrypto0101_shr64.exe` and `ossl$libssl0101_shr64.exe`.
 
 Notes on random number generation
 ---------------------------------
