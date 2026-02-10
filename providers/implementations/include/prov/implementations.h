@@ -274,6 +274,9 @@ extern const OSSL_DISPATCH ossl_mlx_x448_kem_kmgmt_functions[];
 #  endif
 extern const OSSL_DISPATCH ossl_mlx_p256_kem_kmgmt_functions[];
 extern const OSSL_DISPATCH ossl_mlx_p384_kem_kmgmt_functions[];
+#  ifndef OPENSSL_NO_SM2
+extern const OSSL_DISPATCH ossl_mlx_sm2_kem_kmgmt_functions[];
+#  endif
 # endif
 #endif
 #ifndef OPENSSL_NO_SLH_DSA

@@ -198,7 +198,7 @@ static const struct tls13groupselection_test_st tls13groupselection_tests[] =
           "DEFAULT:-X25519:-?X25519MLKEM768",
           CLIENT_PREFERENCE,
 #ifndef OPENSSL_NO_SM2
-          "curveSM2", HRR
+          "SM2MLKEM768", HRR
 #else
           "secp384r1", HRR
 #endif
@@ -207,7 +207,7 @@ static const struct tls13groupselection_test_st tls13groupselection_tests[] =
           "DEFAULT:-X25519:-?X25519MLKEM768",
           SERVER_PREFERENCE,
  #ifndef OPENSSL_NO_SM2
-          "curveSM2", HRR
+          "SM2MLKEM768", HRR
 #else
           "secp384r1", HRR
 #endif

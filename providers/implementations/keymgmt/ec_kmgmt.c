@@ -388,7 +388,7 @@ static int common_check_sm2(const EC_KEY *ec, int sm2_wanted)
      * !sm2_wanted: import the keys or domparams only not on SM2 Curve
      */
     if ((ecg = EC_KEY_get0_group(ec)) == NULL
-        || (sm2_wanted ^ (EC_GROUP_get_curve_name(ecg) == NID_sm2)))
+        || (sm2_wanted & (EC_GROUP_get_curve_name(ecg) != NID_sm2)))
         return 0;
     return 1;
 }

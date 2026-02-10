@@ -50,6 +50,9 @@ static const ECDH_VINFO hybrid_vtable[] = {
     { "X25519", NULL, 32, 32, 32, 0, EVP_PKEY_ML_KEM_768 },
     { "X448",   NULL, 56, 56, 56, 0, EVP_PKEY_ML_KEM_1024 },
 #endif
+#if !defined(OPENSSL_NO_SM2)
+    { "EC",  "SM2", 65, 32, 32, 1, EVP_PKEY_ML_KEM_768 },
+#endif
 };
 
 typedef struct mlx_kem_gen_ctx_st {
@@ -817,4 +820,7 @@ DECLARE_DISPATCH(p384, 1);
 #if !defined(OPENSSL_NO_ECX)
 DECLARE_DISPATCH(x25519, 2);
 DECLARE_DISPATCH(x448, 3);
+#endif
+#if !defined(OPENSSL_NO_SM2)
+DECLARE_DISPATCH(sm2, 4);
 #endif
