@@ -93,7 +93,7 @@ static const TLS_GROUP_CONSTANTS group_list[] = {
     /* 42 */ { OSSL_TLS_GROUP_ID_SecP256r1MLKEM768, ML_KEM_768_SECBITS, TLS1_3_VERSION, 0, -1, -1, 1 },
     /* 43 */ { OSSL_TLS_GROUP_ID_SecP384r1MLKEM1024, ML_KEM_1024_SECBITS, TLS1_3_VERSION, 0, -1, -1, 1 },
     /* 44 */ { OSSL_TLS_GROUP_ID_sm2, 128, NTLS1_1_VERSION, 0, -1, -1, 0 },
-    /* 45 */ { OSSL_TLS_GROUP_ID_SM2MLKEM768, ML_KEM_768_SECBITS, TLS1_3_VERSION, 0, -1, -1, 1 },
+    /* 45 */ { OSSL_TLS_GROUP_ID_curveSM2MLKEM768, ML_KEM_768_SECBITS, TLS1_3_VERSION, 0, -1, -1, 1 },
 };
 
 #define TLS_GROUP_ENTRY(tlsname, realname, algorithm, idx) \
@@ -195,7 +195,7 @@ static const OSSL_PARAM param_group_list[][11] = {
     TLS_GROUP_ENTRY("SecP256r1MLKEM768", "", "SecP256r1MLKEM768", 42),
     TLS_GROUP_ENTRY("SecP384r1MLKEM1024", "", "SecP384r1MLKEM1024", 43),
 #   ifndef OPENSSL_NO_SM2
-    TLS_GROUP_ENTRY("SM2MLKEM768", "", "SM2MLKEM768", 45),
+    TLS_GROUP_ENTRY("curveSM2MLKEM768", "", "curveSM2MLKEM768", 45),
 #   endif
 #  endif
 # endif

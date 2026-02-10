@@ -25,7 +25,7 @@ Header:
           ansiX962_compressed_char2 (2)
         extension_type=supported_groups(10), length=22
           X25519MLKEM768 (4588)
-          SM2MLKEM768 (4590)
+          curveSM2MLKEM768 (4590)
           ecdh_x25519 (29)
           secp256r1 (P-256) (23)
           curveSM2 (41)

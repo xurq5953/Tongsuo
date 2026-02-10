@@ -217,7 +217,7 @@ static const unsigned char ecformats_default[] = {
 #define DEFAULT_GROUP_NAME "DEFAULT"
 #if !defined(OPENSSL_NO_SM2) && !defined(FIPS_MODULE)
     #define TLS_DEFAULT_GROUP_LIST \
-    "?*X25519MLKEM768:?SM2MLKEM768 / ?*X25519:?secp256r1:?curveSM2 / ?X448:?secp384r1:?secp521r1 / ?ffdhe2048:?ffdhe3072"
+    "?*X25519MLKEM768:?curveSM2MLKEM768 / ?*X25519:?secp256r1:?curveSM2 / ?X448:?secp384r1:?secp521r1 / ?ffdhe2048:?ffdhe3072"
 #else
     #define TLS_DEFAULT_GROUP_LIST \
     "?*X25519MLKEM768 / ?*X25519:?secp256r1 / ?X448:?secp384r1:?secp521r1 / ?ffdhe2048:?ffdhe3072"

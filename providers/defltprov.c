@@ -488,7 +488,7 @@ static const OSSL_ALGORITHM deflt_asym_kem[] = {
     { "SecP256r1MLKEM768", "provider=default", ossl_mlx_kem_asym_kem_functions },
     { "SecP384r1MLKEM1024", "provider=default", ossl_mlx_kem_asym_kem_functions },
   #if !defined(OPENSSL_NO_SM2)
-    { "SM2MLKEM768", "provider=default", ossl_mlx_kem_asym_kem_functions },
+    { "curveSM2MLKEM768", "provider=default", ossl_mlx_kem_asym_kem_functions },
   #endif
 # endif
 #endif
@@ -577,8 +577,8 @@ static const OSSL_ALGORITHM deflt_keymgmt[] = {
     { PROV_NAMES_SecP384r1MLKEM1024, "provider=default", ossl_mlx_p384_kem_kmgmt_functions,
       PROV_DESCS_SecP384r1MLKEM1024 },
 #  if !defined(OPENSSL_NO_SM2)
-    { PROV_NAMES_SM2MLKEM768, "provider=default", ossl_mlx_sm2_kem_kmgmt_functions,
-      PROV_DESCS_SM2MLKEM768 },
+    { PROV_NAMES_curveSM2MLKEM768, "provider=default", ossl_mlx_sm2_kem_kmgmt_functions,
+      PROV_DESCS_curveSM2MLKEM768 },
 #  endif  
 # endif
 #endif
