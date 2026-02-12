@@ -2623,10 +2623,10 @@ int speed_main(int argc, char **argv)
     openssl_speed_sec_t seconds = { SECONDS, RSA_SECONDS, DSA_SECONDS,
                                     ECDSA_SECONDS, ECDH_SECONDS,
                                     EdDSA_SECONDS, SM2_SECONDS,
-                                    FFDH_SECONDS, 
+                                    FFDH_SECONDS, KEM_SECONDS,
+                                    SIG_SECONDS, EC_ELGAMAL_SECONDS,
                                     PAILLIER_SECONDS, BULLETPROOFS_SECONDS,
-                                    KEM_SECONDS,
-                                    SIG_SECONDS, KEYGEN_SECONDS };
+                                    KEYGEN_SECONDS };
 
     static const unsigned char key32[32] = {
         0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
@@ -4909,18 +4909,15 @@ int speed_main(int argc, char **argv)
     }
 #endif /* OPENSSL_NO_ECX */
 
-
 #ifndef OPENSSL_NO_SM2
     if (doit[D_SM2_DECRYPT]) {
         int st = 1;
         doit[D_SM2_ENCRYPT] = 1;
-        printf("size_num: %d\n", size_num);
         if (lengths == lengths_list) {
             lengths = sm2_lengths_list;
             size_num = OSSL_NELEM(sm2_lengths_list);
         }
         
-
         for (i = 0; st && i < loopargs_len; i++) {
             EVP_PKEY *pkey = NULL, *pubkey = NULL;
             EVP_PKEY_CTX *ctx = NULL;
