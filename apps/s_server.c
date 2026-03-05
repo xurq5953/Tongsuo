@@ -73,6 +73,9 @@ static SSL_CTX *ctx = NULL;
 static SSL_CTX *ctx2 = NULL;
 static int www = 0;
 
+static int print_rtt = 0;
+static uint64_t rtt = 0;
+
 static BIO *bio_s_out = NULL;
 static BIO *bio_s_msg = NULL;
 static int s_debug = 0;
@@ -748,6 +751,7 @@ typedef enum OPTION_choice {
     OPT_TFO, OPT_CERT_COMP,
     OPT_ENABLE_SERVER_RPK,
     OPT_ENABLE_CLIENT_RPK,
+    OPT_PRINT_HANDSHAKE_RTT,
     OPT_R_ENUM,
     OPT_S_ENUM,
     OPT_V_ENUM,
@@ -1039,6 +1043,7 @@ const OPTIONS s_server_options[] = {
 #endif
     {"enable_server_rpk", OPT_ENABLE_SERVER_RPK, '-', "Enable raw public keys (RFC7250) from the server"},
     {"enable_client_rpk", OPT_ENABLE_CLIENT_RPK, '-', "Enable raw public keys (RFC7250) from the client"},
+    {"print_handshake_rtt", OPT_PRINT_HANDSHAKE_RTT, '-', "Print handshake round-trip-time (RTT)"},
     OPT_R_OPTIONS,
     OPT_S_OPTIONS,
     OPT_V_OPTIONS,
@@ -1880,6 +1885,9 @@ int s_server_main(int argc, char *argv[])
             break;
         case OPT_ENABLE_CLIENT_RPK:
             enable_client_rpk = 1;
+            break;
+        case OPT_PRINT_HANDSHAKE_RTT:
+            print_rtt = 1;
             break;
         }
     }
@@ -3503,6 +3511,10 @@ static void print_connection_info(SSL *con)
     if (BIO_get_ktls_recv(SSL_get_rbio(con)))
         BIO_printf(bio_err, "Using Kernel TLS for receiving\n");
 #endif
+
+    if(print_rtt == 1 && SSL_get_handshake_rtt(con, &rtt) == 1) {
+        BIO_printf(bio_s_out, "Handshake RTT: %lld us\n", (long long int)rtt);
+    }
 
     (void)BIO_flush(bio_s_out);
 }

@@ -88,6 +88,9 @@ static int user_data_process(struct user_data_st *user_data, size_t *len,
                              size_t *off);
 static int user_data_has_data(struct user_data_st *user_data);
 
+static int print_rtt = 0;
+static uint64_t rtt = 0;
+
 static char *prog;
 static int c_debug = 0;
 static int c_showcerts = 0;
@@ -519,6 +522,7 @@ typedef enum OPTION_choice {
     OPT_ENABLE_CLIENT_RPK,
     OPT_SCTP_LABEL_BUG,
     OPT_KTLS,
+    OPT_PRINT_HANDSHAKE_RTT,
     OPT_R_ENUM, OPT_PROV_ENUM
 } OPTION_CHOICE;
 
@@ -754,6 +758,7 @@ const OPTIONS s_client_options[] = {
 #ifndef OPENSSL_NO_KTLS
     {"ktls", OPT_KTLS, '-', "Enable Kernel TLS for sending and receiving"},
 #endif
+    {"print_handshake_rtt", OPT_PRINT_HANDSHAKE_RTT, '-', "Print handshake round-trip-time (RTT)"},
 
     OPT_R_OPTIONS,
     OPT_S_OPTIONS,
@@ -1674,6 +1679,9 @@ int s_client_main(int argc, char **argv)
             break;
         case OPT_ENABLE_CLIENT_RPK:
             enable_client_rpk = 1;
+            break;
+        case OPT_PRINT_HANDSHAKE_RTT:
+            print_rtt = 1;
             break;
         }
     }
@@ -3846,6 +3854,11 @@ static void print_stuff(BIO *bio, SSL *s, int full)
         }
         OPENSSL_free(exportedkeymat);
     }
+
+    if(print_rtt == 1 && SSL_get_handshake_rtt(s, &rtt) == 1) {
+        BIO_printf(bio, "Handshake RTT: %lld us\n", (long long int)rtt);
+    }
+
     BIO_printf(bio, "---\n");
     /* flush, or debugging output gets mixed with http response */
     (void)BIO_flush(bio);
