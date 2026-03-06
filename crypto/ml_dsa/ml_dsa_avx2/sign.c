@@ -3,6 +3,7 @@
 #include "sign.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "fips202x4.h"
@@ -17,6 +18,15 @@
 #include "rejsample.h"
 #include "ntt/ntt.h"
 
+#ifndef ML_DSA_CONTEXT_STRING_BYTES
+# define ML_DSA_CONTEXT_STRING_BYTES 255
+#endif
+
+/*
+ * AVX2 internal helpers operate on a raw message input. Public exported symbols
+ * are provided in pqcrystals_ml_dsa_65_* form to match the top-level API.
+ */
+
 /*************************************************
 * Name:        crypto_sign_keypair
 *
@@ -29,7 +39,8 @@
 *
 * Returns 0 (success)
 **************************************************/
-int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
+static int avx2_crypto_sign_keypair(uint8_t *pk, uint8_t *sk,
+                                    uint8_t *seed, int rand_seed) {
     unsigned int i;
     ALIGN(32) uint8_t seedbuf[2* SEEDBYTES + CRHBYTES];
     ALIGN(32) uint8_t tr[CRHBYTES];
@@ -41,7 +52,9 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
     poly t1, t0;
 
     /* Get randomness for rho, rhoprime and key */
-    randombytes(seedbuf, SEEDBYTES);
+    if (rand_seed)
+        randombytes(seed, SEEDBYTES);
+    memcpy(seedbuf, seed, SEEDBYTES);
     shake256(seedbuf, 2* SEEDBYTES + CRHBYTES, seedbuf, SEEDBYTES);
     rho = seedbuf;
     rhoprime = seedbuf + SEEDBYTES;
@@ -53,7 +66,8 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
     for (i = 0; i < SEEDBYTES; ++i) sk[SEEDBYTES + i] = key[i];
 
     /* Sample short vectors s1 and s2 and Pack secret vectors*/
-    ExpandS_with_pack(&s1, &s2, sk + 2 * SEEDBYTES + CRHBYTES, rhoprime);
+    ExpandS_with_pack(&s1, &s2, sk + 2 * SEEDBYTES + CRHBYTES,
+                      (const uint64_t *)rhoprime);
 
     /* Transform s1 */
     polyvecl_ntt_bo(&s1);
@@ -96,10 +110,13 @@ int crypto_sign_keypair(uint8_t *pk, uint8_t *sk) {
 *
 * Returns 0 (success)
 **************************************************/
-int crypto_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m, size_t mlen, const uint8_t *sk) {
+static int avx2_crypto_sign_signature_msg(uint8_t *sig, size_t *siglen,
+                                          const uint8_t *m, size_t mlen,
+                                          const uint8_t *rnd_in,
+                                          const uint8_t *sk) {
     unsigned int i, j, n, pos;
-    ALIGN(32) uint8_t seedbuf[2 * SEEDBYTES + 2 * CRHBYTES];
-    uint8_t *rho, *tr, *key, *mu, *rhoprime;
+    ALIGN(32) uint8_t seedbuf[3 * SEEDBYTES + 2 * CRHBYTES];
+    uint8_t *rho, *tr, *key, *mu, *rhoprime, *rnd;
     uint8_t *hint = sig + CTILDEBYTES + L * POLYZ_PACKEDBYTES;
     uint64_t nonce = 0;
     polyvecl mat[K], y, z;
@@ -117,14 +134,19 @@ int crypto_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m, size_t
     tr = buf;
     rho = seedbuf;
     key = rho + SEEDBYTES;
-    mu = key + SEEDBYTES;
+    rnd = key + SEEDBYTES;
+    mu = rnd + SEEDBYTES;
     rhoprime = mu + CRHBYTES;
     unpack_sk(rho, tr, key, &t0, s1list, s2list, sk);
     memcpy(buf + CRHBYTES, m, mlen);
+    if (rnd_in != NULL)
+        memcpy(rnd, rnd_in, SEEDBYTES);
+    else
+        randombytes(rnd, SEEDBYTES);
 
     hybrid_hash_ExpandA_shuffled(mu, CRHBYTES, buf, CRHBYTES + mlen, &mat[0].vec[0], &mat[0].vec[1], &mat[0].vec[2], rho, 0,
                                  1, 2);
-    crh(rhoprime, key, SEEDBYTES + CRHBYTES);
+    crh(rhoprime, key, SEEDBYTES + SEEDBYTES + CRHBYTES);
 
     ExpandA_shuffled_part(mat, rho, &loop, rhoprime, nonce);
 #if K==4 || K==8
@@ -225,17 +247,8 @@ rej:
 *
 * Returns 0 (success)
 **************************************************/
-int crypto_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const uint8_t *sk) {
-    size_t i;
-
-    for (i = 0; i < mlen; ++i) sm[CRYPTO_BYTES + mlen - 1 - i] = m[mlen - 1 - i];
-    crypto_sign_signature(sm, smlen, sm + CRYPTO_BYTES, mlen, sk);
-    *smlen += mlen;
-    return 0;
-}
-
-/*************************************************
-* Name:        crypto_sign_verify
+ /*************************************************
+* Name:        avx2_crypto_sign_verify_msg
 *
 * Description: Verifies signature.
 *
@@ -247,7 +260,9 @@ int crypto_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen, const
 *
 * Returns 0 if signature could be verified correctly and -1 otherwise
 **************************************************/
-int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen, const uint8_t *pk) {
+static int avx2_crypto_sign_verify_msg(const uint8_t *sig, size_t siglen,
+                                       const uint8_t *m, size_t mlen,
+                                       const uint8_t *pk) {
     unsigned int i, j, pos = 0;
     ALIGN(32) uint8_t buf[K * POLYW1_PACKEDBYTES];
     uint8_t mu[CRHBYTES];
@@ -325,23 +340,160 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m, size
 *
 * Returns 0 if signed message could be verified correctly and -1 otherwise
 **************************************************/
-int crypto_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen, const uint8_t *pk) {
-    size_t i;
+int pqcrystals_ml_dsa_65_keypair(uint8_t *pk, uint8_t *sk,
+                                 uint8_t *seed, int rand_seed)
+{
+    if (pk == NULL || sk == NULL || seed == NULL)
+        return -1;
 
-    if (smlen < CRYPTO_BYTES) goto badsig;
+    return avx2_crypto_sign_keypair(pk, sk, seed, rand_seed);
+}
 
-    *mlen = smlen - CRYPTO_BYTES;
-    if (crypto_sign_verify(sm, CRYPTO_BYTES, sm + CRYPTO_BYTES, *mlen, pk)) goto badsig;
-    else {
-        /* All good, copy msg, return 0 */
-        for (i = 0; i < *mlen; ++i) m[i] = sm[CRYPTO_BYTES + i];
-        return 0;
+int pqcrystals_ml_dsa_65_signature_internal(uint8_t *sig,
+                                            size_t *siglen,
+                                            const uint8_t *mu,
+                                            const uint8_t rnd[32],
+                                            const uint8_t *sk)
+{
+    if (sig == NULL || siglen == NULL || mu == NULL || rnd == NULL || sk == NULL)
+        return -1;
+
+    return avx2_crypto_sign_signature_msg(sig, siglen, mu, CRHBYTES, rnd, sk);
+}
+
+int pqcrystals_ml_dsa_65_signature(uint8_t *sig, size_t *siglen,
+                                   const uint8_t *m, size_t mlen,
+                                   const uint8_t *ctx, size_t ctxlen,
+                                   const int deterministic,
+                                   const uint8_t *sk)
+{
+    uint8_t rnd[SEEDBYTES];
+    uint8_t *msg;
+    size_t msglen;
+    const uint8_t *rnd_in = NULL;
+    int ret;
+
+    if (sig == NULL || siglen == NULL || m == NULL || sk == NULL)
+        return -1;
+    if (ctxlen > ML_DSA_CONTEXT_STRING_BYTES)
+        return -1;
+    if (ctxlen > 0 && ctx == NULL)
+        return -1;
+
+    msglen = 2 + ctxlen + mlen;
+    msg = malloc(msglen);
+    if (msg == NULL)
+        return 1;
+
+    msg[0] = 0;
+    msg[1] = (uint8_t)ctxlen;
+    if (ctxlen > 0 && ctx != NULL)
+        memcpy(msg + 2, ctx, ctxlen);
+    memcpy(msg + 2 + ctxlen, m, mlen);
+
+    if (deterministic) {
+        memset(rnd, 0, sizeof(rnd));
+        rnd_in = rnd;
     }
 
-badsig:
-    /* Signature verification failed */
-    *mlen = -1;
-    for (i = 0; i < smlen; ++i) m[i] = 0;
+    ret = avx2_crypto_sign_signature_msg(sig, siglen, msg, msglen, rnd_in, sk);
+    free(msg);
+    return ret;
+}
 
+int pqcrystals_ml_dsa_65(uint8_t *sm, size_t *smlen,
+                         const uint8_t *m, size_t mlen,
+                         const uint8_t *ctx, size_t ctxlen,
+                         const uint8_t *sk)
+{
+    size_t i;
+    int ret;
+
+    if (sm == NULL || smlen == NULL || m == NULL || sk == NULL)
+        return -1;
+
+    for (i = 0; i < mlen; ++i)
+        sm[CRYPTO_BYTES + mlen - 1 - i] = m[mlen - 1 - i];
+
+    ret = pqcrystals_ml_dsa_65_signature(sm, smlen, sm + CRYPTO_BYTES, mlen,
+                                         ctx, ctxlen, 0, sk);
+    if (ret != 0)
+        return ret;
+
+    *smlen += mlen;
+    return 0;
+}
+
+int pqcrystals_ml_dsa_65_verify_internal(const uint8_t *sig,
+                                         size_t siglen,
+                                         const uint8_t *mu,
+                                         const uint8_t *pk)
+{
+    if (sig == NULL || mu == NULL || pk == NULL)
+        return -1;
+
+    return avx2_crypto_sign_verify_msg(sig, siglen, mu, CRHBYTES, pk);
+}
+
+int pqcrystals_ml_dsa_65_verify(const uint8_t *sig, size_t siglen,
+                                const uint8_t *m, size_t mlen,
+                                const uint8_t *ctx, size_t ctxlen,
+                                const uint8_t *pk)
+{
+    uint8_t *msg;
+    size_t msglen;
+    int ret;
+
+    if (sig == NULL || m == NULL || pk == NULL)
+        return -1;
+    if (ctxlen > ML_DSA_CONTEXT_STRING_BYTES)
+        return -1;
+    if (ctxlen > 0 && ctx == NULL)
+        return -1;
+
+    msglen = 2 + ctxlen + mlen;
+    msg = malloc(msglen);
+    if (msg == NULL)
+        return 1;
+
+    msg[0] = 0;
+    msg[1] = (uint8_t)ctxlen;
+    if (ctxlen > 0 && ctx != NULL)
+        memcpy(msg + 2, ctx, ctxlen);
+    memcpy(msg + 2 + ctxlen, m, mlen);
+
+    ret = avx2_crypto_sign_verify_msg(sig, siglen, msg, msglen, pk);
+    free(msg);
+    return ret;
+}
+
+int pqcrystals_ml_dsa_65_open(uint8_t *m, size_t *mlen,
+                              const uint8_t *sm, size_t smlen,
+                              const uint8_t *ctx, size_t ctxlen,
+                              const uint8_t *pk)
+{
+    size_t i;
+
+    if (m == NULL || mlen == NULL || sm == NULL || pk == NULL)
+        return -1;
+    if (ctxlen > ML_DSA_CONTEXT_STRING_BYTES)
+        return -1;
+    if (smlen < CRYPTO_BYTES)
+        goto badsig;
+
+    *mlen = smlen - CRYPTO_BYTES;
+    if (pqcrystals_ml_dsa_65_verify(sm, CRYPTO_BYTES,
+                                    sm + CRYPTO_BYTES, *mlen,
+                                    ctx, ctxlen, pk) != 0)
+        goto badsig;
+
+    for (i = 0; i < *mlen; ++i)
+        m[i] = sm[CRYPTO_BYTES + i];
+    return 0;
+
+badsig:
+    *mlen = (size_t)-1;
+    for (i = 0; i < smlen; ++i)
+        m[i] = 0;
     return -1;
 }

@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "KeccakP-1600-times4-SnP.h"
-#include "ntt.h"
+#include "ntt/ntt.h"
 #include "keccak4x/fips202x4.h"
 
 

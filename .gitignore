@@ -13,6 +13,9 @@ tongsuo-build/*
 /out.*
 /tmp.*
 /configdata.pm
+/tongsuo-build-avx2-main
+/tongsuo-build-avx2-main-nostrict
+/.vscode
 
 # Links under apps
 /apps/CA.pl

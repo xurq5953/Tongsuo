@@ -1,18 +1,64 @@
 LIBS=../../libcrypto
 
+# 启用条件：x86_64 + asm + 显式开启 AVX2 编译参数
+IF[{- !$disabled{asm} && $target{asm_arch} eq 'x86_64' &&
+      (grep /(?:^|\s)-mavx2(?:\s|$)/, @{$config{CFLAGS}}, @{$config{cflags}}) -}]
+  # AVX2 优化实现
+  $MLDSA_SOURCES=\
+    ml_dsa_ntt.c \
+    ml_dsa_packing.c \
+    ml_dsa_poly.c \
+    ml_dsa_polyvec.c \
+    ml_dsa_reduce.c \
+    ml_dsa_rounding.c \
+    ml_dsa_symmetric-shake.c \
+    ml_dsa_avx2/ntt/ntt_avx2.c \
+    ml_dsa_avx2/ntt/intt_avx2.c \
+    ml_dsa_avx2/ntt/consts.c \
+    ml_dsa_avx2/ntt/pointwise.S \
+    ml_dsa_avx2/hybrid.c \
+    ml_dsa_avx2_poly_wrap.c \
+    ml_dsa_avx2_polyvec_wrap.c \
+    ml_dsa_avx2/packing.c \
+    ml_dsa_avx2/sign.c \
+    ml_dsa_avx2/rejsample.c \
+    ml_dsa_avx2/rounding.c \
+    ml_dsa_avx2/pspm.c \
+    ml_dsa_avx2_randombytes_wrap.c \
+    ml_dsa_avx2/keccak4x/fips202x4.c \
+    ml_dsa_avx2_fips202_wrap.c \
+    ml_dsa_avx2/keccak4x/KeccakP-1600-times4-SIMD256.c \
+    ml_dsa_key.c
+
+  INCLUDE[ml_dsa_avx2/hybrid.o]=ml_dsa_avx2/keccak4x
+  INCLUDE[ml_dsa_avx2/sign.o]=ml_dsa_avx2/keccak4x
+  INCLUDE[ml_dsa_avx2_poly_wrap.o]=ml_dsa_avx2/keccak4x
+  INCLUDE[ml_dsa_avx2/ntt/pointwise.o]=ml_dsa_avx2
+  
+  # ML-DSA-65
+  $MLDSA_DEFINES=DILITHIUM_MODE=3
+ELSE
+  # 非 AVX2 场景回退到原始 C 实现
+  $MLDSA_SOURCES=\
+    ml_dsa_ntt.c \
+    ml_dsa_packing.c \
+    ml_dsa_poly.c \
+    ml_dsa_polyvec.c \
+    ml_dsa_reduce.c \
+    ml_dsa_rounding.c \
+    ml_dsa_sign.c \
+    ml_dsa_symmetric-shake.c \
+    ml_dsa_key.c
+ENDIF
+
+# 公共源文件（两种实现都需要）
 $COMMON_SOURCES=ml_dsa_fips202.c
 
-$VARIANT_SOURCE=ml_dsa_ntt.c \
-        ml_dsa_packing.c \
-        ml_dsa_poly.c \
-        ml_dsa_polyvec.c \
-        ml_dsa_reduce.c \
-        ml_dsa_rounding.c \
-        ml_dsa_sign.c \
-        ml_dsa_symmetric-shake.c \
-        ml_dsa_key.c
-
 IF[{- !$disabled{ml_dsa} -}]
-    SOURCE[../../libcrypto]= $COMMON_SOURCES \
-        $VARIANT_SOURCE
+    SOURCE[../../libcrypto]= $COMMON_SOURCES $MLDSA_SOURCES
+    
+  # 添加 AVX2 代码需要的宏定义
+    IF[$MLDSA_DEFINES]
+        DEFINE[../../libcrypto]=$MLDSA_DEFINES
+    ENDIF
 ENDIF

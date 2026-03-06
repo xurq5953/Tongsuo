@@ -1,5 +1,5 @@
 #include "consts.h"
-#include "params.h"
+#include "../params.h"
 #include <stdint.h>
 #include "cdecl.h"
 

@@ -3,6 +3,8 @@
 
 #include "config.h"
 
+# define DILITHIUM_MODE 3
+
 #define SEEDBYTES 32
 #define CRHBYTES 64
 #define N 256
