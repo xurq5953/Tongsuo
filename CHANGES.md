@@ -2,17 +2,31 @@
  Tongsuo CHANGES
  _______________
 
- Changes between 8.4.0 and 8.5.0 [xx XXX xxxx]
+ Changes between 8.4.0 and 8.5.0-pre1 [21 Mar 2026]
 
-  *) 修复CVE-2024-13176
+  *) 修复CVE若干
 
-  *) SM4白盒密码算法，支持: wbsm4-xiaolai、wbsm4-baiwu、wbsm4-wsise
-   
-  *) 重新修复CVE-2022-4304
+  *) 优化AES-GCM、SM4-GCM、HMAC、CMAC、RSA等密码学方案以及TLS协议的性能，相较8.4.0最多可翻倍
 
-  *) 修复CVE-2024-9143
+  *) TLS连接的安全等级默认设置为2，禁用过低的协议版本（如TLS1.1）和安全强度低于112bit的密码原语
 
-  *) 修复CVE-2024-6119
+  *) 支持PQC算法ML-KEM、ML-DSA和SLH-DSA，支持PQC密钥协商机制curveSM2MLKEM768、X25519MLKEM768等
+
+  *) 实现QUIC协议（RFC9000）
+
+  *) 实现TCP Fast Open（RFC7413）
+
+  *) 实现HPKE（RFC9180）
+
+  *) 实现AES-GCM-SIV（RFC8452）
+
+  *) 支持在TLS中使用raw public key（RFC7250）
+
+  *) 支持使用brotli和zstd进行证书压缩（RFC8879）
+
+  *) 支持在TLS1.3 ClientHello中包含多个keyshare
+
+  *) 添加TLS round-trip时间测量功能
 
   *) SMTC Provider适配蚂蚁密码卡（atf_slibce）
 
@@ -24,38 +38,14 @@
 
   *) 增加TSAPI，支持常见密码学算法
 
-  *) 修复CVE-2024-5535
-
-  *) 修复CVE-2024-4741
-
-  *) 修复CVE-2024-4603
-
-  *) 修复CVE-2024-2511
-
-  *) 修复CVE-2023-6129
-
-  *) 修复CVE-2023-6237
-
-  *) 修复CVE-2024-0727
-
   *) 增加SM2两方门限解密算法
 
   *) 增加SM2两方门限签名算法 [with work originated from FullyRobert]
 
-  *) 修复CVE-2023-4807
-
-  *) 修复CVE-2023-5363
-
-  *) 修复CVE-2023-5678
-
   *) 增加商用密码检测和认证Provider，包括身份认证、完整性验证、算法自测试、随机数自检、
      熵源健康测试；增加mod应用，包括生成SMTC配置、自测试功能
 
-  *) 修复CVE-2023-3817
-
-  *) 修复CVE-2023-3446
-
-  *) 修复CVE-2023-2975
+  *) SM4白盒密码算法，支持: wbsm4-xiaolai、wbsm4-baiwu、wbsm4-wsise
 
   *) 实现基于64位平台架构的SM2算法性能优化
 
