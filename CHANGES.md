@@ -6,6 +6,8 @@
 
   *) 修复CVE若干
 
+  *) 优化AES-GCM、SM4-GCM、HMAC、CMAC、RSA等密码学方案以及TLS协议的性能，相较8.4.0最多可翻倍
+
   *) TLS连接的安全等级默认设置为2，禁用过低的协议版本（如TLS1.1）和安全强度低于112bit的密码原语
 
   *) 支持PQC算法ML-KEM、ML-DSA和SLH-DSA，支持PQC密钥协商机制curveSM2MLKEM768、X25519MLKEM768等
