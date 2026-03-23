@@ -10,7 +10,7 @@ OpenAtom Tongsuo
 
 Tongsuo is an open-source foundational cryptographic library that provides modern cryptographic algorithms and secure communication protocols. It offers underlying cryptographic capabilities for various business scenarios including storage, networking, key management, and privacy computing, ensuring confidentiality, integrity, and authenticity of data during transmission, usage, and storage, providing privacy and security protection throughout the data lifecycle.
 
-Tongsuo has obtained the Commercial Cryptographic Product Certification issued by the [Commercial Cryptography Testing and Certification Center](https://www.scctc.org.cn/), helping users meet the requirements of China's commercial cryptographic technology compliance more rigorously in the process of national cryptographic transformation, cryptographic evaluation, and classified protection. The original qualification documents can be downloaded [here](https://www.yuque.com/tsdoc/misc/st247r05s8b5dtct).
+Tongsuo has obtained the Commercial Cryptographic Product Certification issued by the [Commercial Cryptography Testing and Certification Center](https://www.scctc.org.cn/), helping users meet the requirements of China's commercial cryptographic technology compliance more rigorously in the process of national cryptographic transformation, cryptographic evaluation, and classified protection. The original qualification documents can be downloaded [here](https://tongsuo.net/).
 
 <div align="center">    
  <img src="https://github.com/Tongsuo-Project/Tongsuo/blob/master/validation-android.png" width=50% height=50% align=center />
@@ -27,21 +27,18 @@ Tongsuo provides the following key features:
     * Complies with GM/T 0005-2021 "Randomness test specification"
   * Zero-Knowledge Proof (ZKP)
     * Bulletproofs range
-    * [Bulletproofs R1CS](https://www.yuque.com/tsdoc/ts/bulletproofs)
+    * [Bulletproofs R1CS](https://tongsuo.net/docs/frontier/zero-knowledge-proof/Bulletproofs-R1CS)
   * Cryptographic Algorithms
-    * Chinese commercial cryptographic algorithms: SM2, SM3, SM4, [ZUC](https://www.yuque.com/tsdoc/ts/copzp3), etc.
+    * Chinese commercial cryptographic algorithms: SM2, SM3, SM4, [ZUC](https://tongsuo.net/docs/features/zuc/ZUC-128-EIA3), etc.
     * International mainstream algorithms: ECDSA, RSA, AES, SHA, etc.
-    * Homomorphic encryption algorithms: [EC-ElGamal](https://www.yuque.com/tsdoc/misc/ec-elgamal), [Paillier](https://www.yuque.com/tsdoc/misc/rdibad), etc.
+    * Homomorphic encryption algorithms: [EC-ElGamal](https://tongsuo.net/docs/frontier/homomorphic-encryption/EC-ElGamal)、[Paillier](https://tongsuo.net/docs/frontier/homomorphic-encryption/Paillier), etc.
     * Post-quantum cryptography\*: Kyber, Dilithium, etc.
   * Secure Communication Protocols
-    * Supports GB/T 38636-2020 TLCP standard, i.e., [dual-certificate national cryptographic](https://www.yuque.com/tsdoc/ts/hedgqf) communication protocol
-    * Supports [RFC 8998](https://datatracker.ietf.org/doc/html/rfc8998), i.e., TLS 1.3 + [national cryptographic single certificate](https://www.yuque.com/tsdoc/ts/grur3x)
+    * Supports GB/T 38636-2020 TLCP standard, i.e., [dual-certificate national cryptographic](https://tongsuo.net/docs/features/TLCP) communication protocol
+    * Supports [RFC 8998](https://datatracker.ietf.org/doc/html/rfc8998), i.e., TLS 1.3 + [national cryptographic single certificate](https://tongsuo.net/docs/features/TLS-1-3)
     * Supports [QUIC](https://datatracker.ietf.org/doc/html/rfc9000) API
-    * Supports [Delegated Credentials](https://www.yuque.com/tsdoc/ts/leubbg) functionality, based on [draft-ietf-tls-subcerts-10](https://www.ietf.org/archive/id/draft-ietf-tls-subcerts-10.txt)
-    * Supports [TLS certificate compression](https://www.yuque.com/tsdoc/ts/df5pyi)
-    * Supports compact TLS protocol\*
-
-Note: \* indicates work in progress
+    * Supports [Delegated Credentials](https://tongsuo.net/docs/ssl-tls/delegated-credentialsg) functionality
+    * Supports [TLS certificate compression](https://tongsuo.net/docs/ssl-tls/certificate-compression-new)
 
 Typical Applications
 =======
